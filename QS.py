@@ -4,6 +4,84 @@ import requests
 import math
 import re
 
+class AmazonTR:
+    base_url = "https://www.amazon.com.tr/"
+    source = '[AmazonTR]'
+    
+    def __init__(self, category):
+        self.category = category
+
+    def search(self, search):
+        self.search = search
+        url = self.getUrl(search)
+        results = []
+
+        content = self.getContent(url)
+
+        if not content.find(cel_widget_id='MAIN-TOP_BANNER_MESSAGE'):# and 'sonuç yok' not in content.find(cel_widget_id='MAIN-TOP_BANNER_MESSAGE').text:
+            page_number = int(content.find("ul","a-pagination").find_all("li")[-2].text if content.find("ul","a-pagination") else '1')
+
+            if page_number > 1:
+                results += self.getProducts(content)
+                for page in range(2, page_number + 1):
+                    content = self.getContent(url + '&page=' + str(page))
+                    results += self.getProducts(content)
+            else:
+                results += self.getProducts(content)
+                
+        return results
+
+    def getUrl(self, search):
+        categories = {'Notebooks':'&i=computers&rh=n%3A12466439031%2Cn%3A12601898031','Smartphones':'&i=electronics&rh=n%3A12466496031%2Cn%3A13709907031','All':''}
+
+        if self.category in categories:
+            url = 'https://www.amazon.com.tr/s?k={}{}&s=price-asc-rank'.format(search, categories[self.category])
+##            print(url)
+        else:
+            url = self.base_url
+        return requote_uri(url)
+        
+    def getContent(self, url):
+        count = 10
+        while count > 0:
+            try:
+                response = requests.get(url, timeout=10)
+                count = 0
+            except Exception as e:
+                print(url,e)
+                print("Trying...",count)
+                count -= 1
+                if count == 0:
+                    response = ''
+        return soup(response.content, "lxml")
+
+    def getProducts(self, content):
+        products = []
+        
+        for product in content.find_all(cel_widget_id="MAIN-SEARCH_RESULTS"):
+            product_name = product.find("span",{'class':['a-size-base-plus', 'a-color-base', 'a-text-normal']}).text.strip()
+            if product.find("span","a-price-whole"):
+                product_price = product.find("span","a-price-whole").text.split()[0].replace(".",'').split(',')[0]+ ' TL'
+            else:
+                continue
+            product_price_from = product.select("span.a-price.a-text-price")[0].text.replace("₺",'').replace(".",'').split(',')[0]+ ' TL' if len(product.select("span.a-price.a-text-price")) > 0 else ''
+            product_info = ('Kargo BEDAVA' if 'BEDAVA' in product.select(".a-row.a-size-base.a-color-secondary.s-align-children-center")[0].text else '') if len(product.select(".a-row.a-size-base.a-color-secondary.s-align-children-center")) > 0 else ''
+            product_comment_count = product.select(".a-section.a-spacing-none.a-spacing-top-micro .a-row.a-size-small span")[-1].text.strip() if len(product.select(".a-section.a-spacing-none.a-spacing-top-micro .a-row.a-size-small")) > 0 else ''
+            suitable_to_search = self.isSuitableToSearch(product_name,self.search)
+            products.append({'source':self.source, 'name':product_name,'code':None,'price':product_price,'old_price':product_price_from,'info':product_info,'comment_count':product_comment_count, 'suitable_to_search':suitable_to_search})
+##            print(product_name,product_price,product_info,product_comment_count)
+        return products
+
+    def isSuitableToSearch(self, product_name, search):
+        search_words = re.findall('\d+', search)
+        word_count = {}
+
+        for word in search_words:
+            count = search.count(word)
+            if product_name.count(word) < count:
+                return False
+        return True
+
 class Trendyol:
     base_url = "https://www.trendyol.com"
     source = '[Trendyol]'
@@ -49,6 +127,8 @@ class Trendyol:
                 print(url,e)
                 print("Trying...",count)
                 count -= 1
+                if count == 0:
+                    response = ''
         return soup(response.content, "lxml")
 
     def getProducts(self, content):
@@ -131,6 +211,8 @@ class HepsiBurada:
                 print(url,e)
                 print("Trying...",count)
                 count -= 1
+                if count == 0:
+                    response = ''
         return soup(response.content, "lxml")
 
     def getProducts(self, content):
@@ -216,6 +298,8 @@ class n11:
                 print(url,e)
                 print("Trying...",count)
                 count -= 1
+                if count == 0:
+                    response = ''
         return soup(response.content, "lxml")
 
     def getProducts(self, content):
@@ -291,6 +375,8 @@ class VatanBilgisayar:
                 print(url,e)
                 print("Trying...",count)
                 count -= 1
+                if count == 0:
+                    response = ''
         return soup(response.content, "lxml")
 
     def getProducts(self, content):
@@ -322,7 +408,7 @@ class VatanBilgisayar:
             
 def sourceController(category):
 ##    print(category)
-    sources = {'VatanBilgisayar':VatanBilgisayar, 'n11':n11, 'HepsiBurada':HepsiBurada, 'Trendyol':Trendyol}
+    sources = {'VatanBilgisayar':VatanBilgisayar, 'n11':n11, 'HepsiBurada':HepsiBurada, 'Trendyol':Trendyol, 'AmazonTR':AmazonTR}
     source_selection = None
     results = []
     correct_results = []
