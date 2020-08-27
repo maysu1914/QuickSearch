@@ -10,7 +10,6 @@ class SourceWebSite():
         self.category = category
 
     def search(self, search):
-        self.search = search
         urls = self.getUrl(search)
         results = []
         for url in urls:
@@ -63,6 +62,8 @@ class SourceWebSite():
             try:
                 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'}
                 response = requests.get(url, timeout=10, headers=headers)
+##                print(response.url)
+##                print(response.content)
                 count = 0
             except Exception as e:
                 print(url,e)
@@ -151,7 +152,7 @@ class AmazonTR(SourceWebSite):
             url['url'] = self.base_url + content.select("a.a-size-medium.a-link-normal.a-text-bold.a-text-italic")[0]['href']
             content = self.getContent(url['url'])
 
-        if not content.find(cel_widget_id='MAIN-TOP_BANNER_MESSAGE'):# and 'sonuç yok' not in content.find(cel_widget_id='MAIN-TOP_BANNER_MESSAGE').text:
+        if content.find(cel_widget_id="MAIN-SEARCH_RESULTS"):# and 'sonuç yok' not in content.find(cel_widget_id='MAIN-TOP_BANNER_MESSAGE').text:
             page_number = int(content.find("ul","a-pagination").find_all("li")[-2].text if content.find("ul","a-pagination") else '1')
 
             if page_number > 1:
@@ -174,7 +175,7 @@ class AmazonTR(SourceWebSite):
     def getProducts(self, content, search):
         products = []
         
-        for product in content.find_all(cel_widget_id="MAIN-SEARCH_RESULTS"):
+        for product in content.find_all("span",cel_widget_id="MAIN-SEARCH_RESULTS"):
             if product.find("span", class_='a-size-medium a-color-base a-text-normal'):
                 product_name = product.find("span", class_='a-size-medium a-color-base a-text-normal').text.strip()
             else:
