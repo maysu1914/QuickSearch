@@ -34,17 +34,17 @@ class SourceWebSite():
                     static = static.replace(part,'')
 
                 for i in list(itertools.product(*dynamic)):
-                    search = ' '.join(static.split()) + ' ' + ' '.join(i)
+                    search = (' '.join(static.split()) + ' ' + ' '.join(i)).strip()
                     url = self.createUrl(search, categories[self.category])
                     urls.append({'search':search,'url':requote_uri(url)})
-                    print(url)
+##                    print(url)
                 return urls
             else:
                 return []
         else:
             if self.category in categories:
                 url = self.createUrl(search, categories[self.category])
-                print(url)
+##                print(url)
                 return [{'search':search,'url':requote_uri(url)}]
             else:
                 return []
@@ -57,6 +57,7 @@ class SourceWebSite():
         return start
         
     def getContent(self, url):
+        print(url)
         count = 10
         while count > 0:
             try:
@@ -71,14 +72,72 @@ class SourceWebSite():
         return soup(response.content, "lxml")
 
     def isSuitableToSearch(self, product_name, search):
-        search_words = re.findall('\d+', search)
-        word_count = {}
+        product_name = product_name.lower()
+        search = search.lower()
+        
+        search_numbers = re.findall('\d+', search)
+        search_words = search.lower()
 
+        for number in search_numbers:
+            search_words = search_words.replace(number,'')
+            
+        search_words = [word if len(word)>2 else None for word in search_words.split()]
+
+        search_words = [i for i in search_words if i] 
+    
+        for number in search_numbers:
+            count = search.count(number)
+            if product_name.count(number) < count:
+                return False
         for word in search_words:
             count = search.count(word)
             if product_name.count(word) < count:
                 return False
         return True
+
+class Teknosa(SourceWebSite):
+    base_url = "https://www.teknosa.com"
+    source = '[Teknosa]'
+
+    def getResults(self, results, url):
+        content = self.getContent(url['url'])
+
+        if not content.find("i","icon-search-circle"):
+            page_number = int(content.find("ul","pagination").find_all("li")[-2].text if content.find("ul","pagination") else '1')
+
+            if page_number > 1:
+                results += self.getProducts(content, url['search'])
+                for page in range(1, page_number):
+                    content = self.getContent(url['url'] + '&page=' + str(page))
+                    results += self.getProducts(content, url['search'])
+            else:
+                results += self.getProducts(content, url['search'])
+        return results
+
+    def getCategories(self):
+        categories = {'Notebooks':':relevance:category:1020101','Smartphones':':relevance:category:100001','All':':relevance'}
+        return categories
+
+    def createUrl(self, search, category):
+        url = 'https://www.teknosa.com/arama/?q={}{}&sort=price-asc'.format(search, category)
+        return url
+
+    def getProducts(self, content, search):
+        products = []
+        
+        for product in content.find_all("div","product-item"):
+            product_name = product.find("div","product-name").text.strip()
+            if product.find("span", class_='price-tag new-price font-size-tertiary'):
+                product_price = product.find("span", class_='price-tag new-price font-size-tertiary').text.split()[0].split(',')[0].replace('.','') + ' TL'
+            else:
+                continue
+            product_price_from = product.find("span", class_='price-tag old-price block').text.split()[0].split(',')[0].replace('.','') + ' TL' if product.find("span", class_='price-tag old-price block') else ''
+            product_info = 'KARGO BEDAVA' if int(product_price.split()[0]) > 100 else ''
+            product_comment_count = ''
+            suitable_to_search = self.isSuitableToSearch(product_name,search)
+            products.append({'source':self.source, 'name':product_name,'code':None,'price':product_price,'old_price':product_price_from,'info':product_info,'comment_count':product_comment_count, 'suitable_to_search':suitable_to_search})
+##            print(product_name,product_price,product_info,product_comment_count)
+        return products
 
 class AmazonTR(SourceWebSite):
     base_url = "https://www.amazon.com.tr"
@@ -108,14 +167,17 @@ class AmazonTR(SourceWebSite):
         return categories
 
     def createUrl(self, search, category):
-        url = 'https://www.amazon.com.tr/s?k={}{}&s=price-asc-rank'.format(search, category)
+        url = 'https://www.amazon.com.tr/s?k={}{}&s=price-asc-rank'.format('+'.join(search.split()), category)
         return url
 
     def getProducts(self, content, search):
         products = []
         
         for product in content.find_all(cel_widget_id="MAIN-SEARCH_RESULTS"):
-            product_name = product.find("span",{'class':['a-size-base-plus', 'a-color-base', 'a-text-normal']}).text.strip()
+            if product.find("span", class_='a-size-medium a-color-base a-text-normal'):
+                product_name = product.find("span", class_='a-size-medium a-color-base a-text-normal').text.strip()
+            else:
+                product_name = product.find("span", class_='a-size-base-plus a-color-base a-text-normal').text.strip()
             if product.find("span","a-price-whole"):
                 product_price = product.find("span","a-price-whole").text.split()[0].replace(".",'').split(',')[0]+ ' TL'
             else:
@@ -306,7 +368,7 @@ class VatanBilgisayar(SourceWebSite):
             
 def sourceController(category):
 ##    print(category)
-    sources = {'VatanBilgisayar':VatanBilgisayar, 'n11':n11, 'HepsiBurada':HepsiBurada, 'Trendyol':Trendyol, 'AmazonTR':AmazonTR}
+    sources = {'VatanBilgisayar':VatanBilgisayar, 'n11':n11, 'HepsiBurada':HepsiBurada, 'Trendyol':Trendyol, 'AmazonTR':AmazonTR, 'Teknosa':Teknosa}
     source_selection = None
     results = []
     correct_results = []
@@ -339,7 +401,15 @@ def sourceController(category):
         if i['suitable_to_search']:
             correct_results.append(i)
         else:
-            near_results.append(i)
+            t = i.copy()
+            t['suitable_to_search'] = True
+            t = tuple(t.items())
+            if t not in seen:
+                near_results.append(i)
+            else:
+##                print(i)
+                pass
+
     print("\nResults:") if correct_results else ''
     for product in correct_results:
         print(product['source'], product['name'], product['price'], product['info'],product['comment_count'])
