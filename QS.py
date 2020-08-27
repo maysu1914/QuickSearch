@@ -8,16 +8,16 @@ import re
 ##import os
 
 class SourceWebSite():
+    results = []
+    
     def __init__(self, category):
         self.category = category
 
     def search(self, search):
-        self.search = search
         urls = self.getUrl(search)
-        results = []
         for url in urls:
-            results += self.getResults(results, url)
-        return results
+            self.getResults(url)
+        return self.results
 
     def getUrl(self, search):
         categories = self.getCategories()
@@ -104,19 +104,22 @@ class Teknosa(SourceWebSite):
     base_url = "https://www.teknosa.com"
     source = '[Teknosa]'
 
-    def getResults(self, results, url):
+    def getResults(self, url):
         content = self.getContent(url['url'])
 
         if not content.find("i","icon-search-circle"):
             page_number = int(content.find("ul","pagination").find_all("li")[-2].text if content.find("ul","pagination") else '1')
 
-            results += self.getProducts(content, url['search'])
+            SourceWebSite.results += self.getProducts(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&page=' + str(number) for number in range(1, page_number)]
                 for page in page_list:
                     content = self.getContent(page)
-                    results += self.getProducts(content, url['search'])
-        return results
+                    SourceWebSite.results += self.getProducts(content, url['search'])
+            else:
+                pass
+        else:
+            pass
 
     def getCategories(self):
         categories = {'Notebooks':':relevance:category:1020101','Smartphones':':relevance:category:100001','All':':relevance'}
@@ -147,23 +150,28 @@ class AmazonTR(SourceWebSite):
     base_url = "https://www.amazon.com.tr"
     source = '[AmazonTR]'
 
-    def getResults(self, results, url):
+    def getResults(self, url):
         content = self.getContent(url['url'])
 
         if any("Şunu mu demek istediniz" in i.text for i in content.select("span.a-size-medium.a-color-base.a-text-normal")):
             url['url'] = self.base_url + content.select("a.a-size-medium.a-link-normal.a-text-bold.a-text-italic")[0]['href']
             content = self.getContent(url['url'])
+        else:
+            pass
 
         if content.find(cel_widget_id="MAIN-SEARCH_RESULTS"):# and 'sonuç yok' not in content.find(cel_widget_id='MAIN-TOP_BANNER_MESSAGE').text:
             page_number = int(content.find("ul","a-pagination").find_all("li")[-2].text if content.find("ul","a-pagination") else '1')
 
-            results += self.getProducts(content, url['search'])
+            SourceWebSite.results += self.getProducts(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&page=' + str(number) for number in range(2, page_number + 1)]
                 for page in page_list:
                     content = self.getContent(page)
-                    results += self.getProducts(content, url['search'])
-        return results
+                    SourceWebSite.results += self.getProducts(content, url['search'])
+            else:
+                pass
+        else:
+            pass
 
     def getCategories(self):
         categories = {'Notebooks':'&i=computers&rh=n%3A12466439031%2Cn%3A12601898031','Smartphones':'&i=electronics&rh=n%3A12466496031%2Cn%3A13709907031','All':''}
@@ -197,19 +205,22 @@ class Trendyol(SourceWebSite):
     base_url = "https://www.trendyol.com"
     source = '[Trendyol]'
 
-    def getResults(self, results, url):
+    def getResults(self, url):
         content = self.getContent(url['url'])
 
         if content.find("div","dscrptn") and "bulunamadı" not in content.find("div","dscrptn").text:
             page_number = math.ceil(int(re.findall('\d+', content.find("div","dscrptn").text)[0])/24)
 
-            results += self.getProducts(content, url['search'])
+            SourceWebSite.results += self.getProducts(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&pi=' + str(number) for number in range(2, page_number + 1)]
                 for page in page_list:
                     content = self.getContent(page)
-                    results += self.getProducts(content, url['search'])
-        return results
+                    SourceWebSite.results += self.getProducts(content, url['search'])
+            else:
+                pass
+        else:
+            pass
 
     def getCategories(self):
         categories = {'Notebooks':'laptop','Smartphones':'akilli-cep-telefonu','All':'tum--urunler'}
@@ -243,19 +254,22 @@ class HepsiBurada(SourceWebSite):
     base_url = "https://www.hepsiburada.com"
     source = '[HepsiBurada]'
 
-    def getResults(self, results, url):
+    def getResults(self, url):
         content = self.getContent(url['url'])
 
         if not content.find("span","product-suggestions-title"):
             page_number = int(content.select("#pagination > ul > li")[-1].text.strip() if content.select("#pagination > ul > li") else 1)
 
-            results += self.getProducts(content, url['search'])
+            SourceWebSite.results += self.getProducts(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&sayfa=' + str(number) for number in range(2, page_number + 1)]
                 for page in page_list:
                     content = self.getContent(page)
-                    results += self.getProducts(content, url['search'])
-        return results
+                    SourceWebSite.results += self.getProducts(content, url['search'])
+            else:
+                pass
+        else:
+            pass
 
     def getCategories(self):
         categories = {'Notebooks':'&filtreler=MainCategory.Id:98','Smartphones':'&kategori=2147483642_371965','All':''}
@@ -290,20 +304,23 @@ class n11(SourceWebSite):
     base_url = "https://www.n11.com"
     source = '[n11]'
 
-    def getResults(self, results, url):
+    def getResults(self, url):
         content = self.getContent(url['url'])
 
         if not content.find("span","result-mean-word") and not content.select('#error404') and not content.select('#searchResultNotFound') and not content.select('.noResultHolder'):
             page_number = math.ceil(int(content.select(".resultText > strong")[0].text.replace(",",""))/28)
             page_number = 50 if page_number > 50 else page_number
 
-            results += self.getProducts(content, url['search'])
+            SourceWebSite.results += self.getProducts(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&pg=' + str(number) for number in range(2, page_number + 1)]
                 for page in page_list:
                     content = self.getContent(page)
-                    results += self.getProducts(content, url['search'])
-        return results
+                    SourceWebSite.results += self.getProducts(content, url['search'])
+            else:
+                pass
+        else:
+            pass
             
     def getCategories(self):
         categories = {'Notebooks':'bilgisayar/dizustu-bilgisayar','Smartphones':'telefon-ve-aksesuarlari/cep-telefonu','All':'arama'}
@@ -330,20 +347,23 @@ class VatanBilgisayar(SourceWebSite):
     base_url = "https://www.vatanbilgisayar.com"
     source = '[VatanBilgisayar]'
 
-    def getResults(self, results, url):
+    def getResults(self, url):
         content = self.getContent(url['url'])
         
         if not content.find("div","empty-basket"):
             page_number = int(content.find("ul", "pagination").find_all("li")[-2].text.strip()) if len(content.find("ul", "pagination").find_all("li")) > 1 else 1
             page_number = 50 if page_number > 50 else page_number
             
-            results += self.getProducts(content, url['search'])
+            SourceWebSite.results += self.getProducts(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&page=' + str(number) for number in range(2, page_number + 1)]
                 for page in page_list:
                     content = self.getContent(page)
-                    results += self.getProducts(content, url['search'])             
-        return results
+                    SourceWebSite.results += self.getProducts(content, url['search'])             
+            else:
+                pass
+        else:
+            pass
 
     def getCategories(self):
         categories = {'Notebooks':'notebook/','Smartphones':'cep-telefonu-modelleri/','All':''}
