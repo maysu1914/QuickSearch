@@ -34,7 +34,7 @@ class SourceWebSite():
                     static = static.replace(part,'')
 
                 for i in list(itertools.product(*dynamic)):
-                    search = ' '.join(static.split()) + ' ' + ' '.join(i)
+                    search = (' '.join(static.split()) + ' ' + ' '.join(i)).strip()
                     url = self.createUrl(search, categories[self.category])
                     urls.append({'search':search,'url':requote_uri(url)})
                     print(url)
@@ -57,6 +57,7 @@ class SourceWebSite():
         return start
         
     def getContent(self, url):
+        print(url)
         count = 10
         while count > 0:
             try:
@@ -71,9 +72,23 @@ class SourceWebSite():
         return soup(response.content, "lxml")
 
     def isSuitableToSearch(self, product_name, search):
-        search_words = re.findall('\d+', search)
-        word_count = {}
+        product_name = product_name.lower()
+        search = search.lower()
+        
+        search_numbers = re.findall('\d+', search)
+        search_words = search.lower()
 
+        for number in search_numbers:
+            search_words = search_words.replace(number,'')
+            
+        search_words = [word if len(word)>2 else None for word in search_words.split()]
+
+        search_words = [i for i in search_words if i] 
+    
+        for number in search_numbers:
+            count = search.count(number)
+            if product_name.count(number) < count:
+                return False
         for word in search_words:
             count = search.count(word)
             if product_name.count(word) < count:
