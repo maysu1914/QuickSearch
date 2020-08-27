@@ -100,6 +100,59 @@ class SourceWebSite():
                 return False
         return True
 
+class GittiGidiyor(SourceWebSite):
+    base_url = "https://www.gittigidiyor.com"
+    source = '[GittiGidiyor]'
+
+    def getResults(self, url):
+        content = self.getContent(url['url'])
+
+        if not (content.find("div","no-result-icon") or content.find("h2","listing-similar-items")):
+            page_number = math.ceil(int(re.findall('\d+', content.find("span","result-count").text)[0])/48)
+
+            SourceWebSite.results += self.getProducts(content, url['search'])
+            if page_number > 1:
+                page_list = [url['url'] + '&sf=' + str(number) for number in range(2, page_number)]
+                for page in page_list:
+                    content = self.getContent(page)
+                    SourceWebSite.results += self.getProducts(content, url['search'])
+            else:
+                pass
+        else:
+            pass
+
+    def getCategories(self):
+        categories = {'Notebooks':'dizustu-laptop-notebook-bilgisayar','Smartphones':'cep-telefonu','All':'arama/'}
+        return categories
+
+    def createUrl(self, search, category):
+        url = 'https://www.gittigidiyor.com/{}?k={}&sra=hpa'.format(category, search)
+        return url
+
+    def getProducts(self, content, search):
+        products = []
+        
+        for product in content.find("ul", class_="catalog-view clearfix products-container").find_all("li", recursive=False):
+            product_name = ' '.join(product.find("h3","product-title").text.split())
+            if product.find("p", class_='fiyat robotobold price-txt'):
+                product_price = product.find("p", class_='fiyat robotobold price-txt').text.split()[0].split(',')[0].replace('.','') + ' TL'
+                product_price_from = product.find("strike", class_='market-price-sel').text.split()[0].split(',')[0].replace('.','') + ' TL'
+            elif product.find("p", class_='fiyat price-txt robotobold price'):
+                product_price = product.find("p", class_='fiyat price-txt robotobold price').text.split()[0].split(',')[0].replace('.','') + ' TL'
+                product_price_from = ''
+            else:
+                continue
+            product_info = product.find("li", class_='shippingFree').text.strip() if product.find("li", class_='shippingFree') else ''
+            if product.find("span","gf-badge-position"):
+                product_info += ' ' + product.find("span","gf-badge-position").text
+            else:
+                pass
+            product_comment_count = ''
+            suitable_to_search = self.isSuitableToSearch(product_name,search)
+            products.append({'source':self.source, 'name':product_name,'code':None,'price':product_price,'old_price':product_price_from,'info':product_info,'comment_count':product_comment_count, 'suitable_to_search':suitable_to_search})
+##            print(product_name,product_price,product_info,product_comment_count)
+        return products
+
 class Teknosa(SourceWebSite):
     base_url = "https://www.teknosa.com"
     source = '[Teknosa]'
@@ -388,7 +441,7 @@ class VatanBilgisayar(SourceWebSite):
         return products
             
 def sourceController(category):
-    sources = {'VatanBilgisayar':VatanBilgisayar, 'n11':n11, 'HepsiBurada':HepsiBurada, 'Trendyol':Trendyol, 'AmazonTR':AmazonTR, 'Teknosa':Teknosa}
+    sources = {'VatanBilgisayar':VatanBilgisayar, 'n11':n11, 'HepsiBurada':HepsiBurada, 'Trendyol':Trendyol, 'AmazonTR':AmazonTR, 'Teknosa':Teknosa, 'GittiGidiyor':GittiGidiyor}
     source_selection = None
     results = []
     correct_results = []
