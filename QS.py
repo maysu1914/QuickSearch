@@ -1,15 +1,18 @@
 from requests.utils import requote_uri
 from bs4 import BeautifulSoup as soup
+from multiprocessing import Pool
 import itertools
 import requests
 import math
 import re
+##import os
 
 class SourceWebSite():
     def __init__(self, category):
         self.category = category
 
     def search(self, search):
+        self.search = search
         urls = self.getUrl(search)
         results = []
         for url in urls:
@@ -369,7 +372,6 @@ class VatanBilgisayar(SourceWebSite):
         return products
             
 def sourceController(category):
-##    print(category)
     sources = {'VatanBilgisayar':VatanBilgisayar, 'n11':n11, 'HepsiBurada':HepsiBurada, 'Trendyol':Trendyol, 'AmazonTR':AmazonTR, 'Teknosa':Teknosa}
     source_selection = None
     results = []
@@ -383,13 +385,16 @@ def sourceController(category):
         source_selection = [source.strip() for source in input('Sources: ').split(',')]
         if '0' in source_selection:
             source_selection = [str(num) for num in range(1,len(sources)+1)]
-
-##    print(source_selection)
     
     search_input = input('\nSearch Text: ').strip()
 
-    for source in source_selection:
-        results += list(sources.values())[int(source)-1](category).search(search_input)
+    processes = []
+##    print(os.cpu_count())
+    with Pool() as pool:
+        for source in source_selection:
+            processes.append(pool.apply_async(list(sources.values())[int(source)-1](category).search, (search_input,)))
+        for process in processes:
+            results += process.get()
 
     unique_results = []
     seen = set()
