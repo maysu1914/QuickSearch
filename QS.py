@@ -1,6 +1,6 @@
 from requests.utils import requote_uri
 from bs4 import BeautifulSoup as soup
-from multiprocessing import Pool
+from concurrent.futures import ProcessPoolExecutor as Pool
 import itertools
 import requests
 import math
@@ -57,6 +57,11 @@ class SourceWebSite():
             start = haystack.find(needle, start+len(needle))
             n -= 1
         return start
+
+    def getResult(self, url, search):
+        content = self.getContent(url)
+        result = self.getProducts(content, search)
+        return result
         
     def getContent(self, url):
         print(url)
@@ -110,13 +115,15 @@ class Teknosa(SourceWebSite):
         if not content.find("i","icon-search-circle"):
             page_number = int(content.find("ul","pagination").find_all("li")[-2].text if content.find("ul","pagination") else '1')
 
+            results += self.getProducts(content, url['search'])
             if page_number > 1:
-                results += self.getProducts(content, url['search'])
-                for page in range(1, page_number):
-                    content = self.getContent(url['url'] + '&page=' + str(page))
-                    results += self.getProducts(content, url['search'])
-            else:
-                results += self.getProducts(content, url['search'])
+                page_list = [url['url'] + '&page=' + str(number) for number in range(1, page_number)]
+                processes = []
+                with Pool() as pool:
+                    for page in page_list:
+                        processes.append(pool.submit(self.getResult, page, url['search']))
+                    for process in processes:
+                        results += process.result()
         return results
 
     def getCategories(self):
@@ -158,13 +165,15 @@ class AmazonTR(SourceWebSite):
         if content.find(cel_widget_id="MAIN-SEARCH_RESULTS"):# and 'sonuç yok' not in content.find(cel_widget_id='MAIN-TOP_BANNER_MESSAGE').text:
             page_number = int(content.find("ul","a-pagination").find_all("li")[-2].text if content.find("ul","a-pagination") else '1')
 
+            results += self.getProducts(content, url['search'])
             if page_number > 1:
-                results += self.getProducts(content, url['search'])
-                for page in range(2, page_number + 1):
-                    content = self.getContent(url['url'] + '&page=' + str(page))
-                    results += self.getProducts(content, url['search'])
-            else:
-                results += self.getProducts(content, url['search'])
+                page_list = [url['url'] + '&page=' + str(number) for number in range(2, page_number + 1)]
+                processes = []
+                with Pool() as pool:
+                    for page in page_list:
+                        processes.append(pool.submit(self.getResult, page, url['search']))
+                    for process in processes:
+                        results += process.result()
         return results
 
     def getCategories(self):
@@ -205,13 +214,15 @@ class Trendyol(SourceWebSite):
         if content.find("div","dscrptn") and "bulunamadı" not in content.find("div","dscrptn").text:
             page_number = math.ceil(int(re.findall('\d+', content.find("div","dscrptn").text)[0])/24)
 
+            results += self.getProducts(content, url['search'])
             if page_number > 1:
-                results += self.getProducts(content, url['search'])
-                for page in range(2, page_number + 1):
-                    content = self.getContent(url['url'] + '&pi=' + str(page))
-                    results += self.getProducts(content, url['search'])
-            else:
-                results += self.getProducts(content, url['search'])
+                page_list = [url['url'] + '&pi=' + str(number) for number in range(2, page_number + 1)]
+                processes = []
+                with Pool() as pool:
+                    for page in page_list:
+                        processes.append(pool.submit(self.getResult, page, url['search']))
+                    for process in processes:
+                        results += process.result()
         return results
 
     def getCategories(self):
@@ -251,14 +262,16 @@ class HepsiBurada(SourceWebSite):
 
         if not content.find("span","product-suggestions-title"):
             page_number = int(content.select("#pagination > ul > li")[-1].text.strip() if content.select("#pagination > ul > li") else 1)
-##            print(page_number)
+
+            results += self.getProducts(content, url['search'])
             if page_number > 1:
-                results += self.getProducts(content, url['search'])
-                for page in range(2, page_number + 1):
-                    content = self.getContent(url['url'] + '&sayfa=' + str(page))
-                    results += self.getProducts(content, url['search'])
-            else:
-                results += self.getProducts(content, url['search'])
+                page_list = [url['url'] + '&sayfa=' + str(number) for number in range(2, page_number + 1)]
+                processes = []
+                with Pool() as pool:
+                    for page in page_list:
+                        processes.append(pool.submit(self.getResult, page, url['search']))
+                    for process in processes:
+                        results += process.result()
         return results
 
     def getCategories(self):
@@ -299,15 +312,17 @@ class n11(SourceWebSite):
 
         if not content.find("span","result-mean-word") and not content.select('#error404') and not content.select('#searchResultNotFound') and not content.select('.noResultHolder'):
             page_number = math.ceil(int(content.select(".resultText > strong")[0].text.replace(",",""))/28)
-            if page_number > 50:
-                page_number = 50
+            page_number = 50 if page_number > 50 else page_number
+
+            results += self.getProducts(content, url['search'])
             if page_number > 1:
-                results += self.getProducts(content, url['search'])
-                for page in range(2, page_number + 1):
-                    content = self.getContent(url['url'] + '&pg=' + str(page))
-                    results += self.getProducts(content, url['search'])
-            else:
-                results += self.getProducts(content, url['search'])
+                page_list = [url['url'] + '&pg=' + str(number) for number in range(2, page_number + 1)]
+                processes = []
+                with Pool() as pool:
+                    for page in page_list:
+                        processes.append(pool.submit(self.getResult, page, url['search']))
+                    for process in processes:
+                        results += process.result()
         return results
             
     def getCategories(self):
@@ -339,14 +354,18 @@ class VatanBilgisayar(SourceWebSite):
         content = self.getContent(url['url'])
         
         if not content.find("div","empty-basket"):
-            for page in content.find("ul", "pagination").find_all("li"):
-                if 'active' in page['class']:
-                    results += self.getProducts(content, url['search'])
-                elif page.find("span","icon-angle-right"):
-                    break
-                else:
-                    content = self.getContent(self.base_url + page.find("a")['href'])
-                    results += self.getProducts(content, url['search'])
+            page_number = int(content.find("ul", "pagination").find_all("li")[-2].text.strip()) if len(content.find("ul", "pagination").find_all("li")) > 1 else 1
+            page_number = 50 if page_number > 50 else page_number
+            
+            results += self.getProducts(content, url['search'])
+            if page_number > 1:
+                page_list = [url['url'] + '&page=' + str(number) for number in range(2, page_number + 1)]
+                processes = []
+                with Pool() as pool:
+                    for page in page_list:
+                        processes.append(pool.submit(self.getResult, page, url['search']))
+                    for process in processes:
+                        results += process.result()                   
         return results
 
     def getCategories(self):
@@ -392,9 +411,9 @@ def sourceController(category):
 ##    print(os.cpu_count())
     with Pool() as pool:
         for source in source_selection:
-            processes.append(pool.apply_async(list(sources.values())[int(source)-1](category).search, (search_input,)))
+            processes.append(pool.submit(list(sources.values())[int(source)-1](category).search, search_input))
         for process in processes:
-            results += process.get()
+            results += process.result()
 
     unique_results = []
     seen = set()
