@@ -118,8 +118,12 @@ class Teknosa(SourceWebSite):
             results += self.getProducts(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&page=' + str(number) for number in range(1, page_number)]
-                for page in page_list:
-                    results += self.getResult(page, url['search'])
+                processes = []
+                with Pool() as pool:
+                    for page in page_list:
+                        processes.append(pool.apply_async(self.getResult, (page, url['search'],)))
+                    for process in processes:
+                        results += process.get()
         return results
 
     def getCategories(self):
@@ -164,8 +168,12 @@ class AmazonTR(SourceWebSite):
             results += self.getProducts(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&page=' + str(number) for number in range(2, page_number + 1)]
-                for page in page_list:
-                    results += self.getResult(page, url['search'])
+                processes = []
+                with Pool() as pool:
+                    for page in page_list:
+                        processes.append(pool.apply_async(self.getResult, (page, url['search'],)))
+                    for process in processes:
+                        results += process.get()
         return results
 
     def getCategories(self):
@@ -209,8 +217,12 @@ class Trendyol(SourceWebSite):
             results += self.getProducts(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&pi=' + str(number) for number in range(2, page_number + 1)]
-                for page in page_list:
-                    results += self.getResult(page, url['search'])
+                processes = []
+                with Pool() as pool:
+                    for page in page_list:
+                        processes.append(pool.apply_async(self.getResult, (page, url['search'],)))
+                    for process in processes:
+                        results += process.get()
         return results
 
     def getCategories(self):
@@ -254,8 +266,12 @@ class HepsiBurada(SourceWebSite):
             results += self.getProducts(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&sayfa=' + str(number) for number in range(2, page_number + 1)]
-                for page in page_list:
-                    results += self.getResult(page, url['search'])
+                processes = []
+                with Pool() as pool:
+                    for page in page_list:
+                        processes.append(pool.apply_async(self.getResult, (page, url['search'],)))
+                    for process in processes:
+                        results += process.get()
         return results
 
     def getCategories(self):
@@ -301,8 +317,12 @@ class n11(SourceWebSite):
             results += self.getProducts(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&pg=' + str(number) for number in range(2, page_number + 1)]
-                for page in page_list:
-                    results += self.getResult(page, url['search'])
+                processes = []
+                with Pool() as pool:
+                    for page in page_list:
+                        processes.append(pool.apply_async(self.getResult, (page, url['search'],)))
+                    for process in processes:
+                        results += process.get()
         return results
             
     def getCategories(self):
@@ -340,8 +360,12 @@ class VatanBilgisayar(SourceWebSite):
             results += self.getProducts(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&page=' + str(number) for number in range(2, page_number + 1)]
-                for page in page_list:
-                    results += self.getResult(page, url['search'])                  
+                processes = []
+                with Pool() as pool:
+                    for page in page_list:
+                        processes.append(pool.apply_async(self.getResult, (page, url['search'],)))
+                    for process in processes:
+                        results += process.get()                   
         return results
 
     def getCategories(self):
@@ -383,13 +407,8 @@ def sourceController(category):
     
     search_input = input('\nSearch Text: ').strip()
 
-    processes = []
-##    print(os.cpu_count())
-    with Pool() as pool:
-        for source in source_selection:
-            processes.append(pool.apply_async(list(sources.values())[int(source)-1](category).search, (search_input,)))
-        for process in processes:
-            results += process.get()
+    for source in source_selection:
+        results += list(sources.values())[int(source)-1](category).search(search_input)
 
     unique_results = []
     seen = set()
