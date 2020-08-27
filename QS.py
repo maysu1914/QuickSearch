@@ -61,7 +61,8 @@ class SourceWebSite():
         count = 10
         while count > 0:
             try:
-                response = requests.get(url, timeout=10)
+                headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'}
+                response = requests.get(url, timeout=10, headers=headers)
                 count = 0
             except Exception as e:
                 print(url,e)
