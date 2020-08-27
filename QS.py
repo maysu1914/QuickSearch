@@ -55,7 +55,8 @@ class Trendyol:
         products = []
         
         for product in content.find_all("div","p-card-wrppr"):
-            product_name = product.find("span","prdct-desc-cntnr-name").text.strip()
+            product_brand = product.find("span","prdct-desc-cntnr-ttl").text.strip() if product.find("span","prdct-desc-cntnr-ttl") else ''
+            product_name = product_brand + ' ' + product.find("span","prdct-desc-cntnr-name").text.strip()
             if product.find("div","prc-box-dscntd"):
                 product_price = product.find("div","prc-box-dscntd").text.split()[0].replace(".",'').split(',')[0]+ ' TL'
             elif product.find("div","prc-box-sllng"):
@@ -72,10 +73,16 @@ class Trendyol:
 
     def isSuitableToSearch(self, product_name, search):
         search_words = re.findall('\d+', search)
-        if any(word not in product_name for word in search_words):
-            return False
-        else:
-            return True
+        word_count = {}
+
+        for word in search_words:
+            count = search.count(word)
+            if product_name.count(word) < count:
+##                print(count,word,search)
+##                print(product_name.count(word),word,product_name)
+##                input()
+                return False
+        return True
 
 class HepsiBurada:
     base_url = "https://www.hepsiburada.com"
@@ -149,10 +156,16 @@ class HepsiBurada:
 
     def isSuitableToSearch(self, product_name, search):
         search_words = re.findall('\d+', search)
-        if any(word not in product_name for word in search_words):
-            return False
-        else:
-            return True
+        word_count = {}
+
+        for word in search_words:
+            count = search.count(word)
+            if product_name.count(word) < count:
+##                print(count,word,search)
+##                print(product_name.count(word),word,product_name)
+##                input()
+                return False
+        return True
 
 class n11:
     base_url = "https://www.n11.com"
@@ -220,10 +233,16 @@ class n11:
 
     def isSuitableToSearch(self, product_name, search):
         search_words = re.findall('\d+', search)
-        if any(word not in product_name for word in search_words):
-            return False
-        else:
-            return True
+        word_count = {}
+
+        for word in search_words:
+            count = search.count(word)
+            if product_name.count(word) < count:
+##                print(count,word,search)
+##                print(product_name.count(word),word,product_name)
+##                input()
+                return False
+        return True
     
 class VatanBilgisayar:
     base_url = "https://www.vatanbilgisayar.com"
@@ -290,10 +309,16 @@ class VatanBilgisayar:
 
     def isSuitableToSearch(self, product_name, search):
         search_words = re.findall('\d+', search)
-        if any(word not in product_name for word in search_words):
-            return False
-        else:
-            return True
+        word_count = {}
+
+        for word in search_words:
+            count = search.count(word)
+            if product_name.count(word) < count:
+##                print(count,word,search)
+##                print(product_name.count(word),word,product_name)
+##                input()
+                return False
+        return True
             
 def sourceController(category):
 ##    print(category)
@@ -303,7 +328,7 @@ def sourceController(category):
     correct_results = []
     near_results = []
 
-    print("\nSelect the sources you want to search?")
+    print("\nSelect the sources you want to search:")
     for index, source in zip(range(1,len(sources)+1),sources):
         print(str(index)+'.',source)
     while source_selection == None or any(source not in [str(num) for num in range(0,len(sources)+1)] for source in source_selection):
