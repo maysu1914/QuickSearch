@@ -1,11 +1,12 @@
 from requests.utils import requote_uri
 from bs4 import BeautifulSoup as soup
+import itertools
 import requests
 import math
 import re
 
 class AmazonTR:
-    base_url = "https://www.amazon.com.tr/"
+    base_url = "https://www.amazon.com.tr"
     source = '[AmazonTR]'
     
     def __init__(self, category):
@@ -13,39 +14,72 @@ class AmazonTR:
 
     def search(self, search):
         self.search = search
-        url = self.getUrl(search)
+        urls = self.getUrl(search)
         results = []
+        for url in urls:
+            content = self.getContent(url['url'])
 
-        content = self.getContent(url)
+            if any("Şunu mu demek istediniz" in i.text for i in content.select("span.a-size-medium.a-color-base.a-text-normal")):
+                url['url'] = self.base_url + content.select("a.a-size-medium.a-link-normal.a-text-bold.a-text-italic")[0]['href']
+                content = self.getContent(url['url'])
 
-        if not content.find(cel_widget_id='MAIN-TOP_BANNER_MESSAGE'):# and 'sonuç yok' not in content.find(cel_widget_id='MAIN-TOP_BANNER_MESSAGE').text:
-            page_number = int(content.find("ul","a-pagination").find_all("li")[-2].text if content.find("ul","a-pagination") else '1')
+            if not content.find(cel_widget_id='MAIN-TOP_BANNER_MESSAGE'):# and 'sonuç yok' not in content.find(cel_widget_id='MAIN-TOP_BANNER_MESSAGE').text:
+                page_number = int(content.find("ul","a-pagination").find_all("li")[-2].text if content.find("ul","a-pagination") else '1')
 
-            if page_number > 1:
-                results += self.getProducts(content)
-                for page in range(2, page_number + 1):
-                    content = self.getContent(url + '&page=' + str(page))
-                    results += self.getProducts(content)
-            else:
-                results += self.getProducts(content)
-                
+                if page_number > 1:
+                    results += self.getProducts(content, url['search'])
+                    for page in range(2, page_number + 1):
+                        content = self.getContent(url['url'] + '&page=' + str(page))
+                        results += self.getProducts(content, url['search'])
+                else:
+                    results += self.getProducts(content, url['search'])
         return results
 
     def getUrl(self, search):
         categories = {'Notebooks':'&i=computers&rh=n%3A12466439031%2Cn%3A12601898031','Smartphones':'&i=electronics&rh=n%3A12466496031%2Cn%3A13709907031','All':''}
 
-        if self.category in categories:
-            url = 'https://www.amazon.com.tr/s?k={}{}&s=price-asc-rank'.format(search, categories[self.category])
-##            print(url)
+        if '[' in search and ']' in search:
+            if self.category in categories:
+                urls = []
+                static = search
+                dynamic = []
+                
+                for a,b in zip(range(1,search.count('[')+1),range(1,search.count(']')+1)):
+                    start = self.find_nth(search, '[', a)
+                    end = self.find_nth(search, ']', a) + 1
+                    part = search[start:end]
+                    dynamic.append(part.strip('][').split(','))
+                    static = static.replace(part,'')
+
+                for i in list(itertools.product(*dynamic)):
+                    search = ' '.join(static.split()) + ' ' + ' '.join(i)
+                    url = 'https://www.amazon.com.tr/s?k={}{}&s=price-asc-rank'.format(search, categories[self.category])
+                    urls.append({'search':search,'url':requote_uri(url)})
+                    print(url)
+                return urls
+            else:
+                return []
         else:
-            url = self.base_url
-        return requote_uri(url)
+            if self.category in categories:
+                url = 'https://www.amazon.com.tr/s?k={}{}&s=price-asc-rank'.format(search, categories[self.category])
+                print(url)
+                return [{'search':search,'url':requote_uri(url)}]
+            else:
+                return []
+
+    def find_nth(self, haystack, needle, n):
+        start = haystack.find(needle)
+        while start >= 0 and n > 1:
+            start = haystack.find(needle, start+len(needle))
+            n -= 1
+        return start
         
     def getContent(self, url):
         count = 10
         while count > 0:
             try:
                 response = requests.get(url, timeout=10)
+##                print(response.url)
                 count = 0
             except Exception as e:
                 print(url,e)
@@ -55,7 +89,7 @@ class AmazonTR:
                     response = ''
         return soup(response.content, "lxml")
 
-    def getProducts(self, content):
+    def getProducts(self, content, search):
         products = []
         
         for product in content.find_all(cel_widget_id="MAIN-SEARCH_RESULTS"):
@@ -67,7 +101,7 @@ class AmazonTR:
             product_price_from = product.select("span.a-price.a-text-price")[0].text.replace("₺",'').replace(".",'').split(',')[0]+ ' TL' if len(product.select("span.a-price.a-text-price")) > 0 else ''
             product_info = ('Kargo BEDAVA' if 'BEDAVA' in product.select(".a-row.a-size-base.a-color-secondary.s-align-children-center")[0].text else '') if len(product.select(".a-row.a-size-base.a-color-secondary.s-align-children-center")) > 0 else ''
             product_comment_count = product.select(".a-section.a-spacing-none.a-spacing-top-micro .a-row.a-size-small span")[-1].text.strip() if len(product.select(".a-section.a-spacing-none.a-spacing-top-micro .a-row.a-size-small")) > 0 else ''
-            suitable_to_search = self.isSuitableToSearch(product_name,self.search)
+            suitable_to_search = self.isSuitableToSearch(product_name,search)
             products.append({'source':self.source, 'name':product_name,'code':None,'price':product_price,'old_price':product_price_from,'info':product_info,'comment_count':product_comment_count, 'suitable_to_search':suitable_to_search})
 ##            print(product_name,product_price,product_info,product_comment_count)
         return products
@@ -91,31 +125,59 @@ class Trendyol:
 
     def search(self, search):
         self.search = search
-        url = self.getUrl(search)
+        urls = self.getUrl(search)
         results = []
+        for url in urls:
+            content = self.getContent(url['url'])
 
-        content = self.getContent(url)
+            if content.find("div","dscrptn") and "bulunamadı" not in content.find("div","dscrptn").text:
+                page_number = math.ceil(int(re.findall('\d+', content.find("div","dscrptn").text)[0])/24)
 
-        if content.find("div","dscrptn") and "bulunamadı" not in content.find("div","dscrptn").text:
-            page_number = math.ceil(int(re.findall('\d+', content.find("div","dscrptn").text)[0])/24)
-
-            if page_number > 1:
-                results += self.getProducts(content)
-                for page in range(2, page_number + 1):
-                    content = self.getContent(url + '&pi=' + str(page))
-                    results += self.getProducts(content)
-            else:
-                results += self.getProducts(content)
+                if page_number > 1:
+                    results += self.getProducts(content, url['search'])
+                    for page in range(2, page_number + 1):
+                        content = self.getContent(url['url'] + '&pi=' + str(page))
+                        results += self.getProducts(content, url['search'])
+                else:
+                    results += self.getProducts(content, url['search'])
         return results
 
     def getUrl(self, search):
         categories = {'Notebooks':'laptop','Smartphones':'akilli-cep-telefonu','All':'tum--urunler'}
-        if self.category in categories:
-            url = 'https://www.trendyol.com/{}?q={}&siralama=1'.format(categories[self.category],search)
-##            print(url)
+        
+        if '[' in search and ']' in search:
+            if self.category in categories:
+                urls = []
+                static = search
+                dynamic = []
+                
+                for a,b in zip(range(1,search.count('[')+1),range(1,search.count(']')+1)):
+                    start = self.find_nth(search, '[', a)
+                    end = self.find_nth(search, ']', a) + 1
+                    part = search[start:end]
+                    dynamic.append(part.strip('][').split(','))
+                    static = static.replace(part,'')
+
+                for i in list(itertools.product(*dynamic)):
+                    search = ' '.join(static.split()) + ' ' + ' '.join(i)
+                    url = 'https://www.trendyol.com/{}?q={}&siralama=1'.format(categories[self.category],search)
+                    urls.append({'search':search,'url':requote_uri(url)})
+                return urls
+            else:
+                return []
         else:
-            url = self.base_url
-        return requote_uri(url)
+            if self.category in categories:
+                url = 'https://www.trendyol.com/{}?q={}&siralama=1'.format(categories[self.category],search)
+                return [{'search':search,'url':requote_uri(url)}]
+            else:
+                return []
+
+    def find_nth(self, haystack, needle, n):
+        start = haystack.find(needle)
+        while start >= 0 and n > 1:
+            start = haystack.find(needle, start+len(needle))
+            n -= 1
+        return start
         
     def getContent(self, url):
         count = 10
@@ -131,7 +193,7 @@ class Trendyol:
                     response = ''
         return soup(response.content, "lxml")
 
-    def getProducts(self, content):
+    def getProducts(self, content, search):
         products = []
         
         for product in content.find_all("div","p-card-wrppr"):
@@ -146,7 +208,7 @@ class Trendyol:
             product_price_from = product.find("div","prc-box-orgnl").text.split()[0].replace(".",'').split(',')[0]+ ' TL' if product.find("div","prc-box-orgnl") is not None else ''
             product_info = product.find("div","stmp").text.strip() if product.find("div","stmp") is not None else ''
             product_comment_count = product.find("span","ratingCount").text.strip() if product.find("span","ratingCount") is not None else ''
-            suitable_to_search = self.isSuitableToSearch(product_name,self.search)
+            suitable_to_search = self.isSuitableToSearch(product_name, search)
             products.append({'source':self.source, 'name':product_name,'code':None,'price':product_price,'old_price':product_price_from,'info':product_info,'comment_count':product_comment_count, 'suitable_to_search':suitable_to_search})
 ##            print(product_name,product_price,product_info,product_comment_count)
         return products
@@ -173,33 +235,60 @@ class HepsiBurada:
 
     def search(self, search):
         self.search = search
-        url = self.getUrl(search)
+        urls = self.getUrl(search)
         results = []
+        for url in urls:
+            content = self.getContent(url['url'])
 
-        content = self.getContent(url)
-
-        if not content.find("span","product-suggestions-title"):
-            page_number = int(content.select("#pagination > ul > li")[-1].text.strip() if content.select("#pagination > ul > li") else 1)
-##            print(page_number)
-            if page_number > 1:
-                results += self.getProducts(content)
-                for page in range(2, page_number + 1):
-                    content = self.getContent(url + '&sayfa=' + str(page))
-                    results += self.getProducts(content)
-            else:
-                results += self.getProducts(content)
+            if not content.find("span","product-suggestions-title"):
+                page_number = int(content.select("#pagination > ul > li")[-1].text.strip() if content.select("#pagination > ul > li") else 1)
+    ##            print(page_number)
+                if page_number > 1:
+                    results += self.getProducts(content, url['search'])
+                    for page in range(2, page_number + 1):
+                        content = self.getContent(url['url'] + '&sayfa=' + str(page))
+                        results += self.getProducts(content, url['search'])
+                else:
+                    results += self.getProducts(content, url['search'])
 
         return results
 
     def getUrl(self, search):
         categories = {'Notebooks':'&filtreler=MainCategory.Id:98','Smartphones':'&kategori=2147483642_371965','All':''}
-        
-        if self.category in categories:
-            url = 'https://www.hepsiburada.com/ara?q={}{}&siralama=artanfiyat'.format(search,categories[self.category])
-##            print(url)
+
+        if '[' in search and ']' in search:
+            if self.category in categories:
+                urls = []
+                static = search
+                dynamic = []
+                
+                for a,b in zip(range(1,search.count('[')+1),range(1,search.count(']')+1)):
+                    start = self.find_nth(search, '[', a)
+                    end = self.find_nth(search, ']', a) + 1
+                    part = search[start:end]
+                    dynamic.append(part.strip('][').split(','))
+                    static = static.replace(part,'')
+
+                for i in list(itertools.product(*dynamic)):
+                    search = ' '.join(static.split()) + ' ' + ' '.join(i)
+                    url = 'https://www.hepsiburada.com/ara?q={}{}&siralama=artanfiyat'.format(search,categories[self.category])
+                    urls.append({'search':search,'url':requote_uri(url)})
+                return urls
+            else:
+                return []
         else:
-            url = self.base_url
-        return requote_uri(url)
+            if self.category in categories:
+                url = 'https://www.hepsiburada.com/ara?q={}{}&siralama=artanfiyat'.format(search,categories[self.category])
+                return [{'search':search,'url':requote_uri(url)}]
+            else:
+                return []
+
+    def find_nth(self, haystack, needle, n):
+        start = haystack.find(needle)
+        while start >= 0 and n > 1:
+            start = haystack.find(needle, start+len(needle))
+            n -= 1
+        return start
         
     def getContent(self, url):
         count = 10
@@ -215,7 +304,7 @@ class HepsiBurada:
                     response = ''
         return soup(response.content, "lxml")
 
-    def getProducts(self, content):
+    def getProducts(self, content, search):
         products = []
         
         for product in content.find_all("div","product-detail"):
@@ -231,7 +320,7 @@ class HepsiBurada:
             product_price_from = product.find("del","product-old-price").text.replace(",",".").split()[0].replace(".",'')[:-2]+ ' TL' if product.find("del","product-old-price") is not None else ''
             product_info = product.find("div","shipping-status").text.strip() if product.find("div","shipping-status") is not None else ''
             product_comment_count = product.find("span","number-of-reviews").text.strip() if product.find("span","number-of-reviews") is not None else ''
-            suitable_to_search = self.isSuitableToSearch(product_name,self.search)
+            suitable_to_search = self.isSuitableToSearch(product_name, search)
             products.append({'source':self.source, 'name':product_name,'code':None,'price':product_price,'old_price':product_price_from,'info':product_info,'comment_count':product_comment_count, 'suitable_to_search':suitable_to_search})
 ##            print(product_name,product_price,product_info,product_comment_count)
         return products
@@ -258,35 +347,61 @@ class n11:
 
     def search(self, search):
         self.search = search
-        url = self.getUrl(search)
+        urls = self.getUrl(search)
         results = []
+        for url in urls:
+            content = self.getContent(url['url'])
 
-        content = self.getContent(url)
-
-        if not content.find("span","result-mean-word") and not content.select('#error404') and not content.select('#searchResultNotFound') and not content.select('.noResultHolder'):
-            page_number = math.ceil(int(content.select(".resultText > strong")[0].text.replace(",",""))/28)
-            if page_number > 50:
-                page_number = 50
-            if page_number > 1:
-                results += self.getProducts(content)
-                for page in range(2, page_number + 1):
-                    content = self.getContent(url + '&pg=' + str(page))
-                    results += self.getProducts(content)
-            else:
-                results += self.getProducts(content)
+            if not content.find("span","result-mean-word") and not content.select('#error404') and not content.select('#searchResultNotFound') and not content.select('.noResultHolder'):
+                page_number = math.ceil(int(content.select(".resultText > strong")[0].text.replace(",",""))/28)
+                if page_number > 50:
+                    page_number = 50
+                if page_number > 1:
+                    results += self.getProducts(content, url['search'])
+                    for page in range(2, page_number + 1):
+                        content = self.getContent(url['url'] + '&pg=' + str(page))
+                        results += self.getProducts(content, url['search'])
+                else:
+                    results += self.getProducts(content, url['search'])
 
         return results
 
     def getUrl(self, search):
         categories = {'Notebooks':'bilgisayar/dizustu-bilgisayar','Smartphones':'telefon-ve-aksesuarlari/cep-telefonu','All':'arama'}
-        
-        if self.category in categories:
-            url = 'https://www.n11.com/{}?q={}&srt=PRICE_LOW'.format(categories[self.category],'+'.join(search.split()))
-##            print(url)
+
+        if '[' in search and ']' in search:
+            if self.category in categories:
+                urls = []
+                static = search
+                dynamic = []
+                
+                for a,b in zip(range(1,search.count('[')+1),range(1,search.count(']')+1)):
+                    start = self.find_nth(search, '[', a)
+                    end = self.find_nth(search, ']', a) + 1
+                    part = search[start:end]
+                    dynamic.append(part.strip('][').split(','))
+                    static = static.replace(part,'')
+
+                for i in list(itertools.product(*dynamic)):
+                    search = ' '.join(static.split()) + ' ' + ' '.join(i)
+                    url = 'https://www.n11.com/{}?q={}&srt=PRICE_LOW'.format(categories[self.category],'+'.join(search.split()))
+                    urls.append({'search':search,'url':requote_uri(url)})
+                return urls
+            else:
+                return []
         else:
-            url = self.base_url
-            
-        return requote_uri(url)
+            if self.category in categories:
+                url = 'https://www.n11.com/{}?q={}&srt=PRICE_LOW'.format(categories[self.category],'+'.join(search.split()))
+                return [{'search':search,'url':requote_uri(url)}]
+            else:
+                return []
+
+    def find_nth(self, haystack, needle, n):
+        start = haystack.find(needle)
+        while start >= 0 and n > 1:
+            start = haystack.find(needle, start+len(needle))
+            n -= 1
+        return start
 
     def getContent(self, url):
         count = 10
@@ -302,7 +417,7 @@ class n11:
                     response = ''
         return soup(response.content, "lxml")
 
-    def getProducts(self, content):
+    def getProducts(self, content, search):
         products = []
         for product in content.select("#view ul")[0].find_all("div","columnContent"):
             product_name = product.find("h3","productName").text.strip()
@@ -310,7 +425,7 @@ class n11:
             product_price_from = product.find("a","oldPrice").text.replace(",",".").split()[0].replace(".",'')[:-2]+ ' TL' if product.find("a","oldPrice") is not None else ''
             product_info = 'Ücretsiz Kargo' if product.find("span","freeShipping") is not None else ''
             product_comment_count = product.find("span","ratingText").text.strip() if product.find("span","ratingText") is not None else ''
-            suitable_to_search = self.isSuitableToSearch(product_name,self.search)
+            suitable_to_search = self.isSuitableToSearch(product_name, search)
             products.append({'source':self.source, 'name':product_name,'code':None,'price':product_price,'old_price':product_price_from,'info':product_info,'comment_count':product_comment_count, 'suitable_to_search':suitable_to_search})
 ##            print(product_name,product_price,product_info,product_comment_count)
         return products
@@ -337,33 +452,59 @@ class VatanBilgisayar:
 
     def search(self, search):
         self.search = search
-        url = self.getUrl(search)
+        urls = self.getUrl(search)
         results = []
-
-        content = self.getContent(url)
-        
-        if not content.find("div","empty-basket"):
-            for page in content.find("ul", "pagination").find_all("li"):
-                if 'active' in page['class']:
-                    results += self.getProducts(content)
-                elif page.find("span","icon-angle-right"):
-                    break
-                else:
-                    content = self.getContent(self.base_url + page.find("a")['href'])
-                    results += self.getProducts(content)
+        for url in urls:
+            content = self.getContent(url['url'])
+            
+            if not content.find("div","empty-basket"):
+                for page in content.find("ul", "pagination").find_all("li"):
+                    if 'active' in page['class']:
+                        results += self.getProducts(content, url['search'])
+                    elif page.find("span","icon-angle-right"):
+                        break
+                    else:
+                        content = self.getContent(self.base_url + page.find("a")['href'])
+                        results += self.getProducts(content, url['search'])
 
         return results
 
     def getUrl(self, search):
         categories = {'Notebooks':'notebook/','Smartphones':'cep-telefonu-modelleri/','All':''}
-        
-        if self.category in categories:
-            url = 'https://www.vatanbilgisayar.com/arama/{}/{}?srt=UP'.format(search,categories[self.category])
-##            print(url)
+
+        if '[' in search and ']' in search:
+            if self.category in categories:
+                urls = []
+                static = search
+                dynamic = []
+                
+                for a,b in zip(range(1,search.count('[')+1),range(1,search.count(']')+1)):
+                    start = self.find_nth(search, '[', a)
+                    end = self.find_nth(search, ']', a) + 1
+                    part = search[start:end]
+                    dynamic.append(part.strip('][').split(','))
+                    static = static.replace(part,'')
+
+                for i in list(itertools.product(*dynamic)):
+                    search = ' '.join(static.split()) + ' ' + ' '.join(i)
+                    url = 'https://www.vatanbilgisayar.com/arama/{}/{}?srt=UP'.format(search,categories[self.category])
+                    urls.append({'search':search,'url':requote_uri(url)})
+                return urls
+            else:
+                return []
         else:
-            url = self.base_url
-        
-        return requote_uri(url)
+            if self.category in categories:
+                url = 'https://www.vatanbilgisayar.com/arama/{}/{}?srt=UP'.format(search,categories[self.category])
+                return [{'search':search,'url':requote_uri(url)}]
+            else:
+                return []
+
+    def find_nth(self, haystack, needle, n):
+        start = haystack.find(needle)
+        while start >= 0 and n > 1:
+            start = haystack.find(needle, start+len(needle))
+            n -= 1
+        return start
 
     def getContent(self, url):
         count = 10
@@ -379,7 +520,7 @@ class VatanBilgisayar:
                     response = ''
         return soup(response.content, "lxml")
 
-    def getProducts(self, content):
+    def getProducts(self, content, search):
         products = []
         for product in content.find_all("div","product-list--list-page"):
             product_name = product.find("div","product-list__product-name").text.strip()
@@ -388,7 +529,7 @@ class VatanBilgisayar:
             product_price_from = product.find("span","product-list__current-price").text.strip().replace(".",'')+ ' TL'
             product_stock = product.find("span","wrapper-condition__text").text.strip() if product.find("span","wrapper-condition__text") else ''
             product_comment_count = product.find("a","comment-count").text.strip()
-            suitable_to_search = self.isSuitableToSearch(product_name,self.search)
+            suitable_to_search = self.isSuitableToSearch(product_name, search)
             products.append({'source':self.source, 'name':product_name,'code':product_code,'price':product_price,'old_price':product_price_from,'info':product_stock,'comment_count':product_comment_count,'suitable_to_search':suitable_to_search})
 ##            print(product_name,product_code,product_price,product_price_from,product_stock,product_comment_count)
         return products
