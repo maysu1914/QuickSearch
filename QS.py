@@ -99,6 +99,68 @@ class SourceWebSite():
             if product_name.count(word) < count:
                 return False
         return True
+class MediaMarktTR(SourceWebSite):
+    base_url = "https://www.mediamarkt.com.tr"
+    source = '[MediaMarktTR]'
+
+    def getResults(self, url):
+        content = self.getContent(url['url'])
+
+        if content.find("ul","products-list"):
+            page_number = int(content.find("ul","pagination").find_all("li")[-2].text if content.find("ul","pagination") else '1')
+            SourceWebSite.results += self.getProducts(content, url['search'])
+            if page_number > 1:
+                page_list = [url['url'] + '&page=' + str(number) for number in range(2, page_number)]
+                for page in page_list:
+                    content = self.getContent(page)
+                    SourceWebSite.results += self.getProducts(content, url['search'])
+            else:
+                pass
+        elif content.find("div", id="product-details"):
+            SourceWebSite.results += self.getProduct(content, url['search'])
+        else:
+            pass
+
+    def getCategories(self):
+        categories = {'Notebooks':'searchParams=%2FSearch.ff%3Fquery%3D{search1}%26filterTabbedCategory%3Donlineshop%26filteravailability%3D1%26filterCategoriesROOT%3DBilgisayar%25C2%25A7MediaTRtrc504925%26filterCategoriesROOT%252FBilgisayar%25C2%25A7MediaTRtrc504925%3DTa%25C5%259F%25C4%25B1nabilir%2BBilgisayarlar%25C2%25A7MediaTRtrc504926%26channel%3Dmmtrtr%26productsPerPage%3D20%26followSearch%3D9873%26disableTabbedCategory%3Dtrue&searchProfile=onlineshop&query={search2}&sort=price&page=&sourceRef=INVALID',
+                      'Smartphones':'searchParams=%2FSearch.ff%3Fquery%3D{search1}%26filterTabbedCategory%3Donlineshop%26filteravailability%3D1%26filterCategoriesROOT%3DTelefon%25C2%25A7MediaTRtrc465595%26filterCategoriesROOT%252FTelefon%25C2%25A7MediaTRtrc465595%3DCep%2BTelefonlar%25C4%25B1%25C2%25A7MediaTRtrc504171%26channel%3Dmmtrtr%26productsPerPage%3D20%26followSearch%3D9931%26disableTabbedCategory%3Dtrue&searchProfile=onlineshop&query={search2}&sort=price&sourceRef=INVALID',
+                      'All':'query={search2}&searchProfile=onlineshop&channel=mmtrtr'}
+        return categories
+
+    def createUrl(self, search, category):
+        category = category.format(search1='%2B'.join(search.split()),search2='+'.join(search.split()))
+        url = 'https://www.mediamarkt.com.tr/tr/search.html?{}'.format(category)
+        return url
+
+    def getProduct(self, product, search):
+        products = []
+
+        product_name = product.find("h1", {'itemprop':'name'}).text.strip()
+        product_price = product.find("meta", {'itemprop':'price'})['content'] + ' TL'
+        product_price_from = ''
+        product_info = 'Ücretsiz Kargo' if product.find("span", {"data-layer":"deliveryinformation"}) else ''
+        product_comment_count = product.find("div", "rating").findNext('span').text.strip() if product.find("div", "rating") else ''
+        suitable_to_search = self.isSuitableToSearch(product_name,search)
+        products.append({'source':self.source, 'name':product_name,'code':None,'price':product_price,'old_price':product_price_from,'info':product_info,'comment_count':product_comment_count, 'suitable_to_search':suitable_to_search})
+##        print(product_name,product_price,product_info,product_comment_count)
+        
+        return products
+
+    def getProducts(self, content, search):
+        products = []
+        
+        for product in content.find("ul", class_="products-list").find_all("li", recursive=False):
+            if product.has_attr('class'):
+                continue
+            product_name = product.find("h2").text.strip()
+            product_price = product.find("div", class_='price small').text.split(',')[0] + ' TL' if product.find("div", class_='price small') else '1'
+            product_price_from = product.find("div", class_='price price-xs price-old').text.split(',')[0] + ' TL' if product.find("div", class_='price price-xs price-old') else '1'
+            product_info = ' '.join(product.find("span", {"data-layer":"deliveryinformation"}).parent.text.split()) if product.find("span", {"data-layer":"deliveryinformation"}) else ''
+            product_comment_count = product.find("div", "rating").findNext('a').text.strip() if product.find("div", "rating") else ''
+            suitable_to_search = self.isSuitableToSearch(product_name,search)
+            products.append({'source':self.source, 'name':product_name,'code':None,'price':product_price,'old_price':product_price_from,'info':product_info,'comment_count':product_comment_count, 'suitable_to_search':suitable_to_search})
+##            print(product_name,product_price,product_info,product_comment_count)
+        return products
 
 class GittiGidiyor(SourceWebSite):
     base_url = "https://www.gittigidiyor.com"
@@ -441,7 +503,7 @@ class VatanBilgisayar(SourceWebSite):
         return products
             
 def sourceController(category):
-    sources = {'VatanBilgisayar':VatanBilgisayar, 'n11':n11, 'HepsiBurada':HepsiBurada, 'Trendyol':Trendyol, 'AmazonTR':AmazonTR, 'Teknosa':Teknosa, 'GittiGidiyor':GittiGidiyor}
+    sources = {'VatanBilgisayar':VatanBilgisayar, 'n11':n11, 'HepsiBurada':HepsiBurada, 'Trendyol':Trendyol, 'AmazonTR':AmazonTR, 'Teknosa':Teknosa, 'GittiGidiyor':GittiGidiyor, 'MediaMarktTR':MediaMarktTR}
     source_selection = None
     results = []
     correct_results = []
