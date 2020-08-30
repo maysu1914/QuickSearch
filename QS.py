@@ -60,7 +60,7 @@ class SourceWebSite():
         
     def getContent(self, url):
         print(url)
-        count = 10
+        count = 3
         while count > 0:
             try:
                 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'}
@@ -73,7 +73,7 @@ class SourceWebSite():
                 print("Trying...",count)
                 count -= 1
                 if count == 0:
-                    response = ''
+                    return None
         return soup(response.content, "lxml")
 
     def isSuitableToSearch(self, product_name, search):
@@ -106,7 +106,7 @@ class MediaMarktTR(SourceWebSite):
     def getResults(self, url):
         content = self.getContent(url['url'])
 
-        if content.find("ul","products-list"):
+        if content and content.find("ul","products-list"):
             page_number = int(content.find("ul","pagination").find_all("li")[-2].text if content.find("ul","pagination") else '1')
             SourceWebSite.results += self.getProducts(content, url['search'])
             if page_number > 1:
@@ -169,7 +169,7 @@ class GittiGidiyor(SourceWebSite):
     def getResults(self, url):
         content = self.getContent(url['url'])
 
-        if not (content.find("div","no-result-icon") or content.find("h2","listing-similar-items")):
+        if content and not (content.find("div","no-result-icon") or content.find("h2","listing-similar-items")):
             page_number = math.ceil(int(re.findall('\d+', content.find("span","result-count").text)[0])/48)
 
             SourceWebSite.results += self.getProducts(content, url['search'])
@@ -222,7 +222,7 @@ class Teknosa(SourceWebSite):
     def getResults(self, url):
         content = self.getContent(url['url'])
 
-        if not content.find("i","icon-search-circle"):
+        if content and not content.find("i","icon-search-circle"):
             page_number = int(content.find("ul","pagination").find_all("li")[-2].text if content.find("ul","pagination") else '1')
 
             SourceWebSite.results += self.getProducts(content, url['search'])
@@ -268,13 +268,13 @@ class AmazonTR(SourceWebSite):
     def getResults(self, url):
         content = self.getContent(url['url'])
 
-        if any("Şunu mu demek istediniz" in i.text for i in content.select("span.a-size-medium.a-color-base.a-text-normal")):
+        if content and any("Şunu mu demek istediniz" in i.text for i in content.select("span.a-size-medium.a-color-base.a-text-normal")):
             url['url'] = self.base_url + content.select("a.a-size-medium.a-link-normal.a-text-bold.a-text-italic")[0]['href']
             content = self.getContent(url['url'])
         else:
             pass
 
-        if content.find(cel_widget_id="MAIN-SEARCH_RESULTS"):# and 'sonuç yok' not in content.find(cel_widget_id='MAIN-TOP_BANNER_MESSAGE').text:
+        if content and content.find(cel_widget_id="MAIN-SEARCH_RESULTS"):# and 'sonuç yok' not in content.find(cel_widget_id='MAIN-TOP_BANNER_MESSAGE').text:
             page_number = int(content.find("ul","a-pagination").find_all("li")[-2].text if content.find("ul","a-pagination") else '1')
 
             SourceWebSite.results += self.getProducts(content, url['search'])
@@ -323,7 +323,7 @@ class Trendyol(SourceWebSite):
     def getResults(self, url):
         content = self.getContent(url['url'])
 
-        if content.find("div","dscrptn") and "bulunamadı" not in content.find("div","dscrptn").text:
+        if content and content.find("div","dscrptn") and "bulunamadı" not in content.find("div","dscrptn").text:
             page_number = math.ceil(int(re.findall('\d+', content.find("div","dscrptn").text)[0])/24)
 
             SourceWebSite.results += self.getProducts(content, url['search'])
@@ -372,7 +372,7 @@ class HepsiBurada(SourceWebSite):
     def getResults(self, url):
         content = self.getContent(url['url'])
 
-        if not content.find("span","product-suggestions-title"):
+        if content and not content.find("span","product-suggestions-title"):
             page_number = int(content.select("#pagination > ul > li")[-1].text.strip() if content.select("#pagination > ul > li") else 1)
 
             SourceWebSite.results += self.getProducts(content, url['search'])
@@ -422,7 +422,7 @@ class n11(SourceWebSite):
     def getResults(self, url):
         content = self.getContent(url['url'])
 
-        if not content.find("span","result-mean-word") and not content.select('#error404') and not content.select('#searchResultNotFound') and not content.select('.noResultHolder'):
+        if content and not content.find("span","result-mean-word") and not content.select('#error404') and not content.select('#searchResultNotFound') and not content.select('.noResultHolder'):
             page_number = math.ceil(int(content.select(".resultText > strong")[0].text.replace(",",""))/28)
             page_number = 50 if page_number > 50 else page_number
 
@@ -465,7 +465,7 @@ class VatanBilgisayar(SourceWebSite):
     def getResults(self, url):
         content = self.getContent(url['url'])
         
-        if not content.find("div","empty-basket"):
+        if content and not content.find("div","empty-basket"):
             page_number = int(content.find("ul", "pagination").find_all("li")[-2].text.strip()) if len(content.find("ul", "pagination").find_all("li")) > 1 else 1
             page_number = 50 if page_number > 50 else page_number
             
