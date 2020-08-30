@@ -116,7 +116,7 @@ class MediaMarktTR(SourceWebSite):
                     SourceWebSite.results += self.getProducts(content, url['search'])
             else:
                 pass
-        elif content.find("div", id="product-details"):
+        elif content and content.find("div", id="product-details"):
             SourceWebSite.results += self.getProduct(content, url['search'])
         else:
             pass
