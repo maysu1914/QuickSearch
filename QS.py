@@ -8,6 +8,7 @@ import re
 ##import os
 
 class SourceWebSite():
+    max_page = 5
     results = []
     
     def __init__(self, category):
@@ -108,6 +109,8 @@ class MediaMarktTR(SourceWebSite):
 
         if content and content.find("ul","products-list"):
             page_number = int(content.find("ul","pagination").find_all("li")[-2].text if content.find("ul","pagination") else '1')
+            page_number = SourceWebSite.max_page if page_number > SourceWebSite.max_page else page_number
+            
             SourceWebSite.results += self.getProducts(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&page=' + str(number) for number in range(2, page_number)]
@@ -171,6 +174,7 @@ class GittiGidiyor(SourceWebSite):
 
         if content and not (content.find("div","no-result-icon") or content.find("h2","listing-similar-items")):
             page_number = math.ceil(int(re.findall('\d+', content.find("span","result-count").text)[0])/48)
+            page_number = SourceWebSite.max_page if page_number > SourceWebSite.max_page else page_number
 
             SourceWebSite.results += self.getProducts(content, url['search'])
             if page_number > 1:
@@ -224,6 +228,7 @@ class Teknosa(SourceWebSite):
 
         if content and not content.find("i","icon-search-circle"):
             page_number = int(content.find("ul","pagination").find_all("li")[-2].text if content.find("ul","pagination") else '1')
+            page_number = SourceWebSite.max_page if page_number > SourceWebSite.max_page else page_number
 
             SourceWebSite.results += self.getProducts(content, url['search'])
             if page_number > 1:
@@ -276,6 +281,7 @@ class AmazonTR(SourceWebSite):
 
         if content and content.find(cel_widget_id="MAIN-SEARCH_RESULTS"):# and 'sonuç yok' not in content.find(cel_widget_id='MAIN-TOP_BANNER_MESSAGE').text:
             page_number = int(content.find("ul","a-pagination").find_all("li")[-2].text if content.find("ul","a-pagination") else '1')
+            page_number = SourceWebSite.max_page if page_number > SourceWebSite.max_page else page_number
 
             SourceWebSite.results += self.getProducts(content, url['search'])
             if page_number > 1:
@@ -325,6 +331,7 @@ class Trendyol(SourceWebSite):
 
         if content and content.find("div","dscrptn") and "bulunamadı" not in content.find("div","dscrptn").text:
             page_number = math.ceil(int(re.findall('\d+', content.find("div","dscrptn").text)[0])/24)
+            page_number = SourceWebSite.max_page if page_number > SourceWebSite.max_page else page_number
 
             SourceWebSite.results += self.getProducts(content, url['search'])
             if page_number > 1:
@@ -374,6 +381,7 @@ class HepsiBurada(SourceWebSite):
 
         if content and not content.find("span","product-suggestions-title"):
             page_number = int(content.select("#pagination > ul > li")[-1].text.strip() if content.select("#pagination > ul > li") else 1)
+            page_number = SourceWebSite.max_page if page_number > SourceWebSite.max_page else page_number
 
             SourceWebSite.results += self.getProducts(content, url['search'])
             if page_number > 1:
@@ -424,7 +432,7 @@ class n11(SourceWebSite):
 
         if content and not content.find("span","result-mean-word") and not content.select('#error404') and not content.select('#searchResultNotFound') and not content.select('.noResultHolder'):
             page_number = math.ceil(int(content.select(".resultText > strong")[0].text.replace(",",""))/28)
-            page_number = 50 if page_number > 50 else page_number
+            page_number = SourceWebSite.max_page if page_number > SourceWebSite.max_page else page_number
 
             SourceWebSite.results += self.getProducts(content, url['search'])
             if page_number > 1:
@@ -467,7 +475,7 @@ class VatanBilgisayar(SourceWebSite):
         
         if content and not content.find("div","empty-basket"):
             page_number = int(content.find("ul", "pagination").find_all("li")[-2].text.strip()) if len(content.find("ul", "pagination").find_all("li")) > 1 else 1
-            page_number = 50 if page_number > 50 else page_number
+            page_number = SourceWebSite.max_page if page_number > SourceWebSite.max_page else page_number
             
             SourceWebSite.results += self.getProducts(content, url['search'])
             if page_number > 1:
