@@ -156,7 +156,10 @@ class MediaMarktTR(SourceWebSite):
             if product.has_attr('class'):
                 continue
             product_name = product.find("h2").text.strip()
-            product_price = product.find("div", class_='price small').text.split(',')[0] + ' TL' if product.find("div", class_='price small') else '1'
+            if product.find("div", class_='price small'):
+                product_price = product.find("div", class_='price small').text.split(',')[0] + ' TL'
+            else:
+                continue
             product_price_from = product.find("div", class_='price price-xs price-old').text.split(',')[0] + ' TL' if product.find("div", class_='price price-xs price-old') else '1'
             product_info = ' '.join(product.find("span", {"data-layer":"deliveryinformation"}).parent.text.split()) if product.find("span", {"data-layer":"deliveryinformation"}) else ''
             product_comment_count = product.find("div", "rating").findNext('a').text.strip() if product.find("div", "rating") else ''
