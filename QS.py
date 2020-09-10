@@ -100,6 +100,7 @@ class SourceWebSite():
             if product_name.count(word) < count:
                 return False
         return True
+    
 class MediaMarktTR(SourceWebSite):
     base_url = "https://www.mediamarkt.com.tr"
     source = '[MediaMarktTR]'
@@ -229,7 +230,7 @@ class Teknosa(SourceWebSite):
     def getResults(self, url):
         content = self.getContent(url['url'])
 
-        if content and not content.find("i","icon-search-circle"):
+        if content and self.isResult(url['search']) and not content.find("i","icon-search-circle"):
             page_number = int(content.find("ul","pagination").find_all("li")[-2].text if content.find("ul","pagination") else '1')
             page_number = SourceWebSite.max_page if page_number > SourceWebSite.max_page else page_number
 
@@ -268,6 +269,17 @@ class Teknosa(SourceWebSite):
             products.append({'source':self.source, 'name':product_name,'code':None,'price':product_price,'old_price':product_price_from,'info':product_info,'comment_count':product_comment_count, 'suitable_to_search':suitable_to_search})
 ##            print(product_name,product_price,product_info,product_comment_count)
         return products
+
+    def isResult(self, search):
+        url = "https://www.teknosa.com/arama/?s=" + search
+        content = self.getContent(url)
+
+        if content and not content.find("i","icon-search-circle"):
+##            print(1)
+            return True
+        else:
+##            print(2)
+            return False
 
 class AmazonTR(SourceWebSite):
     base_url = "https://www.amazon.com.tr"
