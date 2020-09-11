@@ -293,8 +293,8 @@ class AmazonTR(SourceWebSite):
             content = self.getContent(url['url'])
         else:
             pass
-
-        if content and content.find(cel_widget_id="MAIN-SEARCH_RESULTS"):# and 'sonuç yok' not in content.find(cel_widget_id='MAIN-TOP_BANNER_MESSAGE').text:
+            
+        if content and content.find(cel_widget_id="MAIN-SEARCH_RESULTS") and not (content.find("h3", class_='a-size-base a-spacing-base a-color-base a-text-normal') and 'sonuç bulunamadı' in content.find("h3", class_='a-size-base a-spacing-base a-color-base a-text-normal').text):
             page_number = int(content.find("ul","a-pagination").find_all("li")[-2].text if content.find("ul","a-pagination") else '1')
             page_number = SourceWebSite.max_page if page_number > SourceWebSite.max_page else page_number
 
