@@ -379,7 +379,7 @@ class Trendyol(SourceWebSite):
                 product_price = product.find("div","prc-box-sllng").text.split()[0].replace(".",'').split(',')[0]+ ' TL'
             else:
                 continue
-            product_price_from = product.find("div","prc-box-orgnl").text.split()[0].replace(".",'').split(',')[0]+ ' TL' if product.find("div","prc-box-orgnl") is not None else ''
+            product_price_from = '' #product.find("div","prc-box-orgnl").text.split()[0].replace(".",'').split(',')[0]+ ' TL' if product.find("div","prc-box-orgnl") is not None else ''
             product_info = product.find("div","stmp").text.strip() if product.find("div","stmp") is not None else ''
             product_comment_count = product.find("span","ratingCount").text.strip() if product.find("span","ratingCount") is not None else ''
             suitable_to_search = self.isSuitableToSearch(product_name, search)
