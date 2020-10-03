@@ -294,7 +294,7 @@ class AmazonTR(SourceWebSite):
         else:
             pass
             
-        if content and content.find(cel_widget_id="MAIN-SEARCH_RESULTS") and not (content.find("h3", class_='a-size-base a-spacing-base a-color-base a-text-normal') and 'sonuç bulunamadı' in content.find("h3", class_='a-size-base a-spacing-base a-color-base a-text-normal').text):
+        if content and not (content.find("span", class_='a-size-medium a-color-base') or (content.find("h3", class_='a-size-base a-spacing-base a-color-base a-text-normal') and 'sonuç bulunamadı' in content.find("h3", class_='a-size-base a-spacing-base a-color-base a-text-normal').text)):
             page_number = int(content.find("ul","a-pagination").find_all("li")[-2].text if content.find("ul","a-pagination") else '1')
             page_number = SourceWebSite.max_page if page_number > SourceWebSite.max_page else page_number
 
@@ -320,7 +320,7 @@ class AmazonTR(SourceWebSite):
     def getProducts(self, content, search):
         products = []
         
-        for product in content.find_all("span",cel_widget_id="MAIN-SEARCH_RESULTS"):
+        for product in content.find_all("div",{"data-component-type":"s-search-result"}):
             if product.find("span", class_='a-size-medium a-color-base a-text-normal'):
                 product_name = product.find("span", class_='a-size-medium a-color-base a-text-normal').text.strip()
             else:
