@@ -140,7 +140,10 @@ class MediaMarktTR(SourceWebSite):
         products = []
 
         product_name = product.find("h1", {'itemprop':'name'}).text.strip()
-        product_price = product.find("meta", {'itemprop':'price'})['content'] + ' TL'
+        if product.find("meta", {'itemprop':'price'}):
+            product_price =  product.find("meta", {'itemprop':'price'})['content'] + ' TL'
+        else:
+            return products
         product_price_from = ''
         product_info = 'Ücretsiz Kargo' if product.find("span", {"data-layer":"deliveryinformation"}) else ''
         product_comment_count = product.find("div", "rating").findNext('span').text.strip() if product.find("div", "rating") else ''
