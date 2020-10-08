@@ -473,8 +473,11 @@ class n11(SourceWebSite):
 
     def getProducts(self, content, search):
         products = []
-        for product in content.select("#view ul")[0].find_all("div","columnContent"):
-            product_name = product.find("h3","productName").text.strip()
+        for product in content.find_all("div","columnContent"):
+            if product.find("h3","productName"):
+                product_name = product.find("h3","productName").text.strip()
+            else:
+                continue
             product_price = product.find("a","newPrice").text.replace(",",".").replace('"','').split()[0].replace(".",'')[:-2]+ ' TL'
             product_price_from = product.find("a","oldPrice").text.replace(",",".").split()[0].replace(".",'')[:-2]+ ' TL' if product.find("a","oldPrice") is not None else ''
             product_info = 'Ücretsiz Kargo' if product.find("span","freeShipping") is not None else ''
