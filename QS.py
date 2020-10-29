@@ -62,19 +62,28 @@ class SourceWebSite():
     def getContent(self, url):
         print(url)
         count = 3
+        verify = True
         while count > 0:
             try:
                 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'}
-                response = requests.get(url, timeout=10, headers=headers, verify=False)
+                response = requests.get(url, timeout=10, headers=headers, verify=verify)
 ##                print(response.url)
 ##                print(response.content)
                 count = 0
+            except requests.exceptions.SSLError as e:
+                print(url, "SSL error!")
+                print("Trying without SSL verify...", count)
+                verify = False
+                count -= 1
+                if count == 0:
+                    return None
             except Exception as e:
                 print(url,e)
                 print("Trying...",count)
                 count -= 1
                 if count == 0:
                     return None
+            
         return soup(response.content, "lxml")
 
     def isSuitableToSearch(self, product_name, search):
