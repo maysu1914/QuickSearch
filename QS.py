@@ -65,7 +65,7 @@ class SourceWebSite():
         while count > 0:
             try:
                 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'}
-                response = requests.get(url, timeout=10, headers=headers)
+                response = requests.get(url, timeout=10, headers=headers, verify=False)
 ##                print(response.url)
 ##                print(response.content)
                 count = 0
@@ -128,6 +128,7 @@ class MediaMarktTR(SourceWebSite):
     def getCategories(self):
         categories = {'Notebooks':'searchParams=%2FSearch.ff%3Fquery%3D{search1}%26filterTabbedCategory%3Donlineshop%26filteravailability%3D1%26filterCategoriesROOT%3DBilgisayar%25C2%25A7MediaTRtrc504925%26filterCategoriesROOT%252FBilgisayar%25C2%25A7MediaTRtrc504925%3DTa%25C5%259F%25C4%25B1nabilir%2BBilgisayarlar%25C2%25A7MediaTRtrc504926%26channel%3Dmmtrtr%26productsPerPage%3D20%26disableTabbedCategory%3Dtrue&searchProfile=onlineshop&query={search2}&sort=price&page=&sourceRef=INVALID',
                       'Smartphones':'searchParams=%2FSearch.ff%3Fquery%3D{search1}%26filterTabbedCategory%3Donlineshop%26filteravailability%3D1%26filterCategoriesROOT%3DTelefon%25C2%25A7MediaTRtrc465595%26filterCategoriesROOT%252FTelefon%25C2%25A7MediaTRtrc465595%3DCep%2BTelefonlar%25C4%25B1%25C2%25A7MediaTRtrc504171%26channel%3Dmmtrtr%26productsPerPage%3D20%26disableTabbedCategory%3Dtrue&searchProfile=onlineshop&query={search2}&sort=price&sourceRef=INVALID',
+                      'Monitors':'searchParams=/Search.ff?query%3D{search1}%26filterTabbedCategory%3Donlineshop%26filteravailability%3D1%26filterCategoriesROOT%3DBilgisayar%2BBile%25C5%259Fenleri%25C2%25A7MediaTRtrc639556%26filterCategoriesROOT%252FBilgisayar%2BBile%25C5%259Fenleri%25C2%25A7MediaTRtrc639556%3DMonit%25C3%25B6r%25C2%25A7MediaTRtrc639581%26channel%3Dmmtrtr%26productsPerPage%3D20%26disableTabbedCategory%3Dtrue&searchProfile=onlineshop&query={search2}&sort=price&sourceRef=INVALID',
                       'All':'query={search2}&searchProfile=onlineshop&channel=mmtrtr'}
         return categories
 
@@ -195,7 +196,7 @@ class GittiGidiyor(SourceWebSite):
             pass
 
     def getCategories(self):
-        categories = {'Notebooks':'dizustu-laptop-notebook-bilgisayar','Smartphones':'cep-telefonu','All':'arama/'}
+        categories = {'Notebooks':'dizustu-laptop-notebook-bilgisayar','Smartphones':'cep-telefonu','Monitors':'cevre-birimleri/monitor','All':'arama/'}
         return categories
 
     def createUrl(self, search, category):
@@ -249,7 +250,7 @@ class Teknosa(SourceWebSite):
             pass
 
     def getCategories(self):
-        categories = {'Notebooks':':relevance:category:1020101','Smartphones':':relevance:category:100001','All':':relevance'}
+        categories = {'Notebooks':':relevance:category:1020101','Smartphones':':relevance:category:100001','Monitors':':relevance:category:1020301','All':':relevance'}
         return categories
 
     def createUrl(self, search, category):
@@ -313,7 +314,10 @@ class AmazonTR(SourceWebSite):
             pass
 
     def getCategories(self):
-        categories = {'Notebooks':'&i=computers&rh=n%3A12466439031%2Cn%3A12601898031','Smartphones':'&i=electronics&rh=n%3A12466496031%2Cn%3A13709907031','All':''}
+        categories = {'Notebooks':'&i=computers&rh=n%3A12466439031%2Cn%3A12601898031',
+                      'Smartphones':'&i=electronics&rh=n%3A12466496031%2Cn%3A13709907031',
+                      'Monitors':'&i=computers&rh=n%3A12466439031%2Cn%3A12601904031',
+                      'All':''}
         return categories
 
     def createUrl(self, search, category):
@@ -363,7 +367,7 @@ class Trendyol(SourceWebSite):
             pass
 
     def getCategories(self):
-        categories = {'Notebooks':'laptop','Smartphones':'akilli-cep-telefonu','All':'tum--urunler'}
+        categories = {'Notebooks':'laptop','Smartphones':'akilli-cep-telefonu','Monitors':'monitor','All':'tum--urunler'}
         return categories
 
     def createUrl(self, search, category):
@@ -413,7 +417,7 @@ class HepsiBurada(SourceWebSite):
             pass
 
     def getCategories(self):
-        categories = {'Notebooks':'&filtreler=MainCategory.Id:98','Smartphones':'&kategori=2147483642_371965','All':''}
+        categories = {'Notebooks':'&filtreler=MainCategory.Id:98','Smartphones':'&kategori=2147483642_371965','Monitors':'&kategori=2147483646_3013120_57','All':''}
         return categories
 
     def createUrl(self, search, category):
@@ -464,7 +468,7 @@ class n11(SourceWebSite):
             pass
             
     def getCategories(self):
-        categories = {'Notebooks':'bilgisayar/dizustu-bilgisayar','Smartphones':'telefon-ve-aksesuarlari/cep-telefonu','All':'arama'}
+        categories = {'Notebooks':'bilgisayar/dizustu-bilgisayar','Smartphones':'telefon-ve-aksesuarlari/cep-telefonu','Monitors':'bilgisayar/cevre-birimleri/monitor-ve-ekran','All':'arama'}
         return categories
 
     def createUrl(self, search, category):
@@ -510,7 +514,7 @@ class VatanBilgisayar(SourceWebSite):
             pass
 
     def getCategories(self):
-        categories = {'Notebooks':'notebook/','Smartphones':'cep-telefonu-modelleri/','All':''}
+        categories = {'Notebooks':'notebook/','Smartphones':'cep-telefonu-modelleri/','Monitors':'monitor/','All':''}
         return categories
 
     def createUrl(self, search, category):
@@ -589,7 +593,7 @@ def sourceController(category):
 
 
 def main():
-    categories = ['All', 'Notebooks', 'Smartphones']
+    categories = ['All', 'Notebooks', 'Smartphones', 'Monitors']
     category_selection = None
 
     print("What category do you want to search?")
