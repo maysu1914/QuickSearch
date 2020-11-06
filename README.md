@@ -68,6 +68,6 @@ You can search your products with this special search style:
     acer 8gb ram windows
     acer 16gb ram windows
 
-You can use this style when you are not searching for a particular product. Of course it will take some time to search because of many requests to be made. You can calculate how many requests to be made by multiplying the number of words in the word lists with each other.
+You can use this style when you are not searching for a particular product. Of course it will take some time to search because of many requests to be made. You can calculate how many requests to be made by multiplying the number of words in the word lists with each other and multiplying that number with the number of websites to search.
 
-*For example, there is 2x2 requests will be made in the fourth example*
+*For example, there is 2x2 requests will be made for each website in the fourth example*
