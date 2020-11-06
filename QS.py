@@ -2,7 +2,6 @@ import itertools
 import math
 import re
 from multiprocessing import Pool
-from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup as Soup
@@ -130,7 +129,7 @@ class MediaMarktTR(SourceWebSite):
         if content and content.find("ul", "products-list"):
             page_number = int(
                 content.find("ul", "pagination").find_all("li")[-2].text if content.find("ul", "pagination") else '1')
-            page_number = SourceWebSite.max_page if page_number > SourceWebSite.max_page else page_number
+            page_number = self.max_page if page_number > self.max_page else page_number
 
             SourceWebSite.results += self.get_products(content, url['search'])
             if page_number > 1:
@@ -216,7 +215,7 @@ class GittiGidiyor(SourceWebSite):
 
         if content and not (content.find("div", "no-result-icon") or content.find("h2", "listing-similar-items")):
             page_number = math.ceil(int(re.findall('\d+', content.find("span", "result-count").text)[0]) / 48)
-            page_number = SourceWebSite.max_page if page_number > SourceWebSite.max_page else page_number
+            page_number = self.max_page if page_number > self.max_page else page_number
 
             SourceWebSite.results += self.get_products(content, url['search'])
             if page_number > 1:
@@ -231,8 +230,12 @@ class GittiGidiyor(SourceWebSite):
 
     @staticmethod
     def get_categories():
-        categories = {'Notebooks': 'dizustu-laptop-notebook-bilgisayar', 'Smartphones': 'cep-telefonu',
-                      'Monitors': 'cevre-birimleri/monitor', 'All': 'arama/'}
+        categories = {
+            'Notebooks': 'dizustu-laptop-notebook-bilgisayar',
+            'Smartphones': 'cep-telefonu',
+            'Monitors': 'cevre-birimleri/monitor',
+            'All': 'arama/'
+        }
         return categories
 
     @staticmethod
@@ -282,14 +285,14 @@ class Teknosa(SourceWebSite):
         if content and self.is_result(url['search']) and not content.find("i", "icon-search-circle"):
             page_number = int(
                 content.find("ul", "pagination").find_all("li")[-2].text if content.find("ul", "pagination") else '1')
-            page_number = SourceWebSite.max_page if page_number > SourceWebSite.max_page else page_number
+            page_number = self.max_page if page_number > self.max_page else page_number
 
-            SourceWebSite.results += self.get_products(content, url['search'])
+            self.results += self.get_products(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&page=' + str(number) for number in range(1, page_number)]
                 for page in page_list:
                     content = self.get_content(page)
-                    SourceWebSite.results += self.get_products(content, url['search'])
+                    self.results += self.get_products(content, url['search'])
             else:
                 pass
         else:
@@ -297,8 +300,12 @@ class Teknosa(SourceWebSite):
 
     @staticmethod
     def get_categories():
-        categories = {'Notebooks': ':relevance:category:1020101', 'Smartphones': ':relevance:category:100001',
-                      'Monitors': ':relevance:category:1020301', 'All': ':relevance'}
+        categories = {
+            'Notebooks': ':relevance:category:1020101',
+            'Smartphones': ':relevance:category:100001',
+            'Monitors': ':relevance:category:1020301',
+            'All': ':relevance'
+        }
         return categories
 
     @staticmethod
@@ -361,14 +368,14 @@ class AmazonTR(SourceWebSite):
             "h3", class_='a-size-base a-spacing-base a-color-base a-text-normal').text)):
             page_number = int(content.find("ul", "a-pagination").find_all("li")[-2].text if content.find("ul",
                                                                                                          "a-pagination") else '1')
-            page_number = SourceWebSite.max_page if page_number > SourceWebSite.max_page else page_number
+            page_number = self.max_page if page_number > self.max_page else page_number
 
-            SourceWebSite.results += self.get_products(content, url['search'])
+            self.results += self.get_products(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&page=' + str(number) for number in range(2, page_number + 1)]
                 for page in page_list:
                     content = self.get_content(page)
-                    SourceWebSite.results += self.get_products(content, url['search'])
+                    self.results += self.get_products(content, url['search'])
             else:
                 pass
         else:
@@ -376,10 +383,12 @@ class AmazonTR(SourceWebSite):
 
     @staticmethod
     def get_categories():
-        categories = {'Notebooks': '&i=computers&rh=n%3A12466439031%2Cn%3A12601898031',
-                      'Smartphones': '&i=electronics&rh=n%3A12466496031%2Cn%3A13709907031',
-                      'Monitors': '&i=computers&rh=n%3A12466439031%2Cn%3A12601904031',
-                      'All': ''}
+        categories = {
+            'Notebooks': '&i=computers&rh=n%3A12466439031%2Cn%3A12601898031',
+            'Smartphones': '&i=electronics&rh=n%3A12466496031%2Cn%3A13709907031',
+            'Monitors': '&i=computers&rh=n%3A12466439031%2Cn%3A12601904031',
+            'All': ''
+        }
         return categories
 
     @staticmethod
@@ -427,14 +436,14 @@ class Trendyol(SourceWebSite):
 
         if content and content.find("div", "dscrptn") and "bulunamadı" not in content.find("div", "dscrptn").text:
             page_number = math.ceil(int(re.findall('\d+', content.find("div", "dscrptn").text)[0]) / 24)
-            page_number = SourceWebSite.max_page if page_number > SourceWebSite.max_page else page_number
+            page_number = self.max_page if page_number > self.max_page else page_number
 
-            SourceWebSite.results += self.get_products(content, url['search'])
+            self.results += self.get_products(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&pi=' + str(number) for number in range(2, page_number + 1)]
                 for page in page_list:
                     content = self.get_content(page)
-                    SourceWebSite.results += self.get_products(content, url['search'])
+                    self.results += self.get_products(content, url['search'])
             else:
                 pass
         else:
@@ -488,14 +497,14 @@ class HepsiBurada(SourceWebSite):
         if content and not content.find("span", "product-suggestions-title"):
             page_number = int(content.select("#pagination > ul > li")[-1].text.strip() if content.select(
                 "#pagination > ul > li") else 1)
-            page_number = SourceWebSite.max_page if page_number > SourceWebSite.max_page else page_number
+            page_number = self.max_page if page_number > self.max_page else page_number
 
-            SourceWebSite.results += self.get_products(content, url['search'])
+            self.results += self.get_products(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&sayfa=' + str(number) for number in range(2, page_number + 1)]
                 for page in page_list:
                     content = self.get_content(page)
-                    SourceWebSite.results += self.get_products(content, url['search'])
+                    self.results += self.get_products(content, url['search'])
             else:
                 pass
         else:
@@ -503,8 +512,12 @@ class HepsiBurada(SourceWebSite):
 
     @staticmethod
     def get_categories():
-        categories = {'Notebooks': '&filtreler=MainCategory.Id:98', 'Smartphones': '&kategori=2147483642_371965',
-                      'Monitors': '&kategori=2147483646_3013120_57', 'All': ''}
+        categories = {
+            'Notebooks': '&filtreler=MainCategory.Id:98',
+            'Smartphones': '&kategori=2147483642_371965',
+            'Monitors': '&kategori=2147483646_3013120_57',
+            'All': ''
+        }
         return categories
 
     @staticmethod
@@ -551,14 +564,14 @@ class N11(SourceWebSite):
         if content and not content.find("span", "result-mean-word") and not content.select(
                 '#error404') and not content.select('#searchResultNotFound') and not content.select('.noResultHolder'):
             page_number = math.ceil(int(content.select(".resultText > strong")[0].text.replace(",", "")) / 28)
-            page_number = SourceWebSite.max_page if page_number > SourceWebSite.max_page else page_number
+            page_number = self.max_page if page_number > self.max_page else page_number
 
-            SourceWebSite.results += self.get_products(content, url['search'])
+            self.results += self.get_products(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&pg=' + str(number) for number in range(2, page_number + 1)]
                 for page in page_list:
                     content = self.get_content(page)
-                    SourceWebSite.results += self.get_products(content, url['search'])
+                    self.results += self.get_products(content, url['search'])
             else:
                 pass
         else:
@@ -566,9 +579,12 @@ class N11(SourceWebSite):
 
     @staticmethod
     def get_categories():
-        categories = {'Notebooks': 'bilgisayar/dizustu-bilgisayar',
-                      'Smartphones': 'telefon-ve-aksesuarlari/cep-telefonu',
-                      'Monitors': 'bilgisayar/cevre-birimleri/monitor-ve-ekran', 'All': 'arama'}
+        categories = {
+            'Notebooks': 'bilgisayar/dizustu-bilgisayar',
+            'Smartphones': 'telefon-ve-aksesuarlari/cep-telefonu',
+            'Monitors': 'bilgisayar/cevre-birimleri/monitor-ve-ekran',
+            'All': 'arama'
+        }
         return categories
 
     @staticmethod
@@ -608,14 +624,14 @@ class VatanBilgisayar(SourceWebSite):
         if content and not content.find("div", "empty-basket"):
             page_number = int(content.find("ul", "pagination").find_all("li")[-2].text.strip()) if len(
                 content.find("ul", "pagination").find_all("li")) > 1 else 1
-            page_number = SourceWebSite.max_page if page_number > SourceWebSite.max_page else page_number
+            page_number = self.max_page if page_number > self.max_page else page_number
 
-            SourceWebSite.results += self.get_products(content, url['search'])
+            self.results += self.get_products(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&page=' + str(number) for number in range(2, page_number + 1)]
                 for page in page_list:
                     content = self.get_content(page)
-                    SourceWebSite.results += self.get_products(content, url['search'])
+                    self.results += self.get_products(content, url['search'])
             else:
                 pass
         else:
@@ -675,7 +691,7 @@ def source_controller(category):
     with Pool() as pool:
         for source in source_selection:
             processes.append(
-                pool.apply_async(list(sources.values())[int(source) - 1](category).search, (search_input,)))
+                pool.apply_async(list(sources.values())[int(source) - 1](category, max_page=1).search, (search_input,)))
         for process in processes:
             results += process.get()
 
