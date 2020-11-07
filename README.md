@@ -70,4 +70,4 @@ You can search your products with this special search style:
 
 You can use this style when you are not searching for a particular product. Of course it will take some time to search because of many requests to be made. You can calculate the minimum number of requests to be made by multiplying the number of words in the word lists with each other and multiplying that number with the number of websites to search.
 
-*For example, there is minimum of 2x2 requests will be made for each website in the fourth example*
+*For example, there is minimum of 2x2 requests will be made for each website in the third example*
