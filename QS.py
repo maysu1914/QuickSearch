@@ -121,7 +121,7 @@ class SourceWebSite:
 
 class MediaMarktTR(SourceWebSite):
     base_url = "https://www.mediamarkt.com.tr"
-    source = '[MediaMarktTR]'
+    source_name = 'MediaMarktTR'
 
     def get_results(self, url):
         content = self.get_content(url['url'])
@@ -172,9 +172,10 @@ class MediaMarktTR(SourceWebSite):
         product_comment_count = product.find("div", "rating").findNext('span').text.strip() if product.find("div",
                                                                                                             "rating") else ''
         suitable_to_search = self.is_suitable_to_search(product_name, search)
-        products.append({'source': self.source, 'name': product_name, 'code': None, 'price': product_price,
-                         'old_price': product_price_from, 'info': product_info, 'comment_count': product_comment_count,
-                         'suitable_to_search': suitable_to_search})
+        products.append(
+            {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None, 'price': product_price,
+             'old_price': product_price_from, 'info': product_info, 'comment_count': product_comment_count,
+             'suitable_to_search': suitable_to_search})
         # print(product_name,product_price,product_info,product_comment_count)
 
         return products
@@ -199,16 +200,17 @@ class MediaMarktTR(SourceWebSite):
             product_comment_count = product.find("div", "rating").findNext('a').text.strip() if product.find("div",
                                                                                                              "rating") else ''
             suitable_to_search = self.is_suitable_to_search(product_name, search)
-            products.append({'source': self.source, 'name': product_name, 'code': None, 'price': product_price,
-                             'old_price': product_price_from, 'info': product_info,
-                             'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
+            products.append(
+                {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None, 'price': product_price,
+                 'old_price': product_price_from, 'info': product_info,
+                 'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
         # print(product_name,product_price,product_info,product_comment_count)
         return products
 
 
 class GittiGidiyor(SourceWebSite):
     base_url = "https://www.gittigidiyor.com"
-    source = '[GittiGidiyor]'
+    source_name = 'GittiGidiyor'
 
     def get_results(self, url):
         content = self.get_content(url['url'])
@@ -268,16 +270,17 @@ class GittiGidiyor(SourceWebSite):
                 pass
             product_comment_count = ''
             suitable_to_search = self.is_suitable_to_search(product_name, search)
-            products.append({'source': self.source, 'name': product_name, 'code': None, 'price': product_price,
-                             'old_price': product_price_from, 'info': product_info,
-                             'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
+            products.append(
+                {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None, 'price': product_price,
+                 'old_price': product_price_from, 'info': product_info,
+                 'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
         # print(product_name,product_price,product_info,product_comment_count)
         return products
 
 
 class Teknosa(SourceWebSite):
     base_url = "https://www.teknosa.com"
-    source = '[Teknosa]'
+    source_name = 'Teknosa'
 
     def get_results(self, url):
         content = self.get_content(url['url'])
@@ -330,9 +333,10 @@ class Teknosa(SourceWebSite):
             product_info = 'KARGO BEDAVA' if int(product_price.split()[0]) > 100 else ''
             product_comment_count = ''
             suitable_to_search = self.is_suitable_to_search(product_name, search)
-            products.append({'source': self.source, 'name': product_name, 'code': None, 'price': product_price,
-                             'old_price': product_price_from, 'info': product_info,
-                             'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
+            products.append(
+                {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None, 'price': product_price,
+                 'old_price': product_price_from, 'info': product_info,
+                 'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
         # print(product_name,product_price,product_info,product_comment_count)
         return products
 
@@ -350,7 +354,7 @@ class Teknosa(SourceWebSite):
 
 class AmazonTR(SourceWebSite):
     base_url = "https://www.amazon.com.tr"
-    source = '[AmazonTR]'
+    source_name = 'AmazonTR'
 
     def get_results(self, url):
         content = self.get_content(url['url'])
@@ -420,16 +424,17 @@ class AmazonTR(SourceWebSite):
                     -1].text.strip() if len(
                     product.select(".a-section.a-spacing-none.a-spacing-top-micro .a-row.a-size-small")) > 0 else ''
             suitable_to_search = self.is_suitable_to_search(product_name, search)
-            products.append({'source': self.source, 'name': product_name, 'code': None, 'price': product_price,
-                             'old_price': product_price_from, 'info': product_info,
-                             'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
+            products.append(
+                {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None, 'price': product_price,
+                 'old_price': product_price_from, 'info': product_info,
+                 'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
         # print(product_name,product_price,product_info,product_comment_count)
         return products
 
 
 class Trendyol(SourceWebSite):
     base_url = "https://www.trendyol.com"
-    source = '[Trendyol]'
+    source_name = 'Trendyol'
 
     def get_results(self, url):
         content = self.get_content(url['url'])
@@ -480,16 +485,17 @@ class Trendyol(SourceWebSite):
             product_comment_count = product.find("span", "ratingCount").text.strip() if product.find("span",
                                                                                                      "ratingCount") is not None else ''
             suitable_to_search = self.is_suitable_to_search(product_name, search)
-            products.append({'source': self.source, 'name': product_name, 'code': None, 'price': product_price,
-                             'old_price': product_price_from, 'info': product_info,
-                             'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
+            products.append(
+                {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None, 'price': product_price,
+                 'old_price': product_price_from, 'info': product_info,
+                 'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
         # print(product_name,product_price,product_info,product_comment_count)
         return products
 
 
 class HepsiBurada(SourceWebSite):
     base_url = "https://www.hepsiburada.com"
-    source = '[HepsiBurada]'
+    source_name = 'HepsiBurada'
 
     def get_results(self, url):
         content = self.get_content(url['url'])
@@ -547,16 +553,17 @@ class HepsiBurada(SourceWebSite):
             product_comment_count = product.find("span", "number-of-reviews").text.strip() if product.find("span",
                                                                                                            "number-of-reviews") is not None else ''
             suitable_to_search = self.is_suitable_to_search(product_name, search)
-            products.append({'source': self.source, 'name': product_name, 'code': None, 'price': product_price,
-                             'old_price': product_price_from, 'info': product_info,
-                             'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
+            products.append(
+                {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None, 'price': product_price,
+                 'old_price': product_price_from, 'info': product_info,
+                 'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
         # print(product_name,product_price,product_info,product_comment_count)
         return products
 
 
 class N11(SourceWebSite):
     base_url = "https://www.n11.com"
-    source = '[n11]'
+    source_name = 'n11'
 
     def get_results(self, url):
         content = self.get_content(url['url'])
@@ -607,16 +614,17 @@ class N11(SourceWebSite):
             product_comment_count = product.find("span", "ratingText").text.strip() if product.find("span",
                                                                                                     "ratingText") is not None else ''
             suitable_to_search = self.is_suitable_to_search(product_name, search)
-            products.append({'source': self.source, 'name': product_name, 'code': None, 'price': product_price,
-                             'old_price': product_price_from, 'info': product_info,
-                             'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
+            products.append(
+                {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None, 'price': product_price,
+                 'old_price': product_price_from, 'info': product_info,
+                 'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
         # print(product_name,product_price,product_info,product_comment_count)
         return products
 
 
 class VatanBilgisayar(SourceWebSite):
     base_url = "https://www.vatanbilgisayar.com"
-    source = '[VatanBilgisayar]'
+    source_name = 'VatanBilgisayar'
 
     def get_results(self, url):
         content = self.get_content(url['url'])
@@ -660,7 +668,8 @@ class VatanBilgisayar(SourceWebSite):
                                                                                                          "wrapper-condition__text") else ''
             product_comment_count = product.find("a", "comment-count").text.strip()
             suitable_to_search = self.is_suitable_to_search(product_name, search)
-            products.append({'source': self.source, 'name': product_name, 'code': product_code, 'price': product_price,
+            products.append({'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': product_code,
+                             'price': product_price,
                              'old_price': product_price_from, 'info': product_stock,
                              'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
         # print(product_name,product_code,product_price,product_price_from,product_stock,product_comment_count)
@@ -668,30 +677,38 @@ class VatanBilgisayar(SourceWebSite):
 
 
 def source_controller(category):
-    sources = {'VatanBilgisayar': VatanBilgisayar, 'n11': N11, 'HepsiBurada': HepsiBurada, 'Trendyol': Trendyol,
-               'AmazonTR': AmazonTR, 'Teknosa': Teknosa, 'GittiGidiyor': GittiGidiyor, 'MediaMarktTR': MediaMarktTR}
-    source_selection = None
+    sources = [VatanBilgisayar, N11, HepsiBurada, Trendyol, AmazonTR, Teknosa, GittiGidiyor, MediaMarktTR]
+    source_selections = None
     results = []
     correct_results = []
     near_results = []
+    supported_sources = []
 
     print("\nSelect the sources you want to search:")
-    for index, source in zip(range(1, len(sources) + 1), sources):
-        print(str(index) + '.', source)
-    while source_selection is None or any(
-            source not in [str(num) for num in range(0, len(sources) + 1)] for source in source_selection):
-        source_selection = [source.strip() for source in input('Sources: ').split(',')]
-        if '0' in source_selection:
-            source_selection = [str(num) for num in range(1, len(sources) + 1)]
+    index = 1
+    for source in sources:
+        if category in source.get_categories():
+            supported_sources.append(source)
+            print(str(index) + '.', source.source_name)
+            index += 1
+        else:
+            pass
+
+    while source_selections is None or any(
+            source_selection not in [str(num) for num in range(0, len(supported_sources) + 1)] for source_selection in
+            source_selections):
+        source_selections = [supported_source.strip() for supported_source in input('Sources: ').split(',')]
+        if '0' in source_selections:
+            source_selections = [str(num) for num in range(1, len(supported_sources) + 1)]
 
     search_input = input('\nSearch Text: ').strip()
 
     processes = []
     # print(os.cpu_count())
     with Pool() as pool:
-        for source in source_selection:
+        for source in source_selections:
             processes.append(
-                pool.apply_async(list(sources.values())[int(source) - 1](category, max_page=1).search, (search_input,)))
+                pool.apply_async(supported_sources[int(source) - 1](category, max_page=1).search, (search_input,)))
         for process in processes:
             results += process.get()
 
