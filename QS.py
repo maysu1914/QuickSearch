@@ -697,7 +697,7 @@ def source_controller(category):
     while source_selections is None or any(
             source_selection not in [str(num) for num in range(0, len(supported_sources) + 1)] for source_selection in
             source_selections):
-        source_selections = [supported_source.strip() for supported_source in input('Sources: ').split(',')]
+        source_selections = [source_selection.strip() for source_selection in input('Sources: ').split(',')]
         if '0' in source_selections:
             source_selections = [str(num) for num in range(1, len(supported_sources) + 1)]
 
