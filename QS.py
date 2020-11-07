@@ -647,7 +647,9 @@ class VatanBilgisayar(SourceWebSite):
 
     @staticmethod
     def get_categories():
-        categories = {'Notebooks': 'notebook/', 'Smartphones': 'cep-telefonu-modelleri/', 'Monitors': 'monitor/',
+        categories = {'Notebooks': 'notebook/',
+                      'Smartphones': 'cep-telefonu-modelleri/',
+                      'Monitors': 'monitor/',
                       'All': ''}
         return categories
 
@@ -745,8 +747,9 @@ class QuickSearch:
         with Pool() as pool:
             for source in self.source_selections:
                 processes.append(
-                    pool.apply_async(self.sources[int(source) - 1](self.category_selection, max_page=self.max_page).search,
-                                     (self.search_text,)))
+                    pool.apply_async(
+                        self.sources[int(source) - 1](self.category_selection, max_page=self.max_page).search,
+                        (self.search_text,)))
             for process in processes:
                 self.raw_results += process.get()
 
