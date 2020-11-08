@@ -147,10 +147,11 @@ class MediaMarktTR(SourceWebSite):
     @staticmethod
     def get_categories():
         categories = {
+            'All': 'query={search2}&searchProfile=onlineshop&channel=mmtrtr',
             'Notebooks': 'searchParams=%2FSearch.ff%3Fquery%3D{search1}%26filterTabbedCategory%3Donlineshop%26filteravailability%3D1%26filterCategoriesROOT%3DBilgisayar%25C2%25A7MediaTRtrc504925%26filterCategoriesROOT%252FBilgisayar%25C2%25A7MediaTRtrc504925%3DTa%25C5%259F%25C4%25B1nabilir%2BBilgisayarlar%25C2%25A7MediaTRtrc504926%26channel%3Dmmtrtr%26productsPerPage%3D20%26disableTabbedCategory%3Dtrue&searchProfile=onlineshop&query={search2}&sort=price&page=&sourceRef=INVALID',
             'Smartphones': 'searchParams=%2FSearch.ff%3Fquery%3D{search1}%26filterTabbedCategory%3Donlineshop%26filteravailability%3D1%26filterCategoriesROOT%3DTelefon%25C2%25A7MediaTRtrc465595%26filterCategoriesROOT%252FTelefon%25C2%25A7MediaTRtrc465595%3DCep%2BTelefonlar%25C4%25B1%25C2%25A7MediaTRtrc504171%26channel%3Dmmtrtr%26productsPerPage%3D20%26disableTabbedCategory%3Dtrue&searchProfile=onlineshop&query={search2}&sort=price&sourceRef=INVALID',
             'Monitors': 'searchParams=/Search.ff?query%3D{search1}%26filterTabbedCategory%3Donlineshop%26filteravailability%3D1%26filterCategoriesROOT%3DBilgisayar%2BBile%25C5%259Fenleri%25C2%25A7MediaTRtrc639556%26filterCategoriesROOT%252FBilgisayar%2BBile%25C5%259Fenleri%25C2%25A7MediaTRtrc639556%3DMonit%25C3%25B6r%25C2%25A7MediaTRtrc639581%26channel%3Dmmtrtr%26productsPerPage%3D20%26disableTabbedCategory%3Dtrue&searchProfile=onlineshop&query={search2}&sort=price&sourceRef=INVALID',
-            'All': 'query={search2}&searchProfile=onlineshop&channel=mmtrtr'}
+        }
         return categories
 
     @staticmethod
@@ -233,10 +234,10 @@ class GittiGidiyor(SourceWebSite):
     @staticmethod
     def get_categories():
         categories = {
+            'All': 'arama/',
             'Notebooks': 'dizustu-laptop-notebook-bilgisayar',
             'Smartphones': 'cep-telefonu',
             'Monitors': 'cevre-birimleri/monitor',
-            'All': 'arama/'
         }
         return categories
 
@@ -304,10 +305,10 @@ class Teknosa(SourceWebSite):
     @staticmethod
     def get_categories():
         categories = {
+            'All': ':relevance',
             'Notebooks': ':relevance:category:1020101',
             'Smartphones': ':relevance:category:100001',
             'Monitors': ':relevance:category:1020301',
-            'All': ':relevance'
         }
         return categories
 
@@ -388,10 +389,10 @@ class AmazonTR(SourceWebSite):
     @staticmethod
     def get_categories():
         categories = {
+            'All': '',
             'Notebooks': '&i=computers&rh=n%3A12466439031%2Cn%3A12601898031',
             'Smartphones': '&i=electronics&rh=n%3A12466496031%2Cn%3A13709907031',
             'Monitors': '&i=computers&rh=n%3A12466439031%2Cn%3A12601904031',
-            'All': ''
         }
         return categories
 
@@ -519,10 +520,10 @@ class HepsiBurada(SourceWebSite):
     @staticmethod
     def get_categories():
         categories = {
+            'All': '',
             'Notebooks': '&filtreler=MainCategory.Id:98',
             'Smartphones': '&kategori=2147483642_371965',
             'Monitors': '&kategori=2147483646_3013120_57',
-            'All': ''
         }
         return categories
 
@@ -587,10 +588,10 @@ class N11(SourceWebSite):
     @staticmethod
     def get_categories():
         categories = {
+            'All': 'arama',
             'Notebooks': 'bilgisayar/dizustu-bilgisayar',
             'Smartphones': 'telefon-ve-aksesuarlari/cep-telefonu',
             'Monitors': 'bilgisayar/cevre-birimleri/monitor-ve-ekran',
-            'All': 'arama'
         }
         return categories
 
@@ -647,10 +648,12 @@ class VatanBilgisayar(SourceWebSite):
 
     @staticmethod
     def get_categories():
-        categories = {'Notebooks': 'notebook/',
-                      'Smartphones': 'cep-telefonu-modelleri/',
-                      'Monitors': 'monitor/',
-                      'All': ''}
+        categories = {
+            'All': '',
+            'Notebooks': 'notebook/',
+            'Smartphones': 'cep-telefonu-modelleri/',
+            'Monitors': 'monitor/',
+        }
         return categories
 
     @staticmethod
@@ -683,7 +686,7 @@ class QuickSearch:
 
     def __init__(self, max_page=max_page):
         self.sources = [VatanBilgisayar, N11, HepsiBurada, Trendyol, AmazonTR, Teknosa, GittiGidiyor, MediaMarktTR]
-        self.categories = ['All', 'Notebooks', 'Smartphones', 'Monitors']
+        self.categories = self.get_categories()
         self.max_page = max_page
         self.category_selection = None
         self.source_selections = []
@@ -691,6 +694,16 @@ class QuickSearch:
         self.raw_results = []
         self.correct_results = []
         self.near_results = []
+
+    def get_categories(self):
+        categories = []
+        for source in self.sources:
+            for category in source.get_categories():
+                if category not in categories:
+                    categories.append(category)
+                else:
+                    pass
+        return categories
 
     def search(self):
         self.category_selection = self.get_category_input()
