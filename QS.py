@@ -119,6 +119,86 @@ class SourceWebSite:
         return True
 
 
+class FLO(SourceWebSite):
+    base_url = "https://www.flo.com.tr"
+    source_name = 'FLO'
+
+    def get_results(self, url):
+        content = self.get_content(url['url'])
+
+        if content and not content.find("div", "empty-information__heading"):
+            if content.find("ul", "pagination justify-content-center"):
+                page_number = int(content.find_all("li", "page-item")[-2].text)
+                page_number = self.max_page if page_number > self.max_page else page_number
+            else:
+                page_number = 1
+
+            self.results += self.get_products(content, url['search'])
+            if page_number > 1:
+                page_list = [url['url'] + '&page=' + str(number) for number in range(2, page_number)]
+                for page in page_list:
+                    content = self.get_content(page)
+                    self.results += self.get_products(content, url['search'])
+            else:
+                pass
+        else:
+            pass
+
+    @staticmethod
+    def get_categories():
+        categories = {
+            'All': '',
+            'Shoes': '&category_id=770',
+        }
+        return categories
+
+    @staticmethod
+    def create_url(search, category):
+        url = 'https://www.flo.com.tr/search?q={}{}&sort=filter_price:asc'.format(search, category)
+        return url
+
+    def get_products(self, content, search):
+        products = []
+
+        for product in content.find("div", class_="row product-lists").find_all("div", "js-product-vertical"):
+            product_brand = product.find("div", "product__brand").text.strip() if product.find("div",
+                                                                                               "product__brand") else ''
+            product_name = product_brand + ' ' + ' '.join(product.find("div", "product__name").text.split())
+            if product.find("div", "product__prices-third"):
+                price_block = product.find("div", "product__prices-third")
+                price_block.find("span").decompose()
+                product_price = price_block.text.strip().split(',')[0].replace('.', '') + ' TL'
+                product_price_from = product.find("span", "product__prices-sale").text.strip().split(',')[0].replace(
+                    '.',
+                    '') + ' TL'
+            elif product.find("span", "product__prices-sale"):
+                product_price = product.find("span", "product__prices-sale").text.strip().split(',')[0].replace('.',
+                                                                                                                '') + ' TL'
+                if product.find("span", "product__prices-actual"):
+                    product_price_from = product.find("span", "product__prices-actual").text.strip().split(',')[
+                                             0].replace('.',
+                                                        '') + ' TL'
+                else:
+                    product_price_from = ''
+            else:
+                continue
+
+            if product.find("div", "product__badges"):
+                for badge in product.find("div", "product__badges").find_all("div"):
+                    product_name += ' ' + badge.text
+            else:
+                pass
+            product_info = ''
+
+            suitable_to_search = self.is_suitable_to_search(product_name, search)
+            products.append(
+                {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None, 'price': product_price,
+                 'old_price': product_price_from, 'info': product_info,
+                 'comment_count': '', 'suitable_to_search': suitable_to_search})
+        # print(product_name,product_price,product_info,product_comment_count)
+        return products
+
+
 class MediaMarktTR(SourceWebSite):
     base_url = "https://www.mediamarkt.com.tr"
     source_name = 'MediaMarktTR'
@@ -131,16 +211,16 @@ class MediaMarktTR(SourceWebSite):
                 content.find("ul", "pagination").find_all("li")[-2].text if content.find("ul", "pagination") else '1')
             page_number = self.max_page if page_number > self.max_page else page_number
 
-            SourceWebSite.results += self.get_products(content, url['search'])
+            self.results += self.get_products(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&page=' + str(number) for number in range(2, page_number)]
                 for page in page_list:
                     content = self.get_content(page)
-                    SourceWebSite.results += self.get_products(content, url['search'])
+                    self.results += self.get_products(content, url['search'])
             else:
                 pass
         elif content and content.find("div", id="product-details"):
-            SourceWebSite.results += self.get_product(content, url['search'])
+            self.results += self.get_product(content, url['search'])
         else:
             pass
 
@@ -220,12 +300,12 @@ class GittiGidiyor(SourceWebSite):
             page_number = math.ceil(int(re.findall('\d+', content.find("span", "result-count").text)[0]) / 48)
             page_number = self.max_page if page_number > self.max_page else page_number
 
-            SourceWebSite.results += self.get_products(content, url['search'])
+            self.results += self.get_products(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&sf=' + str(number) for number in range(2, page_number)]
                 for page in page_list:
                     content = self.get_content(page)
-                    SourceWebSite.results += self.get_products(content, url['search'])
+                    self.results += self.get_products(content, url['search'])
             else:
                 pass
         else:
@@ -238,6 +318,7 @@ class GittiGidiyor(SourceWebSite):
             'Notebooks': 'dizustu-laptop-notebook-bilgisayar',
             'Smartphones': 'cep-telefonu',
             'Monitors': 'cevre-birimleri/monitor',
+            'Shoes': 'ayakkabi',
         }
         return categories
 
@@ -393,6 +474,7 @@ class AmazonTR(SourceWebSite):
             'Notebooks': '&i=computers&rh=n%3A12466439031%2Cn%3A12601898031',
             'Smartphones': '&i=electronics&rh=n%3A12466496031%2Cn%3A13709907031',
             'Monitors': '&i=computers&rh=n%3A12466439031%2Cn%3A12601904031',
+            'Shoes': '&i=fashion&rh=n%3A12466553031',
         }
         return categories
 
@@ -457,8 +539,13 @@ class Trendyol(SourceWebSite):
 
     @staticmethod
     def get_categories():
-        categories = {'Notebooks': 'laptop', 'Smartphones': 'akilli-cep-telefonu', 'Monitors': 'monitor',
-                      'All': 'tum--urunler'}
+        categories = {
+            'All': 'tum--urunler',
+            'Notebooks': 'laptop',
+            'Smartphones': 'akilli-cep-telefonu',
+            'Monitors': 'monitor',
+            'Shoes': 'ayakkabi'
+        }
         return categories
 
     @staticmethod
@@ -524,6 +611,7 @@ class HepsiBurada(SourceWebSite):
             'Notebooks': '&filtreler=MainCategory.Id:98',
             'Smartphones': '&kategori=2147483642_371965',
             'Monitors': '&kategori=2147483646_3013120_57',
+            'Shoes': '&kategori=2147483636',
         }
         return categories
 
@@ -592,6 +680,7 @@ class N11(SourceWebSite):
             'Notebooks': 'bilgisayar/dizustu-bilgisayar',
             'Smartphones': 'telefon-ve-aksesuarlari/cep-telefonu',
             'Monitors': 'bilgisayar/cevre-birimleri/monitor-ve-ekran',
+            'Shoes': 'ayakkabi-ve-canta',
         }
         return categories
 
@@ -685,7 +774,7 @@ class QuickSearch:
     max_page = 3
 
     def __init__(self, max_page=max_page):
-        self.sources = [VatanBilgisayar, N11, HepsiBurada, Trendyol, AmazonTR, Teknosa, GittiGidiyor, MediaMarktTR]
+        self.sources = [VatanBilgisayar, N11, HepsiBurada, Trendyol, AmazonTR, Teknosa, GittiGidiyor, MediaMarktTR, FLO]
         self.categories = self.get_categories()
         self.max_page = max_page
         self.category_selection = None
