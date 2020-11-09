@@ -827,12 +827,15 @@ class QuickSearch:
             else:
                 pass
 
-        while not source_selections or any(
-                int(source_selection) not in range(len(supported_sources) + 1) for source_selection in
-                source_selections):
-            source_selections = [source_selection.strip() for source_selection in input('Sources: ').split(',')]
+        while not source_selections or \
+                any(
+                    not source_selection.isnumeric() or int(source_selection) not in range(len(supported_sources) + 1)
+                    for source_selection in source_selections
+                ):
+            source_selections = [source_selection.strip() for source_selection in
+                                 input('Sources: ').split(',')]
             if '0' in source_selections:
-                source_selections = range(1, len(supported_sources) + 1)
+                source_selections = [str(i) for i in range(1, len(supported_sources) + 1)]
 
         self.sources = supported_sources
 
