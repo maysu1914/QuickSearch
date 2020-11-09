@@ -26,6 +26,7 @@ You can search your product in a particular category for getting much clear resu
 - Notebooks
 - Smartphones
 - Monitors
+- Shoes
 - All categories
 
 ## Special search style
