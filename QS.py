@@ -245,7 +245,7 @@ class MediaMarktTR(SourceWebSite):
 
         product_name = product.find("h1", {'itemprop': 'name'}).text.strip()
         if product.find("meta", {'itemprop': 'price'}):
-            product_price = product.find("meta", {'itemprop': 'price'})['content'] + ' TL'
+            product_price = product.find("meta", {'itemprop': 'price'})['content'].split('.')[0] + ' TL'
         else:
             return products
         product_price_from = ''
