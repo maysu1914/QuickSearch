@@ -365,9 +365,9 @@ class Teknosa(SourceWebSite):
     source_name = 'Teknosa'
 
     def get_results(self, url):
-        content = self.get_content(url['url'])
+        content = self.get_content(url['url']) if self.is_result(url['search']) else ''
 
-        if content and self.is_result(url['search']) and not content.find("i", "icon-search-circle"):
+        if content and not content.find("i", "icon-search-circle"):
             page_number = int(
                 content.find("ul", "pagination").find_all("li")[-2].text if content.find("ul", "pagination") else '1')
             page_number = self.max_page if page_number > self.max_page else page_number
