@@ -1,11 +1,8 @@
 # QuickSearch
 A project based on Python to make product searching on internet much easier and quicker. Searching every website regularly for a product may tire the user, with this project you can search your product or products very easy and quick.
 
-## Required External Libraries
-Please check your libraries or be sure your IDE downloaded them before running the project.
-
-- requests
-- bs4
+## Requirements
+Install requirements by typing "pip3 install -r requirements.txt" your terminal in the base folder
 
 ## Supported websites
 These websites are can be searched at the same time for now:
