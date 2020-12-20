@@ -1,14 +1,14 @@
 from multiprocessing.pool import Pool
 
-from Websites.VatanBilgisayar import VatanBilgisayar
-from Websites.N11 import N11
-from Websites.HepsiBurada import HepsiBurada
-from Websites.Trendyol import Trendyol
-from Websites.AmazonTR import AmazonTR
-from Websites.Teknosa import Teknosa
-from Websites.GittiGidiyor import GittiGidiyor
-from Websites.MediaMarktTR import MediaMarktTR
-from Websites.FLO import FLO
+from .websites.VatanBilgisayar import VatanBilgisayar
+from .websites.N11 import N11
+from .websites.HepsiBurada import HepsiBurada
+from .websites.Trendyol import Trendyol
+from .websites.AmazonTR import AmazonTR
+from .websites.Teknosa import Teknosa
+from .websites.GittiGidiyor import GittiGidiyor
+from .websites.MediaMarktTR import MediaMarktTR
+from .websites.FLO import FLO
 
 
 class QuickSearch:

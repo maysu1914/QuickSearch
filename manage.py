@@ -1,6 +1,6 @@
 import multiprocessing
 
-from QuickSearch.app import QuickSearch
+from QuickSearch.QuickSearch import QuickSearch
 
 if __name__ == '__main__':
     while True:
