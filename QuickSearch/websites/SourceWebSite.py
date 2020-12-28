@@ -3,7 +3,7 @@ import re
 from abc import abstractmethod
 
 import requests
-from bs4 import BeautifulSoup as Soup
+from bs4 import BeautifulSoup
 from requests.utils import requote_uri
 
 
@@ -90,7 +90,7 @@ class SourceWebSite:
                 if count == 0:
                     return None
 
-        return Soup(response.content, "lxml")
+        return BeautifulSoup(response.content, "lxml")
 
     @staticmethod
     def is_suitable_to_search(product_name, search):
