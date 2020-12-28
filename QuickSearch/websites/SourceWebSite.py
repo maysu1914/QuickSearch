@@ -18,8 +18,9 @@ class SourceWebSite:
 
     def search(self, search):
         urls = self.get_url(search)
-        for url in urls:
-            self.get_results(url)
+        threads = [ThreadPoolExecutor().submit(self.get_results, url) for url in urls]
+        for thread in threads:
+            thread.result()
         return self.results
 
     def get_url(self, search):
