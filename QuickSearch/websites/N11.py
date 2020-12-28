@@ -18,8 +18,8 @@ class N11(SourceWebSite):
             self.results += self.get_products(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&pg=' + str(number) for number in range(2, page_number + 1)]
-                for page in page_list:
-                    content = self.get_content(page)
+                contents = self.get_contents(page_list)
+                for content in contents:
                     self.results += self.get_products(content, url['search'])
             else:
                 pass

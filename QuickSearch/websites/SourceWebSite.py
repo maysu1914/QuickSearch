@@ -1,6 +1,7 @@
 import itertools
 import re
 from abc import abstractmethod
+from concurrent.futures.thread import ThreadPoolExecutor
 
 import requests
 from bs4 import BeautifulSoup
@@ -91,6 +92,14 @@ class SourceWebSite:
                     return None
 
         return BeautifulSoup(response.content, "lxml")
+
+    @staticmethod
+    def get_contents(url_list):
+        contents = []
+        threads = [ThreadPoolExecutor().submit(SourceWebSite.get_content, url) for url in url_list]
+        for thread in threads:
+            contents.append(thread.result())
+        return contents
 
     @staticmethod
     def is_suitable_to_search(product_name, search):
