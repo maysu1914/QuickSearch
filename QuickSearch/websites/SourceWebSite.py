@@ -10,11 +10,11 @@ from requests.utils import requote_uri
 
 class SourceWebSite:
     max_page = 5
-    results = []
 
     def __init__(self, category, max_page=max_page):
         self.category = category
         self.max_page = max_page
+        self.results = []
 
     def search(self, search):
         urls = self.get_url(search)
