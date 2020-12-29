@@ -1,4 +1,4 @@
-from multiprocessing.pool import Pool
+from concurrent.futures.thread import ThreadPoolExecutor
 
 from .websites.AmazonTR import AmazonTR
 from .websites.FLO import FLO
@@ -88,16 +88,15 @@ class QuickSearch:
         return search_input
 
     def get_results(self):
-        processes = []
-        # print(os.cpu_count())
-        with Pool() as pool:
-            for source in self.source_selections:
-                processes.append(
-                    pool.apply_async(
-                        self.sources[int(source) - 1](self.category_selection, max_page=self.max_page).search,
-                        (self.search_text,)))
-            for process in processes:
-                self.raw_results += process.get()
+        threads = []
+
+        for source in self.source_selections:
+            threads.append(ThreadPoolExecutor().submit(
+                self.sources[int(source) - 1](self.category_selection, max_page=self.max_page).search,
+                self.search_text))
+
+        for thread in threads:
+            self.raw_results += thread.result()
 
         unique_results = []
         seen = set()
