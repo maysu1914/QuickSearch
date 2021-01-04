@@ -6,7 +6,7 @@ class Teknosa(SourceWebSite):
     source_name = 'Teknosa'
 
     def get_results(self, url):
-        content = self.get_content(url['url']) if self.is_result(url['search']) else ''
+        content = self.get_content(url['url'])
 
         if content and not content.find("i", "icon-search-circle"):
             page_number = int(
@@ -63,13 +63,14 @@ class Teknosa(SourceWebSite):
         # print(product_name,product_price,product_info,product_comment_count)
         return products
 
-    def is_result(self, search):
-        url = "https://www.teknosa.com/arama/?s=" + search
-        content = self.get_content(url)
-
-        if content and not content.find("i", "icon-search-circle"):
-            # print(1)
-            return True
-        else:
-            # print(2)
-            return False
+    # Teknos's website was showing the wrong products if no result when filtered search only, it seems they fixed it
+    # def get_result(self, url):
+    #     urls = ["https://www.teknosa.com/arama/?s=" + url['search'], url['url']]
+    #     contents = self.get_contents(urls)
+    #
+    #     if contents[0] and not contents[0].find("i", "icon-search-circle"):
+    #         # print(1)
+    #         return contents[1]
+    #     else:
+    #         # print(2)
+    #         return False
