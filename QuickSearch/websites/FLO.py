@@ -15,7 +15,11 @@ class FLO(SourceWebSite):
             else:
                 page_number = 1
 
-            self.results += self.get_products(content, url['search'])
+            if content.find("div", id="commerce-product-list"):
+                self.results += self.get_products(content, url['search'])
+            else:
+                self.results += self.get_product(content, url['search'])
+
             if page_number > 1:
                 page_list = [url['url'] + '&page=' + str(number) for number in range(2, page_number)]
                 contents = self.get_contents(page_list)
@@ -79,3 +83,43 @@ class FLO(SourceWebSite):
                  'comment_count': '', 'suitable_to_search': suitable_to_search})
         # print(product_name,product_price,product_info,product_comment_count)
         return products
+
+    def get_product(self, content, search):
+        # return []
+
+        product_brand = content.find("div", "product__brand").text.strip() if content.find("div",
+                                                                                           "product__brand") else ''
+        product_name = product_brand + ' ' + ' '.join(content.find("h1", "product__name").text.split())
+        if content.find("div", "product__prices-third"):
+            price_block = content.find("div", "product__prices-third")
+            price_block.find("span").decompose()
+            product_price = price_block.text.strip().split(',')[0].replace('.', '') + ' TL'
+            product_price_from = content.find("span", "product__prices-sale").text.strip().split(',')[0].replace(
+                '.',
+                '') + ' TL'
+        elif content.find("span", "product__prices-sale"):
+            product_price = content.find("span", "product__prices-sale").text.strip().split(',')[0].replace('.',
+                                                                                                            '') + ' TL'
+            if content.find("span", "product__prices-actual"):
+                product_price_from = content.find("span", "product__prices-actual").text.strip().split(',')[
+                                         0].replace('.',
+                                                    '') + ' TL'
+            else:
+                product_price_from = ''
+        else:
+            return []
+
+        if content.find("div", "product__badges"):
+            for badge in content.find("div", "product__badges").find_all("div"):
+                product_name += ' ' + badge.text
+        else:
+            pass
+        product_info = ''
+
+        suitable_to_search = self.is_suitable_to_search(product_name, search)
+        product = {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None,
+                   'price': product_price,
+                   'old_price': product_price_from, 'info': product_info,
+                   'comment_count': '', 'suitable_to_search': suitable_to_search}
+        # print(product_name,product_price,product_info,product_comment_count)
+        return [product]
