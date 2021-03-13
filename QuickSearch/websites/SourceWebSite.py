@@ -17,7 +17,7 @@ class SourceWebSite:
         self.results = []
 
     def search(self, search):
-        urls = self.get_url(search)
+        urls = self.get_url(search)  # multiple results if search has list
         threads = [self.executor.submit(self.get_results, url) for url in urls]
         for thread in threads:
             thread.result()
