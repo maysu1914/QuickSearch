@@ -39,6 +39,7 @@ class AmazonTR(SourceWebSite):
         categories = {
             'All': '',
             'Notebooks': '&i=computers&rh=n%3A12466439031%2Cn%3A12601898031',
+            'Desktop PCs': '&i=computers&rh=n%3A12601903031',
             'Smartphones': '&i=electronics&rh=n%3A12466496031%2Cn%3A13709907031',
             'Monitors': '&i=computers&rh=n%3A12466439031%2Cn%3A12601904031',
             'Shoes': '&i=fashion&rh=n%3A12466553031',

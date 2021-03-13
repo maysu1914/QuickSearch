@@ -31,6 +31,7 @@ class N11(SourceWebSite):
         categories = {
             'All': 'arama',
             'Notebooks': 'bilgisayar/dizustu-bilgisayar',
+            'Desktop PCs': 'bilgisayar/masaustu-bilgisayar',
             'Smartphones': 'telefon-ve-aksesuarlari/cep-telefonu',
             'Monitors': 'bilgisayar/cevre-birimleri/monitor-ve-ekran',
             'Shoes': 'ayakkabi-ve-canta',

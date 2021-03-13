@@ -29,6 +29,7 @@ class VatanBilgisayar(SourceWebSite):
         categories = {
             'All': '',
             'Notebooks': 'notebook/',
+            'Desktop PCs': 'masaustu-bilgisayarlar/',
             'Smartphones': 'cep-telefonu-modelleri/',
             'Monitors': 'monitor/',
         }

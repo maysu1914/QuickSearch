@@ -1,6 +1,5 @@
 import itertools
 import re
-from abc import abstractmethod
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import requests
@@ -14,11 +13,12 @@ class SourceWebSite:
     def __init__(self, category, max_page=max_page):
         self.category = category
         self.max_page = max_page
+        self.executor = ThreadPoolExecutor()
         self.results = []
 
     def search(self, search):
         urls = self.get_url(search)
-        threads = [ThreadPoolExecutor().submit(self.get_results, url) for url in urls]
+        threads = [self.executor.submit(self.get_results, url) for url in urls]
         for thread in threads:
             thread.result()
         return self.results
@@ -127,14 +127,13 @@ class SourceWebSite:
                 return False
         return True
 
-    @abstractmethod
-    def get_categories(self):
+    @staticmethod
+    def get_categories():
         pass
 
-    @abstractmethod
-    def create_url(self, search, param):
+    @staticmethod
+    def create_url(search, param):
         pass
 
-    @abstractmethod
     def get_results(self, url):
         pass

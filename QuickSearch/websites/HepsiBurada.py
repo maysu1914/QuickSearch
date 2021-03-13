@@ -28,7 +28,8 @@ class HepsiBurada(SourceWebSite):
     def get_categories():
         categories = {
             'All': '',
-            'Notebooks': '&filtreler=MainCategory.Id:98',
+            'Notebooks': '&kategori=2147483646_3000500_98',
+            'Desktop PCs': '&kategori=2147483646_3000500_34',
             'Smartphones': '&kategori=2147483642_371965',
             'Monitors': '&kategori=2147483646_3013120_57',
             'Shoes': '&kategori=2147483636',

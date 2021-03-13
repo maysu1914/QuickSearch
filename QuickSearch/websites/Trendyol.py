@@ -31,6 +31,7 @@ class Trendyol(SourceWebSite):
         categories = {
             'All': 'tum--urunler',
             'Notebooks': 'laptop',
+            'Desktop PCs': 'masaustu-bilgisayar',
             'Smartphones': 'akilli-cep-telefonu',
             'Monitors': 'monitor',
             'Shoes': 'ayakkabi'

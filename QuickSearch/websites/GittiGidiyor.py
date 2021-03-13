@@ -31,6 +31,7 @@ class GittiGidiyor(SourceWebSite):
         categories = {
             'All': 'arama/',
             'Notebooks': 'dizustu-laptop-notebook-bilgisayar',
+            'Desktop PCs': 'masaustu-desktop-bilgisayar',
             'Smartphones': 'cep-telefonu',
             'Monitors': 'cevre-birimleri/monitor',
             'Shoes': 'ayakkabi',

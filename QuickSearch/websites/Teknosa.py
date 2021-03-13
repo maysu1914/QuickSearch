@@ -29,6 +29,7 @@ class Teknosa(SourceWebSite):
         categories = {
             'All': ':relevance',
             'Notebooks': ':relevance:category:1020101',
+            'Desktop PCs': ':relevance:category:10201',
             'Smartphones': ':relevance:category:100001',
             'Monitors': ':relevance:category:1020301',
         }
