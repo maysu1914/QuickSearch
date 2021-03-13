@@ -44,9 +44,15 @@ class VatanBilgisayar(SourceWebSite):
         for product in content.find_all("div", "product-list--list-page"):
             product_name = product.find("div", "product-list__product-name").text.strip()
             product_code = product.find("div", "product-list__product-code").text.strip()
-            product_price = product.find("span", "product-list__price").text.strip().replace(".", '') + ' TL'
-            product_price_from = product.find("span", "product-list__current-price").text.strip().replace(".",
-                                                                                                          '') + ' TL'
+            if product.find("span", "product-list__price"):
+                product_price = product.find("span", "product-list__price").text.strip().replace(".", '') + ' TL'
+            else:
+                continue
+            if product.find("span", "product-list__current-price"):
+                product_price_from = product.find("span", "product-list__current-price").text.strip().replace(".",
+                                                                                                              '') + ' TL'
+            else:
+                product_price_from = ''
             product_stock = product.find("span", "wrapper-condition__text").text.strip() if product.find("span",
                                                                                                          "wrapper-condition__text") else ''
             product_comment_count = product.find("a", "comment-count").text.strip()
