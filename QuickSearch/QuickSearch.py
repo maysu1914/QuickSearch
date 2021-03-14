@@ -73,12 +73,22 @@ class QuickSearch:
 
         while not source_selections:
             try:
-                source_selections = [int(source_selection) for source_selection in input('Sources: ').split(',')]
+                # make set to handle duplicate inputs
+                source_selections = {int(source_selection) for source_selection in input('Sources: ').split(',')}
                 # if All option is selected
                 if 0 in source_selections:
-                    source_selections = list(range(len(self.sources_of_category)))
+                    # filter the selections to accept only negatives
+                    # get positive of them by mapping
+                    # make set to use set subtraction feature in the next code
+                    # convert user selection numbers to indexes by subtracting 1
+                    excludes = set(map(lambda i: abs(i)-1, filter(lambda i: True if i < 0 else False, source_selections)))
+                    # add all sources by len and exclude the unwanted
+                    source_selections = set(range(len(self.sources_of_category))) - set(excludes)
                 else:
-                    # if not all, store the index rather than storing selection
+                    # don't accept exclusion if already precise selection made
+                    # filter the selections to leave only positives
+                    source_selections = filter(lambda i: True if i > 0 else False, source_selections)
+                    # store the index rather than storing selection
                     source_selections = [source_selection - 1 for source_selection in source_selections]
                     # to trigger possible IndexError exception
                     [self.sources_of_category[source_selection] for source_selection in source_selections]

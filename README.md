@@ -15,16 +15,18 @@ These websites are can be searched at the same time for now:
 - teknosa.com
 - gittigidiyor.com
 - mediamarkt.com.tr
-- All of the above
+- flo.com.tr
+- All (you can exclude any one of the above by entering of negatives of their indexes)
 
 ## Supported categories
 You can search your product in a particular category for getting much clear results.
 
 - Notebooks
+- Desktop PCs
 - Smartphones
 - Monitors
 - Shoes
-- All categories
+- All
 
 ## Special search style
 You can search your products with this special search style:
