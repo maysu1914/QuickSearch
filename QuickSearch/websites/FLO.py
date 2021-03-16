@@ -50,10 +50,12 @@ class FLO(SourceWebSite):
             product_brand = product.find("div", "product__brand").text.strip() if product.find("div",
                                                                                                "product__brand") else ''
             product_name = product_brand + ' ' + ' '.join(product.find("div", "product__name").text.split())
-            if product.find("div", "product__prices-third"):
+            if product.find("div", "product__prices-third") and ' TL' in product.find("div", "product__prices-third"):
                 price_block = product.find("div", "product__prices-third")
                 price_block.find("span").decompose()
                 product_price = price_block.text.strip().split(',')[0].replace('.', '') + ' TL'
+                if len(product_price) < 4:
+                    print(price_block, product_price,product)
                 product_price_from = product.find("span", "product__prices-sale").text.strip().split(',')[0].replace(
                     '.',
                     '') + ' TL'
@@ -81,7 +83,6 @@ class FLO(SourceWebSite):
                 {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None, 'price': product_price,
                  'old_price': product_price_from, 'info': product_info,
                  'comment_count': '', 'suitable_to_search': suitable_to_search})
-        # print(product_name,product_price,product_info,product_comment_count)
         return products
 
     def get_product(self, content, search):
