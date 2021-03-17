@@ -34,6 +34,7 @@ class GittiGidiyor(SourceWebSite):
             'Desktop PCs': 'masaustu-desktop-bilgisayar',
             'Smartphones': 'cep-telefonu',
             'Monitors': 'cevre-birimleri/monitor',
+            'Digital Cameras': 'dijital-fotograf-makinesi',
             'Shoes': 'ayakkabi',
         }
         return categories

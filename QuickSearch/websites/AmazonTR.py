@@ -42,6 +42,7 @@ class AmazonTR(SourceWebSite):
             'Desktop PCs': '&i=computers&rh=n%3A12601903031',
             'Smartphones': '&i=electronics&rh=n%3A12466496031%2Cn%3A13709907031',
             'Monitors': '&i=computers&rh=n%3A12466439031%2Cn%3A12601904031',
+            'Digital Cameras': '&i=electronics&rh=n%3A12466496031%2Cn%3A13709883031%2Cn%3A13709933031',
             'Shoes': '&i=fashion&rh=n%3A12466553031',
         }
         return categories

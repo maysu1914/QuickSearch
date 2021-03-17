@@ -34,6 +34,7 @@ class N11(SourceWebSite):
             'Desktop PCs': 'bilgisayar/masaustu-bilgisayar',
             'Smartphones': 'telefon-ve-aksesuarlari/cep-telefonu',
             'Monitors': 'bilgisayar/cevre-birimleri/monitor-ve-ekran',
+            'Digital Cameras': 'fotograf-ve-kamera/fotograf-makinesi',
             'Shoes': 'ayakkabi-ve-canta',
         }
         return categories

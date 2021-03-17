@@ -32,6 +32,7 @@ class Teknosa(SourceWebSite):
             'Desktop PCs': ':relevance:category:10201',
             'Smartphones': ':relevance:category:100001',
             'Monitors': ':relevance:category:1020301',
+            'Digital Cameras': ':relevance:category:10701',
         }
         return categories
 

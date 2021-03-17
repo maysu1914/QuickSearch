@@ -32,6 +32,7 @@ class HepsiBurada(SourceWebSite):
             'Desktop PCs': '&kategori=2147483646_3000500_34',
             'Smartphones': '&kategori=2147483642_371965',
             'Monitors': '&kategori=2147483646_3013120_57',
+            'Digital Cameras': '&kategori=2147483606_60002083',
             'Shoes': '&kategori=2147483636',
         }
         return categories

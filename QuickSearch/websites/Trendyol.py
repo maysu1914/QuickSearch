@@ -34,6 +34,7 @@ class Trendyol(SourceWebSite):
             'Desktop PCs': 'masaustu-bilgisayar',
             'Smartphones': 'akilli-cep-telefonu',
             'Monitors': 'monitor',
+            'Digital Cameras': 'dijital-fotograf-makineleri',
             'Shoes': 'ayakkabi'
         }
         return categories

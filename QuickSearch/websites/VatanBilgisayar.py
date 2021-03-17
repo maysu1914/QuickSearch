@@ -32,6 +32,7 @@ class VatanBilgisayar(SourceWebSite):
             'Desktop PCs': 'masaustu-bilgisayarlar/',
             'Smartphones': 'cep-telefonu-modelleri/',
             'Monitors': 'monitor/',
+            'Digital Cameras': 'fotograf-makinesi/',
         }
         return categories
 
