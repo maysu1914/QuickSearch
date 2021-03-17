@@ -81,7 +81,8 @@ class QuickSearch:
                     # get positive of them by mapping
                     # make set to use set subtraction feature in the next code
                     # convert user selection numbers to indexes by subtracting 1
-                    excludes = set(map(lambda i: abs(i)-1, filter(lambda i: True if i < 0 else False, source_selections)))
+                    excludes = set(
+                        map(lambda i: abs(i) - 1, filter(lambda i: True if i < 0 else False, source_selections)))
                     # add all sources by len and exclude the unwanted
                     source_selections = set(range(len(self.sources_of_category))) - set(excludes)
                 else:
@@ -115,8 +116,14 @@ class QuickSearch:
         for thread in futures.as_completed(threads):
             self.raw_results += thread.result()
 
+        # sort results by price and suitable_to_search values
+        # (True value is first after than low price)
+        self.raw_results = sorted(self.raw_results,
+                                  key=lambda i: [int(i['price'].split()[0]), -i['suitable_to_search']])
+
         unique_results = []
         seen = set()  # to skip same products from different results
+
         for result in self.raw_results:
             r = (result['source'], result['name'], result['price'], result['info'])
             # check above data only for duplicate check
@@ -124,8 +131,7 @@ class QuickSearch:
                 seen.add(r)
                 unique_results.append(result)
 
-        # sort results by price and split two
-        for result in sorted(unique_results, key=lambda i: [int(i['price'].split()[0])]):
+        for result in unique_results:
             if result['suitable_to_search']:
                 self.correct_results.append(result)
             else:
