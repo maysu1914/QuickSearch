@@ -119,7 +119,7 @@ class QuickSearch:
         # sort results by price and suitable_to_search values
         # (True value is first after than low price)
         self.raw_results = sorted(self.raw_results,
-                                  key=lambda i: [int(i['price'].split()[0]), -i['suitable_to_search']])
+                                  key=lambda i: (int(i['price'].split()[0]), -i['suitable_to_search']))
 
         unique_results = []
         seen = set()  # to skip same products from different results
