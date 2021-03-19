@@ -11,7 +11,9 @@ class GittiGidiyor(SourceWebSite):
     def get_results(self, url):
         content = self.get_content(url['url'])
 
-        if content and not (content.find("div", "no-result-icon") or content.find("h2", "listing-similar-items")):
+        if content and not (
+                content.find("div", "no-result-icon") or content.find("h2", "listing-similar-items") or content.find(
+                id='SearchCon')):
             page_number = math.ceil(int(re.findall('\d+', content.find("span", "result-count").text)[0]) / 48)
             page_number = self.max_page if page_number > self.max_page else page_number
 
