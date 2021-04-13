@@ -113,7 +113,7 @@ class QuickSearch:
             thread = self.executor.submit(source_object(*arguments, **keyword_arguments).search, self.search_text)
             threads.append(thread)
 
-        for thread in futures.as_completed(threads):
+        for thread in threads:
             self.raw_results += thread.result()
 
         # sort results by price and suitable_to_search values
