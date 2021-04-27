@@ -46,10 +46,9 @@ class Teknosa(SourceWebSite):
 
         for product in content.find_all("div", "product-item"):
             product_name = product.find("div", "product-name").text.strip()
-            if product.find("span", class_='price-tag new-price font-size-tertiary'):
-                product_price = \
-                    product.find("span", class_='price-tag new-price font-size-tertiary').text.split()[0].split(',')[
-                        0].replace('.', '') + ' TL'
+            product_price_element = product.find("span", class_='price-tag new-price font-size-tertiary')
+            if product_price_element and product_price_element.text:
+                product_price = product_price_element.text.split()[0].split(',')[0].replace('.', '') + ' TL'
             else:
                 continue
             product_price_from = product.find("span", class_='price-tag old-price block').text.split()[0].split(',')[
