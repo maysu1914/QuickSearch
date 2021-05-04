@@ -14,14 +14,20 @@ class SourceWebSite:
         self.category = category
         self.max_page = max_page
         self.executor = ThreadPoolExecutor()
-        self.results = []
 
     def search(self, search):
+        results = []
         urls = self.get_url(search)  # multiple results if search has list
         threads = [self.executor.submit(self.get_results, url) for url in urls]
         for thread in threads:
-            thread.result()
-        return self.results
+            results += thread.result()
+        return results
+
+    def is_product_list_page(self, element):
+        pass
+
+    def is_did_you_mean(self, element):
+        pass
 
     def get_url(self, search):
         categories = self.get_categories()
@@ -55,52 +61,50 @@ class SourceWebSite:
             else:
                 return []
 
-    @staticmethod
-    def find_nth(haystack, needle, n):
-        start = haystack.find(needle)
-        while start >= 0 and n > 1:
-            start = haystack.find(needle, start + len(needle))
-            n -= 1
-        return start
-
-    @staticmethod
-    def get_content(url):
+    def get_page_content(self, url, counter=3):
+        """
+        Content retriever
+        :param url: the link whose content is to be returned
+        :param counter: how many times of retrying
+        :return: content of response
+        """
         print(url)
-        count = 3
-        verify = True
-        while count > 0:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36',
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+        }
+        for count in range(1, counter + 1):
             try:
-                headers = {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36',
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                }
-                response = requests.get(url, timeout=10, headers=headers, verify=verify)
-                # print(response.url)
-                # print(response.content)
-                count = 0
-            except requests.exceptions.SSLError as e:
-                print(url, "SSL error!")
-                print("Trying without SSL verify...", count)
-                verify = False
-                count -= 1
-                if count == 0:
-                    return None
+                response = requests.get(url, timeout=10, headers=headers)
+                return response.content
             except Exception as e:
-                print(url, e)
-                print("Trying...", count)
-                count -= 1
-                if count == 0:
-                    return None
+                print('Error occurred while getting page content!', count, url, e)
+                continue
+        return None
 
-        return BeautifulSoup(response.content, "lxml")
-
-    @staticmethod
-    def get_contents(url_list):
+    def get_contents(self, url_list):
         contents = []
-        threads = [ThreadPoolExecutor().submit(SourceWebSite.get_content, url) for url in url_list]
+        threads = [ThreadPoolExecutor().submit(self.get_page_content, url) for url in url_list]
         for thread in threads:
             contents.append(thread.result())
         return contents
+
+    @staticmethod
+    def get_categories():
+        pass
+
+    @staticmethod
+    def create_url(search, param):
+        pass
+
+    def get_results(self, url):
+        pass
+
+    def get_products(self, content, search):
+        pass
+
+    def get_page_number(self, element):
+        pass
 
     @staticmethod
     def is_suitable_to_search(product_name, search):
@@ -128,12 +132,30 @@ class SourceWebSite:
         return True
 
     @staticmethod
-    def get_categories():
+    def find_nth(haystack, needle, n):
+        start = haystack.find(needle)
+        while start >= 0 and n > 1:
+            start = haystack.find(needle, start + len(needle))
+            n -= 1
+        return start
+
+    def get_product_source(self, element):
         pass
 
-    @staticmethod
-    def create_url(search, param):
+    def get_product_name(self, element):
         pass
 
-    def get_results(self, url):
+    def get_product_code(self, element):
+        pass
+
+    def get_product_price(self, element):
+        pass
+
+    def get_product_old_price(self, element):
+        pass
+
+    def get_product_info(self, element):
+        pass
+
+    def get_product_comment_count(self, element):
         pass

@@ -1,6 +1,8 @@
 import math
 import re
 
+from bs4 import BeautifulSoup
+
 from .SourceWebSite import SourceWebSite
 
 
@@ -9,22 +11,42 @@ class Trendyol(SourceWebSite):
     source_name = 'Trendyol'
 
     def get_results(self, url):
-        content = self.get_content(url['url'])
+        content = self.get_page_content(url['url'])
+        soup = BeautifulSoup(content, "lxml")
+        results = []
 
-        if content and content.find("div", "dscrptn") and "bulunamadı" not in content.find("div", "dscrptn").text:
-            page_number = math.ceil(int(re.findall('\d+', content.find("div", "dscrptn").text)[0]) / 24)
-            page_number = self.max_page if page_number > self.max_page else page_number
-
-            self.results += self.get_products(content, url['search'])
+        if soup and self.is_product_list_page(soup.find("div", "dscrptn")):
+            page_number = self.get_page_number(soup.find("div", "dscrptn"))
+            results += self.get_products(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&pi=' + str(number) for number in range(2, page_number + 1)]
                 contents = self.get_contents(page_list)
                 for content in contents:
-                    self.results += self.get_products(content, url['search'])
+                    results += self.get_products(content, url['search'])
             else:
                 pass
         else:
             pass
+        return results
+
+    def is_product_list_page(self, element):
+        if element:
+            if "bulunamadı" not in element.text:
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def get_page_number(self, element):
+        if element:
+            page_number = math.ceil(int(re.findall('\d+', element.text)[0]) / 24)
+            if page_number > self.max_page:
+                return self.max_page
+            else:
+                return page_number
+        else:
+            return 1
 
     @staticmethod
     def get_categories():
@@ -45,9 +67,10 @@ class Trendyol(SourceWebSite):
         return url
 
     def get_products(self, content, search):
+        soup = BeautifulSoup(content, "lxml")
         products = []
 
-        for product in content.find_all("div", "p-card-wrppr"):
+        for product in soup.find_all("div", "p-card-wrppr"):
             product_brand = product.find("span", "prdct-desc-cntnr-ttl").text.strip() if product.find("span",
                                                                                                       "prdct-desc-cntnr-ttl") else ''
             product_name = product_brand + ' ' + product.find("span", "prdct-desc-cntnr-name").text.strip()

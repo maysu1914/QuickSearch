@@ -1,3 +1,5 @@
+from bs4 import BeautifulSoup
+
 from .SourceWebSite import SourceWebSite
 
 
@@ -6,23 +8,33 @@ class Teknosa(SourceWebSite):
     source_name = 'Teknosa'
 
     def get_results(self, url):
-        content = self.get_content(url['url'])
+        content = self.get_page_content(url['url'])
+        soup = BeautifulSoup(content, "lxml")
+        results = []
 
-        if content and not content.find("i", "icon-search-circle"):
-            page_number = int(
-                content.find("ul", "pagination").find_all("li")[-2].text if content.find("ul", "pagination") else '1')
-            page_number = self.max_page if page_number > self.max_page else page_number
-
-            self.results += self.get_products(content, url['search'])
+        if soup and not soup.find("i", "icon-search-circle"):
+            page_number = self.get_page_number(soup.find("ul", "pagination"))
+            results += self.get_products(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&page=' + str(number) for number in range(1, page_number)]
                 contents = self.get_contents(page_list)
                 for content in contents:
-                    self.results += self.get_products(content, url['search'])
+                    results += self.get_products(content, url['search'])
             else:
                 pass
         else:
             pass
+        return results
+
+    def get_page_number(self, element):
+        if element:
+            page_number = int(element.find_all("li")[-2].text)
+            if page_number > self.max_page:
+                return self.max_page
+            else:
+                return page_number
+        else:
+            return 1
 
     @staticmethod
     def get_categories():
@@ -42,9 +54,10 @@ class Teknosa(SourceWebSite):
         return url
 
     def get_products(self, content, search):
+        soup = BeautifulSoup(content, "lxml")
         products = []
 
-        for product in content.find_all("div", "product-item"):
+        for product in soup.find_all("div", "product-item"):
             product_name = product.find("div", "product-name").text.strip()
             product_price_element = product.find("span", class_='price-tag new-price font-size-tertiary')
             if product_price_element and product_price_element.text:

@@ -1,3 +1,5 @@
+from bs4 import BeautifulSoup
+
 from .SourceWebSite import SourceWebSite
 
 
@@ -6,25 +8,35 @@ class MediaMarktTR(SourceWebSite):
     source_name = 'MediaMarktTR'
 
     def get_results(self, url):
-        content = self.get_content(url['url'])
+        content = self.get_page_content(url['url'])
+        soup = BeautifulSoup(content, "lxml")
+        results = []
 
-        if content and content.find("ul", "products-list"):
-            page_number = int(
-                content.find("ul", "pagination").find_all("li")[-2].text if content.find("ul", "pagination") else '1')
-            page_number = self.max_page if page_number > self.max_page else page_number
-
-            self.results += self.get_products(content, url['search'])
+        if soup and soup.find("ul", "products-list"):
+            page_number = self.get_page_number(soup.find("ul", "pagination"))
+            results += self.get_products(content, url['search'])
             if page_number > 1:
-                page_list = [url['url'] + '&page=' + str(number) for number in range(2, page_number)]
+                page_list = [url['url'] + '&page=' + str(number) for number in range(2, page_number + 1)]
                 contents = self.get_contents(page_list)
                 for content in contents:
-                    self.results += self.get_products(content, url['search'])
+                    results += self.get_products(content, url['search'])
             else:
                 pass
-        elif content and content.find("div", id="product-details"):
-            self.results += self.get_product(content, url['search'])
+        elif soup and soup.find("div", id="product-details"):
+            results += self.get_product(content, url['search'])
         else:
             pass
+        return results
+
+    def get_page_number(self, element):
+        if element:
+            page_number = int(element.find_all("li")[-2].text)
+            if page_number > self.max_page:
+                return self.max_page
+            else:
+                return page_number
+        else:
+            return 1
 
     @staticmethod
     def get_categories():
@@ -44,18 +56,19 @@ class MediaMarktTR(SourceWebSite):
         url = 'https://www.mediamarkt.com.tr/tr/search.html?{}&sort=price&sourceRef=INVALID'.format(category)
         return url
 
-    def get_product(self, product, search):
+    def get_product(self, content, search):
+        soup = BeautifulSoup(content, "lxml")
         products = []
 
-        product_name = product.find("h1", {'itemprop': 'name'}).text.strip()
-        if product.find("meta", {'itemprop': 'price'}):
-            product_price = product.find("meta", {'itemprop': 'price'})['content'].split('.')[0] + ' TL'
+        product_name = soup.find("h1", {'itemprop': 'name'}).text.strip()
+        if soup.find("meta", {'itemprop': 'price'}):
+            product_price = soup.find("meta", {'itemprop': 'price'})['content'].split('.')[0] + ' TL'
         else:
             return products
         product_price_from = ''
-        product_info = 'Ücretsiz Kargo' if product.find("span", {"data-layer": "deliveryinformation"}) else ''
-        product_comment_count = product.find("div", "rating").findNext('span').text.strip() if product.find("div",
-                                                                                                            "rating") else ''
+        product_info = 'Ücretsiz Kargo' if soup.find("span", {"data-layer": "deliveryinformation"}) else ''
+        product_comment_count = soup.find("div", "rating").findNext('span').text.strip() if soup.find("div",
+                                                                                                      "rating") else ''
         suitable_to_search = self.is_suitable_to_search(product_name, search)
         products.append(
             {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None, 'price': product_price,
@@ -66,9 +79,10 @@ class MediaMarktTR(SourceWebSite):
         return products
 
     def get_products(self, content, search):
+        soup = BeautifulSoup(content, "lxml")
         products = []
 
-        for product in content.find("ul", class_="products-list").find_all("li", recursive=False):
+        for product in soup.find("ul", class_="products-list").find_all("li", recursive=False):
             if product.has_attr('class'):
                 continue
             product_name = product.find("h2").text.strip()
@@ -83,7 +97,7 @@ class MediaMarktTR(SourceWebSite):
                                                                                                                  {
                                                                                                                      "data-layer": "deliveryinformation"}) else ''
             product_comment_count = product.find("span", "clickable see-reviews").text.strip() if product.find("span",
-                                                                                                            "clickable see-reviews") else ''
+                                                                                                               "clickable see-reviews") else ''
             suitable_to_search = self.is_suitable_to_search(product_name, search)
             products.append(
                 {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None, 'price': product_price,

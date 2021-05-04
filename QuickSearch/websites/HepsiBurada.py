@@ -1,3 +1,5 @@
+from bs4 import BeautifulSoup
+
 from .SourceWebSite import SourceWebSite
 
 
@@ -6,23 +8,33 @@ class HepsiBurada(SourceWebSite):
     source_name = 'HepsiBurada'
 
     def get_results(self, url):
-        content = self.get_content(url['url'])
+        content = self.get_page_content(url['url'])
+        soup = BeautifulSoup(content, "lxml")
+        results = []
 
-        if content and not content.find("span", "product-suggestions-title"):
-            page_number = int(content.select("#pagination > ul > li")[-1].text.strip() if content.select(
-                "#pagination > ul > li") else 1)
-            page_number = self.max_page if page_number > self.max_page else page_number
-
-            self.results += self.get_products(content, url['search'])
+        if soup and not soup.find("span", "product-suggestions-title"):
+            page_number = self.get_page_number(soup.select("#pagination > ul > li"))
+            results += self.get_products(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&sayfa=' + str(number) for number in range(2, page_number + 1)]
                 contents = self.get_contents(page_list)
                 for content in contents:
-                    self.results += self.get_products(content, url['search'])
+                    results += self.get_products(content, url['search'])
             else:
                 pass
         else:
             pass
+        return results
+
+    def get_page_number(self, element):
+        if element:
+            page_number = int(element[-1].text.strip())
+            if page_number > self.max_page:
+                return self.max_page
+            else:
+                return page_number
+        else:
+            return 1
 
     @staticmethod
     def get_categories():
@@ -43,8 +55,9 @@ class HepsiBurada(SourceWebSite):
         return url
 
     def get_products(self, content, search):
+        soup = BeautifulSoup(content, "lxml")
         products = []
-        for product in content.find_all("div", "product-detail"):
+        for product in soup.find_all("div", "product-detail"):
             if product.find("span", "out-of-stock-icon"):
                 continue
             product_name = product.find("h3", "product-title").text.strip()

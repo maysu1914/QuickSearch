@@ -1,3 +1,5 @@
+from bs4 import BeautifulSoup
+
 from .SourceWebSite import SourceWebSite
 
 
@@ -6,23 +8,33 @@ class VatanBilgisayar(SourceWebSite):
     source_name = 'VatanBilgisayar'
 
     def get_results(self, url):
-        content = self.get_content(url['url'])
+        content = self.get_page_content(url['url'])
+        soup = BeautifulSoup(content, "lxml")
+        results = []
 
-        if content and not content.find("div", "empty-basket"):
-            page_number = int(content.find("ul", "pagination").find_all("li")[-2].text.strip()) if len(
-                content.find("ul", "pagination").find_all("li")) > 1 else 1
-            page_number = self.max_page if page_number > self.max_page else page_number
-
-            self.results += self.get_products(content, url['search'])
+        if soup and not soup.find("div", "empty-basket"):
+            page_number = self.get_page_number(soup.find("ul", "pagination"))
+            results += self.get_products(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&page=' + str(number) for number in range(2, page_number + 1)]
                 contents = self.get_contents(page_list)
                 for content in contents:
-                    self.results += self.get_products(content, url['search'])
+                    results += self.get_products(content, url['search'])
             else:
                 pass
         else:
             pass
+        return results
+
+    def get_page_number(self, element):
+        if element and len(element.find_all("li")) > 1:
+            page_number = int(element.find_all("li")[-2].text.strip())
+            if page_number > self.max_page:
+                return self.max_page
+            else:
+                return page_number
+        else:
+            return 1
 
     @staticmethod
     def get_categories():
@@ -42,8 +54,9 @@ class VatanBilgisayar(SourceWebSite):
         return url
 
     def get_products(self, content, search):
+        soup = BeautifulSoup(content, "lxml")
         products = []
-        for product in content.find_all("div", "product-list--list-page"):
+        for product in soup.find_all("div", "product-list--list-page"):
             product_name = product.find("div", "product-list__product-name").text.strip()
             product_code = product.find("div", "product-list__product-code").text.strip()
             if product.find("span", "product-list__price"):

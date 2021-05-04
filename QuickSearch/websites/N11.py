@@ -1,5 +1,7 @@
 import math
 
+from bs4 import BeautifulSoup
+
 from .SourceWebSite import SourceWebSite
 
 
@@ -8,23 +10,43 @@ class N11(SourceWebSite):
     source_name = 'n11'
 
     def get_results(self, url):
-        content = self.get_content(url['url'])
+        content = self.get_page_content(url['url'])
+        soup = BeautifulSoup(content, "lxml")
+        results = []
 
-        if content and not content.find("span", "result-mean-word") and not content.select(
-                '#error404') and not content.select('#searchResultNotFound') and not content.select('.noResultHolder'):
-            page_number = math.ceil(int(content.select(".resultText > strong")[0].text.replace(",", "")) / 28)
-            page_number = self.max_page if page_number > self.max_page else page_number
-
-            self.results += self.get_products(content, url['search'])
+        if soup and self.is_product_list_page(soup):
+            page_number = self.get_page_number(soup.select(".resultText > strong"))
+            results += self.get_products(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&pg=' + str(number) for number in range(2, page_number + 1)]
                 contents = self.get_contents(page_list)
                 for content in contents:
-                    self.results += self.get_products(content, url['search'])
+                    results += self.get_products(content, url['search'])
             else:
                 pass
         else:
             pass
+        return results
+
+    def is_product_list_page(self, page):
+        did_you_mean = page.find("span", "result-mean-word")
+        error = page.select('#error404')
+        not_found = page.select('#searchResultNotFound')
+        no_result = page.select('.noResultHolder')
+        if did_you_mean or error or not_found or no_result:
+            return False
+        else:
+            return True
+
+    def get_page_number(self, element):
+        if element:
+            page_number = math.ceil(int(element[0].text.replace(",", "")) / 28)
+            if page_number > self.max_page:
+                return self.max_page
+            else:
+                return page_number
+        else:
+            return 1
 
     @staticmethod
     def get_categories():
@@ -45,8 +67,9 @@ class N11(SourceWebSite):
         return url
 
     def get_products(self, content, search):
+        soup = BeautifulSoup(content, "lxml")
         products = []
-        for product in content.find_all("div", "columnContent"):
+        for product in soup.find_all("div", "columnContent"):
             if product.find("h3", "productName"):
                 product_name = product.find("h3", "productName").text.strip()
             else:

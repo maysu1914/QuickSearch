@@ -1,3 +1,7 @@
+from urllib.parse import urljoin
+
+from bs4 import BeautifulSoup
+
 from .SourceWebSite import SourceWebSite
 
 
@@ -6,33 +10,54 @@ class AmazonTR(SourceWebSite):
     source_name = 'AmazonTR'
 
     def get_results(self, url):
-        content = self.get_content(url['url'])
+        content = self.get_page_content(url['url'])
+        soup = BeautifulSoup(content, "lxml")
+        results = []
 
-        if content and any("Şunu mu demek istediniz" in i.text for i in
-                           content.select("span.a-size-medium.a-color-base.a-text-normal")):
-            url['url'] = self.base_url + content.select("a.a-size-medium.a-link-normal.a-text-bold.a-text-italic")[0][
-                'href']
-            content = self.get_content(url['url'])
+        if soup and self.is_did_you_mean(soup.select("span.a-size-medium.a-color-base.a-text-normal")):
+            pathname = soup.select("a.a-size-medium.a-link-normal.a-text-bold.a-text-italic")[0]['href']
+            url['url'] = urljoin(self.base_url, pathname)
+            content = self.get_page_content(url['url'])
+            soup = BeautifulSoup(content, "lxml")
         else:
             pass
 
-        if content and not (content.find("span", class_='a-size-medium a-color-base') or (content.find("h3",
-                                                                                                       class_='a-size-base a-spacing-base a-color-base a-text-normal') and 'sonuç bulunamadı' in content.find(
-            "h3", class_='a-size-base a-spacing-base a-color-base a-text-normal').text)):
-            page_number = int(content.find("ul", "a-pagination").find_all("li")[-2].text if content.find("ul",
-                                                                                                         "a-pagination") else '1')
-            page_number = self.max_page if page_number > self.max_page else page_number
-
-            self.results += self.get_products(content, url['search'])
+        if soup and self.is_product_list_page(soup):
+            page_number = self.get_page_number(soup.find("ul", "a-pagination"))
+            results += self.get_products(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&page=' + str(number) for number in range(2, page_number + 1)]
                 contents = self.get_contents(page_list)
                 for content in contents:
-                    self.results += self.get_products(content, url['search'])
+                    results += self.get_products(content, url['search'])
             else:
                 pass
         else:
             pass
+        return results
+
+    def is_product_list_page(self, page):
+        no_results_all = page.find("span", class_='a-size-medium a-color-base')
+        no_results_category = page.find("h3", class_='a-size-base a-spacing-base a-color-base a-text-normal')
+        if no_results_all:
+            return False
+        elif no_results_category and 'sonuç bulunamadı' in no_results_category.text:
+            return False
+        else:
+            return True
+
+    def is_did_you_mean(self, element):
+        return any("Şunu mu demek istediniz" in i.text for i in element)
+
+    def get_page_number(self, element):
+        if element:
+            page_number = int(element.find_all("li")[-2].text)
+            if page_number > self.max_page:
+                return self.max_page
+            else:
+                return page_number
+        else:
+            return 1
 
     @staticmethod
     def get_categories():
@@ -53,9 +78,10 @@ class AmazonTR(SourceWebSite):
         return url
 
     def get_products(self, content, search):
+        soup = BeautifulSoup(content, "lxml")
         products = []
 
-        for product in content.find_all("div", {"data-component-type": "s-search-result"}):
+        for product in soup.find_all("div", {"data-component-type": "s-search-result"}):
             if product.find("span", class_='a-size-medium a-color-base a-text-normal'):
                 product_name = product.find("span", class_='a-size-medium a-color-base a-text-normal').text.strip()
             else:

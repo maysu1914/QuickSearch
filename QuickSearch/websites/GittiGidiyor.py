@@ -1,6 +1,8 @@
 import math
 import re
 
+from bs4 import BeautifulSoup
+
 from .SourceWebSite import SourceWebSite
 
 
@@ -9,24 +11,42 @@ class GittiGidiyor(SourceWebSite):
     source_name = 'GittiGidiyor'
 
     def get_results(self, url):
-        content = self.get_content(url['url'])
+        content = self.get_page_content(url['url'])
+        soup = BeautifulSoup(content, "lxml")
+        results = []
 
-        if content and not (
-                content.find("div", "no-result-icon") or content.find("h2", "listing-similar-items") or content.find(
-                id='SearchCon')):
-            page_number = math.ceil(int(re.findall('\d+', content.find("span", "result-count").text)[0]) / 48)
-            page_number = self.max_page if page_number > self.max_page else page_number
-
-            self.results += self.get_products(content, url['search'])
+        if soup and self.is_product_list_page(soup):
+            page_number = self.get_page_number(soup.find("span", "result-count"))
+            results += self.get_products(content, url['search'])
             if page_number > 1:
-                page_list = [url['url'] + '&sf=' + str(number) for number in range(2, page_number)]
+                page_list = [url['url'] + '&sf=' + str(number) for number in range(2, page_number + 1)]
                 contents = self.get_contents(page_list)
                 for content in contents:
-                    self.results += self.get_products(content, url['search'])
+                    results += self.get_products(content, url['search'])
             else:
                 pass
         else:
             pass
+        return results
+
+    def get_page_number(self, element):
+        if element:
+            page_number = math.ceil(int(re.findall('\d+', element.text)[0]) / 48)
+            if page_number > self.max_page:
+                return self.max_page
+            else:
+                return page_number
+        else:
+            return 1
+
+    def is_product_list_page(self, page):
+        no_result_icon = page.find("div", "no-result-icon")
+        similar_items = page.find("h2", "listing-similar-items")
+        search_container = page.find(id='SearchCon')
+        if no_result_icon or similar_items or search_container:
+            return False
+        else:
+            return True
 
     @staticmethod
     def get_categories():
@@ -47,10 +67,11 @@ class GittiGidiyor(SourceWebSite):
         return url
 
     def get_products(self, content, search):
+        soup = BeautifulSoup(content, "lxml")
         products = []
 
-        for product in content.find("ul", class_="catalog-view clearfix products-container").find_all("li",
-                                                                                                      recursive=False):
+        for product in soup.find("ul", class_="catalog-view clearfix products-container").find_all("li",
+                                                                                                   recursive=False):
             product_name = ' '.join(product.find("h3", "product-title").text.split())
             if product.find("p", class_='fiyat robotobold price-txt'):
                 product_price = product.find("p", class_='fiyat robotobold price-txt').text.split()[0].split(',')[
