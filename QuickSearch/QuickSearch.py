@@ -37,7 +37,7 @@ class QuickSearch:
                     categories.append(category)
         return categories
 
-    def search(self):
+    def start(self):
         self.category_selection = self.get_category_input()
         self.source_selections = self.get_source_input()
         self.search_text = self.get_search_input()

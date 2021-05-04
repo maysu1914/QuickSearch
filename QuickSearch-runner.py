@@ -1,7 +1,7 @@
 from QuickSearch.QuickSearch import QuickSearch
 
 if __name__ == '__main__':
-    print("QuickSearch v0.9.50")
+    print("QuickSearch v0.9.51")
     print("Copyright (c) 2020 maysu1914.")
     print("")
     print("Check new versions of QuickSearch from https://github.com/maysu1914/QuickSearch")
@@ -9,4 +9,4 @@ if __name__ == '__main__':
 
     while True:
         qs = QuickSearch(max_page=3)
-        qs.search()
+        qs.start()
