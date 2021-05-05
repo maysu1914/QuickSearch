@@ -82,29 +82,55 @@ class AmazonTR(SourceWebSite):
         products = []
 
         for product in soup.find_all("div", {"data-component-type": "s-search-result"}):
-            if product.find("span", class_='a-size-medium a-color-base a-text-normal'):
-                product_name = product.find("span", class_='a-size-medium a-color-base a-text-normal').text.strip()
-            else:
-                product_name = product.find("span", class_='a-size-base-plus a-color-base a-text-normal').text.strip()
-            if product.find("span", "a-price-whole"):
-                product_price = product.find("span", "a-price-whole").text.split()[0].replace(".", '').split(',')[
-                                    0] + ' TL'
-            else:
-                continue
-            product_price_from = \
-                product.select("span.a-price.a-text-price")[0].text.replace("₺", '').replace(".", '').split(',')[
-                    0] + ' TL' if len(product.select("span.a-price.a-text-price")) > 0 else ''
-            product_info = ('Kargo BEDAVA' if 'BEDAVA' in product.select(
-                ".a-row.a-size-base.a-color-secondary.s-align-children-center")[0].text else '') if len(
-                product.select(".a-row.a-size-base.a-color-secondary.s-align-children-center")) > 0 else ''
-            product_comment_count = \
-                product.select(".a-section.a-spacing-none.a-spacing-top-micro .a-row.a-size-small span")[
-                    -1].text.strip() if len(
-                    product.select(".a-section.a-spacing-none.a-spacing-top-micro .a-row.a-size-small")) > 0 else ''
-            suitable_to_search = self.is_suitable_to_search(product_name, search)
-            products.append(
-                {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None, 'price': product_price,
-                 'old_price': product_price_from, 'info': product_info,
-                 'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
-        # print(product_name,product_price,product_info,product_comment_count)
+            data = {}
+            data['source'] = '[{}]'.format(self.source_name)
+            data['name'] = self.get_product_name(product.find("a", class_='a-link-normal a-text-normal'))
+            data['price'] = self.get_product_price(product.find("span", "a-price-whole"))
+            data['old_price'] = self.get_product_old_price(product.select("span.a-price.a-text-price"))
+            data['info'] = self.get_product_info(product.select(".a-row.a-size-base.a-color-secondary"))
+            data['comment_count'] = self.get_product_comment_count(product.select(".a-spacing-top-micro .a-size-small"))
+            data['suitable_to_search'] = self.is_suitable_to_search(data['name'], search)
+            products.append(data)
         return products
+
+    def get_product_name(self, element):
+        if element:
+            return element.text.strip()
+        else:
+            return None
+
+    def get_product_price(self, element):
+        if element:
+            price = element.text.split(',')[0].replace('.', '')
+            return int(price)
+        else:
+            return None
+
+    def get_product_old_price(self, element):
+        if element:
+            if len(element) > 0:
+                old_price = element[0].text.strip()[0].replace('.', '')
+                return int(old_price)
+            else:
+                return None
+        else:
+            return None
+
+    def get_product_info(self, element):
+        if element:
+            if 'BEDAVA' in element[0].text:
+                return 'Kargo BEDAVA'
+            else:
+                return None
+        else:
+            return None
+
+    def get_product_comment_count(self, element):
+        if element:
+            comment_count = element[0].text.split()[-1]
+            if comment_count.isdigit():
+                return comment_count
+            else:
+                return None
+        else:
+            return None

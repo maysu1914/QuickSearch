@@ -16,7 +16,8 @@ class QuickSearch:
     max_page = 3
 
     def __init__(self, max_page=max_page):
-        self.sources = (VatanBilgisayar, N11, HepsiBurada, Trendyol, AmazonTR, Teknosa, GittiGidiyor, MediaMarktTR, FLO)
+        # self.sources = (VatanBilgisayar, N11, HepsiBurada, Trendyol, AmazonTR, Teknosa, GittiGidiyor, MediaMarktTR, FLO)
+        self.sources = (AmazonTR, FLO)
         self.categories = self.get_categories()
         self.max_page = max_page
         self.executor = ThreadPoolExecutor()
@@ -119,7 +120,7 @@ class QuickSearch:
         # sort results by price and suitable_to_search values
         # (True value is first after than low price)
         self.raw_results = sorted(self.raw_results,
-                                  key=lambda i: (int(i['price'].split()[0]), -i['suitable_to_search']))
+                                  key=lambda i: (i['price'] is None, i['price'], -i['suitable_to_search']))
 
         unique_results = []
         seen = set()  # to skip same products from different results
@@ -140,10 +141,24 @@ class QuickSearch:
     def show_results(self):
         print("\nResults:") if self.correct_results else ''
         for product in self.correct_results:
-            print(product['source'], product['name'], product['price'], product['info'], product['comment_count'])
+            data = (
+                product['source'],
+                product['name'],
+                str(product['price']) + ' TL' if product['price'] else 'Fiyat Yok',
+                product['info'] if product['info'] else '',
+                product['comment_count'] if product['comment_count'] else ''
+            )
+            print(' '.join(data))
 
         print("\nYou may want to look at these:") if self.near_results else ''
         for product in self.near_results:
-            print(product['source'], product['name'], product['price'], product['info'], product['comment_count'])
+            data = (
+                product['source'],
+                product['name'],
+                str(product['price']) + ' TL' if product['price'] else 'Fiyat Yok',
+                product['info'] if product['info'] else '',
+                product['comment_count'] if product['comment_count'] else ''
+            )
+            print(' '.join(data))
 
         print("_________________________________\n")

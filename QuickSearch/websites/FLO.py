@@ -57,82 +57,68 @@ class FLO(SourceWebSite):
         soup = BeautifulSoup(content, "lxml")
         products = []
 
-        for product in soup.find("div", class_="row product-lists").find_all("div", "js-product-vertical"):
-            product_brand = product.find("div", "product__brand").text.strip() if product.find("div",
-                                                                                               "product__brand") else ''
-            product_name = product_brand + ' ' + ' '.join(product.find("div", "product__name").text.split())
-            if product.find("div", "product__prices-third") and ' TL' in product.find("div", "product__prices-third"):
-                price_block = product.find("div", "product__prices-third")
-                price_block.find("span").decompose()
-                product_price = price_block.text.strip().split(',')[0].replace('.', '') + ' TL'
-                if len(product_price) < 4:
-                    print(price_block, product_price, product)
-                product_price_from = product.find("span", "product__prices-sale").text.strip().split(',')[0].replace(
-                    '.',
-                    '') + ' TL'
-            elif product.find("span", "product__prices-sale"):
-                product_price = product.find("span", "product__prices-sale").text.strip().split(',')[0].replace('.',
-                                                                                                                '') + ' TL'
-                if product.find("span", "product__prices-actual"):
-                    product_price_from = product.find("span", "product__prices-actual").text.strip().split(',')[
-                                             0].replace('.',
-                                                        '') + ' TL'
-                else:
-                    product_price_from = ''
-            else:
-                continue
-
-            if product.find("div", "product__badges"):
-                for badge in product.find("div", "product__badges").find_all("div"):
-                    product_name += ' ' + badge.text
-            else:
-                pass
-            product_info = ''
-
-            suitable_to_search = self.is_suitable_to_search(product_name, search)
-            products.append(
-                {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None, 'price': product_price,
-                 'old_price': product_price_from, 'info': product_info,
-                 'comment_count': '', 'suitable_to_search': suitable_to_search})
+        for product in soup.find_all("div", "js-product-vertical"):
+            data = {}
+            data['source'] = '[{}]'.format(self.source_name)
+            data['name'] = self.get_product_name(product.select("a:has(> .product__brand)"))
+            data['price'] = self.get_product_price(product.find("div", "product__info"))
+            data['old_price'] = self.get_product_old_price(product.find("div", "product__info"))
+            data['info'] = self.get_product_info(product.select(".product__badges-item"))
+            data['comment_count'] = None
+            data['suitable_to_search'] = self.is_suitable_to_search(data['name'], search)
+            products.append(data)
         return products
 
     def get_product(self, content, search):
         soup = BeautifulSoup(content, "lxml")
-        # return []
+        data = {}
+        data['source'] = '[{}]'.format(self.source_name)
+        data['name'] = self.get_product_name(soup.select(".product"))
+        data['price'] = self.get_product_price(soup.find("div", "product__info"))
+        data['old_price'] = self.get_product_old_price(soup.find("div", "product__info"))
+        data['info'] = self.get_product_info(soup.select(".product__badges-item"))
+        data['comment_count'] = None
+        data['suitable_to_search'] = self.is_suitable_to_search(data['name'], search)
+        return [data]
 
-        product_brand = soup.find("div", "product__brand").text.strip() if soup.find("div",
-                                                                                     "product__brand") else ''
-        product_name = product_brand + ' ' + ' '.join(soup.find("h1", "product__name").text.split())
-        if soup.find("div", "product__prices-third"):
-            price_block = soup.find("div", "product__prices-third")
-            price_block.find("span").decompose()
-            product_price = price_block.text.strip().split(',')[0].replace('.', '') + ' TL'
-            product_price_from = soup.find("span", "product__prices-sale").text.strip().split(',')[0].replace(
-                '.',
-                '') + ' TL'
-        elif soup.find("span", "product__prices-sale"):
-            product_price = soup.find("span", "product__prices-sale").text.strip().split(',')[0].replace('.',
-                                                                                                         '') + ' TL'
-            if soup.find("span", "product__prices-actual"):
-                product_price_from = soup.find("span", "product__prices-actual").text.strip().split(',')[
-                                         0].replace('.',
-                                                    '') + ' TL'
-            else:
-                product_price_from = ''
+    def get_product_name(self, element):
+        if element:
+            product_name = list(element[0].select(".product__brand, .product__name"))
+            return ' '.join(map(lambda i: i.text.strip(), product_name))
         else:
-            return []
+            return None
 
-        if soup.find("div", "product__badges"):
-            for badge in soup.find("div", "product__badges").find_all("div"):
-                product_name += ' ' + badge.text
+    def get_product_price(self, element):
+        if element:
+            price = element.find("div", "product__prices-third")
+            if price:
+                return int(self.get_text(price).split(',')[0].replace('.', ''))
+
+            price = element.find("span", "product__prices-sale")
+            if price:
+                return int(price.text.split(',')[0].replace('.', ''))
+            return None
         else:
-            pass
-        product_info = ''
+            return None
 
-        suitable_to_search = self.is_suitable_to_search(product_name, search)
-        product = {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None,
-                   'price': product_price,
-                   'old_price': product_price_from, 'info': product_info,
-                   'comment_count': '', 'suitable_to_search': suitable_to_search}
-        # print(product_name,product_price,product_info,product_comment_count)
-        return [product]
+    def get_product_old_price(self, element):
+        if element:
+            price = element.find("div", "product__prices-third")
+            if price:
+                old_price = element.find("span", "product__prices-sale")
+                return int(old_price.text.split(',')[0].replace('.', ''))
+
+            price = element.find("span", "product__prices-sale")
+            if price:
+                old_price = element.find("span", "product__prices-actual")
+                if old_price:
+                    return int(old_price.text.split(',')[0].replace('.', ''))
+            return None
+        else:
+            return None
+
+    def get_product_info(self, element):
+        if element:
+            return ' '.join(map(lambda i: i.text.strip(), element))
+        else:
+            return None

@@ -108,8 +108,11 @@ class SourceWebSite:
 
     @staticmethod
     def is_suitable_to_search(product_name, search):
-        product_name = product_name.lower()
-        search = search.lower()
+        if product_name:
+            product_name = product_name.lower()
+            search = search.lower()
+        else:
+            return False
 
         search_numbers = re.findall('\d+', search)
         search_words = search.lower()
@@ -139,8 +142,13 @@ class SourceWebSite:
             n -= 1
         return start
 
-    def get_product_source(self, element):
-        pass
+    def get_text(self, element):
+        """
+        it will parse the text of element without children's
+        :param element:
+        :return: string
+        """
+        return ''.join(element.find_all(text=True, recursive=False)).strip()
 
     def get_product_name(self, element):
         pass
