@@ -58,33 +58,37 @@ class Teknosa(SourceWebSite):
         products = []
 
         for product in soup.find_all("div", "product-item"):
-            product_name = product.find("div", "product-name").text.strip()
-            product_price_element = product.find("span", class_='price-tag new-price font-size-tertiary')
-            if product_price_element and product_price_element.text:
-                product_price = product_price_element.text.split()[0].split(',')[0].replace('.', '') + ' TL'
-            else:
-                continue
-            product_price_from = product.find("span", class_='price-tag old-price block').text.split()[0].split(',')[
-                                     0].replace('.', '') + ' TL' if product.find("span",
-                                                                                 class_='price-tag old-price block') else ''
-            product_info = 'KARGO BEDAVA' if int(product_price.split()[0]) > 100 else ''
-            product_comment_count = ''
-            suitable_to_search = self.is_suitable_to_search(product_name, search)
-            products.append(
-                {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None, 'price': product_price,
-                 'old_price': product_price_from, 'info': product_info,
-                 'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
-        # print(product_name,product_price,product_info,product_comment_count)
+            data = {}
+            data['source'] = '[{}]'.format(self.source_name)
+            data['name'] = self.get_product_name(product.find("div", "product-name"))
+            data['price'] = self.get_product_price(product.find("span", "new-price"))
+            data['old_price'] = self.get_product_old_price(product.find("span", "old-price"))
+            data['info'] = self.get_product_info(product.select("div.product-list-badge-item, div.only-in-store-badge"))
+            data['comment_count'] = None
+            data['suitable_to_search'] = self.is_suitable_to_search(data['name'], search)
+            products.append(data)
         return products
 
-    # Teknos's website was showing the wrong products if no result when filtered search only, it seems they fixed it
-    # def get_result(self, url):
-    #     urls = ["https://www.teknosa.com/arama/?s=" + url['search'], url['url']]
-    #     contents = self.get_contents(urls)
-    #
-    #     if contents[0] and not contents[0].find("i", "icon-search-circle"):
-    #         # print(1)
-    #         return contents[1]
-    #     else:
-    #         # print(2)
-    #         return False
+    def get_product_name(self, element):
+        if element:
+            return element.text.strip()
+        else:
+            return None
+
+    def get_product_price(self, element):
+        if element:
+            return int(element.text.split()[0].split(',')[0].replace('.', ''))
+        else:
+            return None
+
+    def get_product_old_price(self, element):
+        if element:
+            return int(element.text.split()[0].split(',')[0].replace('.', ''))
+        else:
+            return None
+
+    def get_product_info(self, element):
+        if element:
+            return ' '.join(map(lambda i: i.text.strip(), list(element)))
+        else:
+            return None

@@ -98,6 +98,8 @@ class GittiGidiyor(SourceWebSite):
             if price:
                 return int(price.text.split(',')[0].replace('.', ''))
             return None
+        else:
+            return None
 
     def get_product_old_price(self, element):
         if element:
@@ -118,6 +120,8 @@ class GittiGidiyor(SourceWebSite):
                     return int(old_price.text.split(',')[0].replace('.', ''))
                 else:
                     return None
+            return None
+        else:
             return None
 
     def get_product_info(self, element):

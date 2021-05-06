@@ -85,6 +85,8 @@ class HepsiBurada(SourceWebSite):
             if price:
                 return int(price.text.split(',')[0].replace('.', ''))
             return None
+        else:
+            return None
 
     def get_product_old_price(self, element):
         if element:
@@ -103,6 +105,8 @@ class HepsiBurada(SourceWebSite):
                 old_price = element.find("del", "product-old-price")
                 if old_price:
                     return int(price.text.split(',')[0].replace('.', ''))
+            return None
+        else:
             return None
 
     def get_product_info(self, element):
