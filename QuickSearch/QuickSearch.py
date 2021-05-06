@@ -17,7 +17,7 @@ class QuickSearch:
 
     def __init__(self, max_page=max_page):
         # self.sources = (VatanBilgisayar, N11, HepsiBurada, Trendyol, AmazonTR, Teknosa, GittiGidiyor, MediaMarktTR, FLO)
-        self.sources = (AmazonTR, FLO)
+        self.sources = (AmazonTR, GittiGidiyor, FLO)
         self.categories = self.get_categories()
         self.max_page = max_page
         self.executor = ThreadPoolExecutor()

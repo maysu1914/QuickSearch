@@ -70,31 +70,58 @@ class GittiGidiyor(SourceWebSite):
         soup = BeautifulSoup(content, "lxml")
         products = []
 
-        for product in soup.find("ul", class_="catalog-view clearfix products-container").find_all("li",
-                                                                                                   recursive=False):
-            product_name = ' '.join(product.find("h3", "product-title").text.split())
-            if product.find("p", class_='fiyat robotobold price-txt'):
-                product_price = product.find("p", class_='fiyat robotobold price-txt').text.split()[0].split(',')[
-                                    0].replace('.', '') + ' TL'
-                product_price_from = product.find("strike", class_='market-price-sel').text.split()[0].split(',')[
-                                         0].replace('.', '') + ' TL'
-            elif product.find("p", class_='fiyat price-txt robotobold price'):
-                product_price = product.find("p", class_='fiyat price-txt robotobold price').text.split()[0].split(',')[
-                                    0].replace('.', '') + ' TL'
-                product_price_from = ''
-            else:
-                continue
-            product_info = product.find("li", class_='shippingFree').text.strip() if product.find("li",
-                                                                                                  class_='shippingFree') else ''
-            if product.find("span", "gf-badge-position"):
-                product_info += ' ' + product.find("span", "gf-badge-position").text
-            else:
-                pass
-            product_comment_count = ''
-            suitable_to_search = self.is_suitable_to_search(product_name, search)
-            products.append(
-                {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None, 'price': product_price,
-                 'old_price': product_price_from, 'info': product_info,
-                 'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
-        # print(product_name,product_price,product_info,product_comment_count)
+        for product in soup.find_all("li", "srp-item-list"):
+            data = {}
+            data['source'] = '[{}]'.format(self.source_name)
+            data['name'] = self.get_product_name(product.find("h3", "product-title"))
+            data['price'] = self.get_product_price(product.find("div", "product-price"))
+            data['old_price'] = self.get_product_old_price(product.find("div", "product-price"))
+            data['info'] = self.get_product_info(product.select("li.shippingFree, [class*='-badge-position']"))
+            data['comment_count'] = None
+            data['suitable_to_search'] = self.is_suitable_to_search(data['name'], search)
+            products.append(data)
         return products
+
+    def get_product_name(self, element):
+        if element:
+            return ' '.join(element.text.split())
+        else:
+            return None
+
+    def get_product_price(self, element):
+        if element:
+            price = element.find("p", "extra-price")
+            if price:
+                return int(price.text.split(',')[0].replace('.', ''))
+
+            price = element.find("p", "fiyat")
+            if price:
+                return int(price.text.split(',')[0].replace('.', ''))
+            return None
+
+    def get_product_old_price(self, element):
+        if element:
+            price = element.find("p", "extra-price")
+            if price:
+                old_price = element.find("p", "fiyat")
+                if old_price:
+                    return int(old_price.text.split(',')[0].replace('.', ''))
+
+                old_price = element.find("div", "discount-detail-grey")
+                if old_price:
+                    return int(old_price.text.split(',')[0].replace('.', ''))
+
+            price = element.find("p", "fiyat")
+            if price:
+                old_price = element.find("div", "discount-detail-grey")
+                if old_price:
+                    return int(old_price.text.split(',')[0].replace('.', ''))
+                else:
+                    return None
+            return None
+
+    def get_product_info(self, element):
+        if element:
+            return ' '.join(map(lambda i: self.get_text(i), list(element)))
+        else:
+            return None
