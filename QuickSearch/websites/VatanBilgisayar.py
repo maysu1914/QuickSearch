@@ -57,24 +57,46 @@ class VatanBilgisayar(SourceWebSite):
         soup = BeautifulSoup(content, "lxml")
         products = []
         for product in soup.find_all("div", "product-list--list-page"):
-            product_name = product.find("div", "product-list__product-name").text.strip()
-            product_code = product.find("div", "product-list__product-code").text.strip()
-            if product.find("span", "product-list__price"):
-                product_price = product.find("span", "product-list__price").text.strip().replace(".", '') + ' TL'
-            else:
-                continue
-            if product.find("span", "product-list__current-price"):
-                product_price_from = product.find("span", "product-list__current-price").text.strip().replace(".",
-                                                                                                              '') + ' TL'
-            else:
-                product_price_from = ''
-            product_stock = product.find("span", "wrapper-condition__text").text.strip() if product.find("span",
-                                                                                                         "wrapper-condition__text") else ''
-            product_comment_count = product.find("a", "comment-count").text.strip()
-            suitable_to_search = self.is_suitable_to_search(product_name, search)
-            products.append({'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': product_code,
-                             'price': product_price,
-                             'old_price': product_price_from, 'info': product_stock,
-                             'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
-        # print(product_name,product_code,product_price,product_price_from,product_stock,product_comment_count)
+            data = {}
+            data['source'] = '[{}]'.format(self.source_name)
+            data['name'] = self.get_product_name(product.find("div", "product-list__product-name"))
+            data['price'] = self.get_product_price(product.find("span", "product-list__price"))
+            data['old_price'] = self.get_product_old_price(product.find("span", "product-list__current-price"))
+            data['info'] = self.get_product_info(product.select("span.wrapper-condition__text"))
+            data['comment_count'] = self.get_product_comment_count(product.find("a", "comment-count"))
+            data['suitable_to_search'] = self.is_suitable_to_search(data['name'], search)
+            products.append(data)
         return products
+
+    def get_product_name(self, element):
+        if element:
+            return element.text.strip()
+        else:
+            return None
+
+    def get_product_price(self, element):
+        if element:
+            return int(element.text.split()[0].split(',')[0].replace('.', ''))
+        else:
+            return None
+
+    def get_product_old_price(self, element):
+        if element:
+            if element.text.strip():
+                return int(element.text.split()[0].split(',')[0].replace('.', ''))
+            else:
+                return None
+        else:
+            return None
+
+    def get_product_info(self, element):
+        if element:
+            return ' '.join(map(lambda i: i.text.strip(), list(element)))
+        else:
+            return None
+
+    def get_product_comment_count(self, element):
+        if element:
+            return element.text.strip()
+        else:
+            return None
