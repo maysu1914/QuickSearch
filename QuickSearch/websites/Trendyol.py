@@ -71,25 +71,62 @@ class Trendyol(SourceWebSite):
         products = []
 
         for product in soup.find_all("div", "p-card-wrppr"):
-            product_brand = product.find("span", "prdct-desc-cntnr-ttl").text.strip() if product.find("span",
-                                                                                                      "prdct-desc-cntnr-ttl") else ''
-            product_name = product_brand + ' ' + product.find("span", "prdct-desc-cntnr-name").text.strip()
-            if product.find("div", "prc-box-dscntd"):
-                product_price = product.find("div", "prc-box-dscntd").text.split()[0].replace(".", '').split(',')[
-                                    0] + ' TL'
-            elif product.find("div", "prc-box-sllng"):
-                product_price = product.find("div", "prc-box-sllng").text.split()[0].replace(".", '').split(',')[
-                                    0] + ' TL'
-            else:
-                continue
-            product_price_from = ''  # product.find("div","prc-box-orgnl").text.split()[0].replace(".",'').split(',')[0]+ ' TL' if product.find("div","prc-box-orgnl") is not None else ''
-            product_info = product.find("div", "stmp").text.strip() if product.find("div", "stmp") is not None else ''
-            product_comment_count = product.find("span", "ratingCount").text.strip() if product.find("span",
-                                                                                                     "ratingCount") is not None else ''
-            suitable_to_search = self.is_suitable_to_search(product_name, search)
-            products.append(
-                {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None, 'price': product_price,
-                 'old_price': product_price_from, 'info': product_info,
-                 'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
-        # print(product_name,product_price,product_info,product_comment_count)
+            data = {}
+            data['source'] = '[{}]'.format(self.source_name)
+            data['name'] = self.get_product_name(product.find("div", "prdct-desc-cntnr-ttl-w"))
+            data['price'] = self.get_product_price(product.find("div", "prdct-desc-cntnr-wrppr"))
+            data['old_price'] = self.get_product_old_price(product.find("div", "prdct-desc-cntnr-wrppr"))
+            data['info'] = self.get_product_info(product.select("div.stmp.fc"))
+            data['comment_count'] = self.get_product_comment_count(product.find("span", "ratingCount"))
+            data['suitable_to_search'] = self.is_suitable_to_search(data['name'], search)
+            products.append(data)
         return products
+
+    def get_product_name(self, element):
+        if element:
+            product_name = list(element.select(".prdct-desc-cntnr-ttl, .prdct-desc-cntnr-name"))
+            return ' '.join(map(lambda i: i.text.strip(), product_name))
+        else:
+            return None
+
+    def get_product_price(self, element):
+        if element:
+            price = element.find("div", "prc-box-dscntd")
+            if price:
+                return int(price.text.split()[0].split(',')[0].replace('.', ''))
+
+            price = element.find("div", "prc-box-sllng")
+            if price:
+                return int(price.text.split()[0].split(',')[0].replace('.', ''))
+            return None
+        else:
+            return None
+
+    def get_product_old_price(self, element):
+        if element:
+            price = element.find("div", "prc-box-dscntd")
+            if price:
+                old_price = element.find("div", "prc-box-sllng")
+                return int(old_price.text.split()[0].split(',')[0].replace('.', ''))
+
+            price = element.find("div", "prc-box-sllng")
+            if price:
+                old_price = element.find("div", "prc-box-orgnl")
+                if old_price:
+                    return int(old_price.text.split()[0].split(',')[0].replace('.', ''))
+                return None
+            return None
+        else:
+            return None
+
+    def get_product_info(self, element):
+        if element:
+            return ' '.join(map(lambda i: i.text.strip(), list(element)))
+        else:
+            return None
+
+    def get_product_comment_count(self, element):
+        if element:
+            return element.text.strip()
+        else:
+            return None
