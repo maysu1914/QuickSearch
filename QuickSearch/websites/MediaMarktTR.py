@@ -58,50 +58,61 @@ class MediaMarktTR(SourceWebSite):
 
     def get_product(self, content, search):
         soup = BeautifulSoup(content, "lxml")
-        products = []
-
-        product_name = soup.find("h1", {'itemprop': 'name'}).text.strip()
-        if soup.find("meta", {'itemprop': 'price'}):
-            product_price = soup.find("meta", {'itemprop': 'price'})['content'].split('.')[0] + ' TL'
-        else:
-            return products
-        product_price_from = ''
-        product_info = 'Ücretsiz Kargo' if soup.find("span", {"data-layer": "deliveryinformation"}) else ''
-        product_comment_count = soup.find("div", "rating").findNext('span').text.strip() if soup.find("div",
-                                                                                                      "rating") else ''
-        suitable_to_search = self.is_suitable_to_search(product_name, search)
-        products.append(
-            {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None, 'price': product_price,
-             'old_price': product_price_from, 'info': product_info, 'comment_count': product_comment_count,
-             'suitable_to_search': suitable_to_search})
-        # print(product_name,product_price,product_info,product_comment_count)
-
-        return products
+        data = {}
+        data['source'] = '[{}]'.format(self.source_name)
+        data['name'] = self.get_product_name(soup.find("h1", {'itemprop': 'name'}))
+        data['price'] = self.get_product_price(soup.select("div.price.big"))
+        data['old_price'] = None
+        data['info'] = self.get_product_info(soup.select("div.price-details > small"))
+        data['comment_count'] = self.get_product_comment_count(soup.select("dd.product-rate > span.clickable > span"))
+        data['suitable_to_search'] = self.is_suitable_to_search(data['name'], search)
+        return [data]
 
     def get_products(self, content, search):
         soup = BeautifulSoup(content, "lxml")
         products = []
 
-        for product in soup.find("ul", class_="products-list").find_all("li", recursive=False):
-            if product.has_attr('class'):
-                continue
-            product_name = product.find("h2").text.strip()
-            if product.find("div", class_='price small'):
-                product_price = product.find("div", class_='price small').text.split(',')[0] + ' TL'
-            else:
-                continue
-            product_price_from = product.find("div", class_='price price-xs price-old').text.split(',')[
-                                     0] + ' TL' if product.find("div", class_='price price-xs price-old') else '1'
-            product_info = ' '.join(
-                product.find("span", {"data-layer": "deliveryinformation"}).parent.text.split()) if product.find("span",
-                                                                                                                 {
-                                                                                                                     "data-layer": "deliveryinformation"}) else ''
-            product_comment_count = product.find("span", "clickable see-reviews").text.strip() if product.find("span",
-                                                                                                               "clickable see-reviews") else ''
-            suitable_to_search = self.is_suitable_to_search(product_name, search)
-            products.append(
-                {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None, 'price': product_price,
-                 'old_price': product_price_from, 'info': product_info,
-                 'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
-        # print(product_name,product_price,product_info,product_comment_count)
+        for product in soup.select("ul.products-list > li:not([class])"):
+            data = {}
+            data['source'] = '[{}]'.format(self.source_name)
+            data['name'] = self.get_product_name(product.find("h2"))
+            data['price'] = self.get_product_price(product.select("div.price.small"))
+            data['old_price'] = self.get_product_old_price(product.select("div.price.price-old"))
+            data['info'] = self.get_product_info(product.select("div.price-box > small"))
+            data['comment_count'] = self.get_product_comment_count(product.select("span.see-reviews"))
+            data['suitable_to_search'] = self.is_suitable_to_search(data['name'], search)
+            products.append(data)
         return products
+
+    def get_product_name(self, element):
+        if element:
+            return element.text.strip()
+        else:
+            return None
+
+    def get_product_price(self, element):
+        if element:
+            return int(element[0].text.split(',')[0])
+        else:
+            return None
+
+    def get_product_old_price(self, element):
+        if element:
+            return int(element[0].text.split(',')[0])
+        else:
+            return None
+
+    def get_product_info(self, element):
+        if element:
+            if element[0].find("img"):
+                return 'Ücretsiz Kargo'
+            else:
+                return element[0].text.strip()
+        else:
+            return None
+
+    def get_product_comment_count(self, element):
+        if element:
+            return element[0].text.strip()
+        else:
+            return None
