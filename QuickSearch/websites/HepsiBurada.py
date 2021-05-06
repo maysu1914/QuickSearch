@@ -57,29 +57,62 @@ class HepsiBurada(SourceWebSite):
     def get_products(self, content, search):
         soup = BeautifulSoup(content, "lxml")
         products = []
-        for product in soup.find_all("div", "product-detail"):
-            if product.find("span", "out-of-stock-icon"):
-                continue
-            product_name = product.find("h3", "product-title").text.strip()
-            if product.find("div", "price-value"):
-                product_price = product.find("div", "price-value").text.replace(",", ".").replace('"', '').split()[
-                                    0].replace(".", '')[:-2] + ' TL'
-            elif product.find("span", "product-price"):
-                product_price = product.find("span", "product-price").text.replace(",", ".").replace('"', '').split()[
-                                    0].replace(".", '')[:-2] + ' TL'
-            else:  # if product.find("span","can-pre-order-text"): ÖN SIPARIS
-                continue
-            product_price_from = product.find("del", "product-old-price").text.replace(",", ".").split()[0].replace(".",
-                                                                                                                    '')[
-                                 :-2] + ' TL' if product.find("del", "product-old-price") is not None else ''
-            product_info = product.find("div", "shipping-status").text.strip() if product.find("div",
-                                                                                               "shipping-status") is not None else ''
-            product_comment_count = product.find("span", "number-of-reviews").text.strip() if product.find("span",
-                                                                                                           "number-of-reviews") is not None else ''
-            suitable_to_search = self.is_suitable_to_search(product_name, search)
-            products.append(
-                {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None, 'price': product_price,
-                 'old_price': product_price_from, 'info': product_info,
-                 'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
-        # print(product_name,product_price,product_info,product_comment_count)
+        for product in soup.select("div.box.product"):
+            data = {}
+            data['source'] = '[{}]'.format(self.source_name)
+            data['name'] = self.get_product_name(product.find("h3", "product-title"))
+            data['price'] = self.get_product_price(product.find("div", "product-detail"))
+            data['old_price'] = self.get_product_old_price(product.find("div", "product-detail"))
+            data['info'] = self.get_product_info(product.select("div.shipping-status, .dod-badge"))
+            data['comment_count'] = self.get_product_comment_count(product.find("span", "number-of-reviews"))
+            data['suitable_to_search'] = self.is_suitable_to_search(data['name'], search)
+            products.append(data)
         return products
+
+    def get_product_name(self, element):
+        if element:
+            return element.text.strip()
+        else:
+            return None
+
+    def get_product_price(self, element):
+        if element:
+            price = element.find("div", "price-value")
+            if price:
+                return int(price.text.split(',')[0].replace('.', ''))
+
+            price = element.find("span", "product-price")
+            if price:
+                return int(price.text.split(',')[0].replace('.', ''))
+            return None
+
+    def get_product_old_price(self, element):
+        if element:
+            price = element.find("div", "price-value")
+            if price:
+                old_price = element.find("span", "product-old-price")
+                if old_price:
+                    return int(price.text.split(',')[0].replace('.', ''))
+
+                old_price = element.find("del", "product-old-price")
+                if old_price:
+                    return int(price.text.split(',')[0].replace('.', ''))
+
+            price = element.find("span", "product-price")
+            if price:
+                old_price = element.find("del", "product-old-price")
+                if old_price:
+                    return int(price.text.split(',')[0].replace('.', ''))
+            return None
+
+    def get_product_info(self, element):
+        if element:
+            return ' '.join(map(lambda i: i.text.strip(), list(element)))
+        else:
+            return None
+
+    def get_product_comment_count(self, element):
+        if element:
+            return element.text.strip()
+        else:
+            return None
