@@ -10,9 +10,8 @@ from requests.utils import requote_uri
 
 
 class WebsiteScraper:
-    max_page = 5
 
-    def __init__(self, category, max_page=max_page):
+    def __init__(self, category, max_page=5):
         self.category = category
         self.max_page = max_page
         self.executor = ThreadPoolExecutor()
