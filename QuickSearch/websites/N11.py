@@ -69,22 +69,44 @@ class N11(SourceWebSite):
     def get_products(self, content, search):
         soup = BeautifulSoup(content, "lxml")
         products = []
-        for product in soup.find_all("div", "columnContent"):
-            if product.find("h3", "productName"):
-                product_name = product.find("h3", "productName").text.strip()
-            else:
-                continue
-            product_price = product.find("a", "newPrice").text.replace(",", ".").replace('"', '').split()[0].replace(
-                ".", '')[:-2] + ' TL'
-            product_price_from = product.find("a", "oldPrice").text.replace(",", ".").split()[0].replace(".", '')[
-                                 :-2] + ' TL' if product.find("a", "oldPrice") is not None else ''
-            product_info = 'Ücretsiz Kargo' if product.find("span", "freeShipping") is not None else ''
-            product_comment_count = product.find("span", "ratingText").text.strip() if product.find("span",
-                                                                                                    "ratingText") is not None else ''
-            suitable_to_search = self.is_suitable_to_search(product_name, search)
-            products.append(
-                {'source': '[{}]'.format(self.source_name), 'name': product_name, 'code': None, 'price': product_price,
-                 'old_price': product_price_from, 'info': product_info,
-                 'comment_count': product_comment_count, 'suitable_to_search': suitable_to_search})
-        # print(product_name,product_price,product_info,product_comment_count)
+        for product in soup.select("#view > ul > li"):
+            data = {}
+            data['source'] = '[{}]'.format(self.source_name)
+            data['name'] = self.get_product_name(product.find("h3", "productName"))
+            data['price'] = self.get_product_price(product.find("a", "newPrice"))
+            data['old_price'] = self.get_product_old_price(product.find("a", "oldPrice"))
+            data['info'] = self.get_product_info(product.find("span", "freeShipping"))
+            data['comment_count'] = self.get_product_comment_count(product.find("span", "ratingText"))
+            data['suitable_to_search'] = self.is_suitable_to_search(data['name'], search)
+            products.append(data)
         return products
+
+    def get_product_name(self, element):
+        if element:
+            return element.text.strip()
+        else:
+            return None
+
+    def get_product_price(self, element):
+        if element:
+            return int(element.text.split(',')[0].replace('.', ''))
+        else:
+            return None
+
+    def get_product_old_price(self, element):
+        if element:
+            return int(element.text.split(',')[0].replace('.', ''))
+        else:
+            return None
+
+    def get_product_info(self, element):
+        if element:
+            return 'Ücretsiz Kargo'
+        else:
+            return None
+
+    def get_product_comment_count(self, element):
+        if element:
+            return element.text.strip()
+        else:
+            return None
