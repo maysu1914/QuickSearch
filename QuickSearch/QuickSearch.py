@@ -1,22 +1,14 @@
 from concurrent.futures.thread import ThreadPoolExecutor
 from concurrent import futures
 
-from .websites.AmazonTR import AmazonTR
-from .websites.FLO import FLO
-from .websites.GittiGidiyor import GittiGidiyor
-from .websites.HepsiBurada import HepsiBurada
-from .websites.MediaMarktTR import MediaMarktTR
-from .websites.N11 import N11
-from .websites.Teknosa import Teknosa
-from .websites.Trendyol import Trendyol
-from .websites.VatanBilgisayar import VatanBilgisayar
+from .WebsiteScrapers import *
 
 
 class QuickSearch:
     max_page = 3
 
     def __init__(self, max_page=max_page):
-        self.sources = (VatanBilgisayar, N11, HepsiBurada, Trendyol, AmazonTR, Teknosa, GittiGidiyor, MediaMarktTR, FLO)
+        self.sources = (VatanbilgisayarScraper, N11Scraper, HepsiburadaScraper, TrendyolScraper, AmazonScraper, TeknosaScraper, GittigidiyorScraper, MediamarktScraper, FloScraper)
         self.categories = self.get_categories()
         self.max_page = max_page
         self.executor = ThreadPoolExecutor()
