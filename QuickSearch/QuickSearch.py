@@ -8,7 +8,9 @@ class QuickSearch:
     max_page = 3
 
     def __init__(self, max_page=max_page):
-        self.sources = (VatanbilgisayarScraper, N11Scraper, HepsiburadaScraper, TrendyolScraper, AmazonScraper, TeknosaScraper, GittigidiyorScraper, MediamarktScraper, FloScraper)
+        self.sources = (
+            VatanbilgisayarScraper, N11Scraper, HepsiburadaScraper, TrendyolScraper, AmazonScraper, TeknosaScraper,
+            GittigidiyorScraper, MediamarktScraper, FloScraper)
         self.categories = self.get_categories()
         self.max_page = max_page
         self.executor = ThreadPoolExecutor()
