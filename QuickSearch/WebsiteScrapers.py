@@ -1,3 +1,4 @@
+import concurrent
 import itertools
 import math
 import re
@@ -89,11 +90,9 @@ class WebsiteScraper:
         pass
 
     def get_contents(self, url_list):
-        contents = []
         threads = [ThreadPoolExecutor().submit(self.get_page_content, url) for url in url_list]
-        for thread in threads:
-            contents.append(thread.result())
-        return contents
+        for thread in concurrent.futures.as_completed(threads):
+            yield thread.result()
 
     def get_results(self, url):
         pass
