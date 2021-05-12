@@ -7,6 +7,7 @@ from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
+from requests.exceptions import SSLError
 from requests.utils import requote_uri
 
 
@@ -62,9 +63,10 @@ class WebsiteScraper:
         pass
 
     @staticmethod
-    def get_page_content(url, counter=3):
+    def get_page_content(url, counter=3, dynamic_verification=True):
         """
         Content retriever
+        :param dynamic_verification: try without SSL verify if needed
         :param url: the link whose content is to be returned
         :param counter: how many times of retrying
         :return: content of response
@@ -74,14 +76,17 @@ class WebsiteScraper:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36',
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
         }
+        verify = True
         for count in range(1, counter + 1):
             try:
-                response = requests.get(url, timeout=10, headers=headers)
+                response = requests.get(url, timeout=10, headers=headers, verify=verify)
                 return response.content
             except Exception as e:
                 print('Error occurred while getting page content!', count, url, e)
+                if dynamic_verification and type(e) == SSLError:
+                    verify = False
                 continue
-        return None
+        return ''
 
     def is_did_you_mean(self, element):
         pass
