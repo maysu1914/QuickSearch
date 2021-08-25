@@ -1127,7 +1127,7 @@ class FloScraper(WebsiteScraper):
     def get_categories():
         categories = {
             'All': '',
-            'Shoes': '&category_id=770',
+            'Shoes': '&category_id=18',
         }
         return categories
 
