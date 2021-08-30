@@ -89,7 +89,7 @@ class QuickSearch:
         except ValueError:
             max_page_input = None
 
-        return max_page_input
+        return max_page_input if max_page_input else self.max_page
 
     def get_source_by_url(self):
         for source in self.sources:
