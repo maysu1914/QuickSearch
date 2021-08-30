@@ -13,7 +13,7 @@ from requests.utils import requote_uri
 
 class WebsiteScraper:
 
-    def __init__(self, category, max_page=5):
+    def __init__(self, category=None, max_page=5):
         self.category = category
         self.max_page = max_page
         self.executor = ThreadPoolExecutor()
