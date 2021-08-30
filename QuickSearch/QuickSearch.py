@@ -1,5 +1,4 @@
-from concurrent.futures.thread import ThreadPoolExecutor
-from concurrent import futures
+from urllib.parse import urlparse
 
 from .WebsiteScrapers import *
 
@@ -14,6 +13,11 @@ class QuickSearch:
         self.categories = self.get_categories()
         self.max_page = max_page
         self.executor = ThreadPoolExecutor()
+
+        self.search_type_selection = None
+
+        self.url_input = None
+        self.url_source = None
 
         self.category_selection = None
         self.sources_of_category = []
@@ -31,16 +35,72 @@ class QuickSearch:
                     categories.append(category)
         return categories
 
+    def get_search_type_input(self):
+        search_types = [
+            'By entering the categories, sources, and a search text.',
+            'By entering a URL and a search text.',
+        ]
+        search_type_selection = None
+        print("Which way do you prefer to search with?")
+
+        for index, search_type in enumerate(search_types):
+            print(str(index) + '.', search_type)
+
+        while not isinstance(search_type_selection, int):
+            try:
+                search_type_selection = int(input('Search Type: ').strip())
+            except ValueError:
+                search_type_selection = None
+
+        return search_type_selection
+
     def start(self):
-        self.category_selection = self.get_category_input()
-        self.source_selections = self.get_source_input()
-        self.search_text = self.get_search_input()
-        self.get_results()
-        self.show_results()
+        self.search_type_selection = self.get_search_type_input()
+        if self.search_type_selection == 0:
+            self.category_selection = self.get_category_input()
+            self.source_selections = self.get_source_input()
+            self.search_text = self.get_search_input()
+            self.get_results()
+            self.set_results()
+            self.show_results()
+        if self.search_type_selection == 1:
+            self.url_input = self.get_url_input()
+            self.search_text = self.get_search_input()
+            self.max_page = self.get_max_page_input()
+            self.url_source = self.get_source_by_url()
+            self.get_results_from_url()
+            self.set_results()
+            self.show_results()
+
+    def get_url_input(self):
+        url_input = None
+        # https://regexr.com/39nr7
+        regex = r"[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)"
+        print("\nWhich URL you want to search?")
+
+        while not url_input:
+            url_input = re.match(regex, input('The url: '))
+
+        return urlparse(url_input.string)
+
+    def get_max_page_input(self):
+        try:
+            max_page_input = int(input('(Optional) Max page limit: '))
+        except ValueError:
+            max_page_input = None
+
+        return max_page_input
+
+    def get_source_by_url(self):
+        for source in self.sources:
+            if urlparse(source.base_url).hostname == self.url_input.hostname:
+                return source
+        else:
+            return None
 
     def get_category_input(self):
         category_selection = []
-        print("What category do you want to search?")
+        print("\nWhat category do you want to search?")
 
         for index, category in enumerate(self.categories):
             print(str(index) + '.', category)
@@ -110,6 +170,12 @@ class QuickSearch:
         for thread in threads:
             self.raw_results += thread.result()
 
+    def get_results_from_url(self):
+        keyword_arguments = {"max_page": self.max_page}
+        self.raw_results += self.url_source(**keyword_arguments).get_results(
+            {'url': self.url_input.geturl(), 'search': self.search_text})
+
+    def set_results(self):
         # sort results by price and suitable_to_search values
         # (True value is first after than low price)
         self.raw_results = sorted(self.raw_results,
@@ -126,10 +192,21 @@ class QuickSearch:
                 unique_results.append(result)
 
         for result in unique_results:
-            if result['suitable_to_search']:
-                self.correct_results.append(result)
+            if self.search_type_selection == 0:
+                if result['suitable_to_search']:
+                    self.correct_results.append(result)
+                else:
+                    self.near_results.append(result)
             else:
-                self.near_results.append(result)
+                data = (
+                    result['name'],
+                    result['info'] if result['info'] else ''
+                )
+                if any(WebsiteScraper.is_suitable_to_search(' '.join(data).lower(), search) for search in
+                       self.search_text.replace('[', "").replace(']', "").split(',')):
+                    self.correct_results.append(result)
+                else:
+                    self.near_results.append(result)
 
     def show_results(self):
         print("\nResults:") if self.correct_results else ''
