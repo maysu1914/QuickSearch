@@ -46,7 +46,7 @@ class QuickSearch:
         for index, search_type in enumerate(search_types):
             print(str(index) + '.', search_type)
 
-        while not isinstance(search_type_selection, int):
+        while search_type_selection not in list(range(len(search_types))):
             try:
                 search_type_selection = int(input('Search Type: ').strip())
             except ValueError:
