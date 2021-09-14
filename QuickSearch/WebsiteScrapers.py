@@ -246,14 +246,14 @@ class VatanbilgisayarScraper(WebsiteScraper):
 
     def get_product_price(self, element):
         if element:
-            return int(element.text.split()[0].split(',')[0].replace('.', ''))
+            return int(''.join([s for s in element.text if s.isdigit()]))
         else:
             return None
 
     def get_product_old_price(self, element):
         if element:
             if element.text.strip():
-                return int(element.text.split()[0].split(',')[0].replace('.', ''))
+                return int(''.join([s for s in element.text if s.isdigit()]))
             else:
                 return None
         else:
@@ -356,13 +356,13 @@ class N11Scraper(WebsiteScraper):
 
     def get_product_price(self, element):
         if element:
-            return int(element.text.split(',')[0].replace('.', ''))
+            return int(''.join([s for s in element.text.split(',')[0] if s.isdigit()]))
         else:
             return None
 
     def get_product_old_price(self, element):
         if element:
-            return int(element.text.split(',')[0].replace('.', ''))
+            return int(''.join([s for s in element.text.split(',')[0] if s.isdigit()]))
         else:
             return None
 
@@ -455,11 +455,11 @@ class HepsiburadaScraper(WebsiteScraper):
         if element:
             price = element.find("div", "price-value")
             if price:
-                return int(price.text.split(',')[0].replace('.', ''))
+                return int(''.join([s for s in price.text.split(',')[0] if s.isdigit()]))
 
             price = element.find("span", "product-price")
             if price:
-                return int(price.text.split(',')[0].replace('.', ''))
+                return int(''.join([s for s in price.text.split(',')[0] if s.isdigit()]))
             return None
         else:
             return None
@@ -470,17 +470,17 @@ class HepsiburadaScraper(WebsiteScraper):
             if price:
                 old_price = element.find("span", "product-old-price")
                 if old_price:
-                    return int(price.text.split(',')[0].replace('.', ''))
+                    return int(''.join([s for s in price.text.split(',')[0] if s.isdigit()]))
 
                 old_price = element.find("del", "product-old-price")
                 if old_price:
-                    return int(price.text.split(',')[0].replace('.', ''))
+                    return int(''.join([s for s in price.text.split(',')[0] if s.isdigit()]))
 
             price = element.find("span", "product-price")
             if price:
                 old_price = element.find("del", "product-old-price")
                 if old_price:
-                    return int(price.text.split(',')[0].replace('.', ''))
+                    return int(''.join([s for s in price.text.split(',')[0] if s.isdigit()]))
             return None
         else:
             return None
@@ -585,11 +585,11 @@ class TrendyolScraper(WebsiteScraper):
         if element:
             price = element.find("div", "prc-box-dscntd")
             if price:
-                return int(price.text.split()[0].split(',')[0].replace('.', ''))
+                return int(''.join([s for s in price.text.split(',')[0] if s.isdigit()]))
 
             price = element.find("div", "prc-box-sllng")
             if price:
-                return int(price.text.split()[0].split(',')[0].replace('.', ''))
+                return int(''.join([s for s in price.text.split(',')[0] if s.isdigit()]))
             return None
         else:
             return None
@@ -599,13 +599,13 @@ class TrendyolScraper(WebsiteScraper):
             price = element.find("div", "prc-box-dscntd")
             if price:
                 old_price = element.find("div", "prc-box-sllng")
-                return int(old_price.text.split()[0].split(',')[0].replace('.', ''))
+                return int(''.join([s for s in old_price.text.split(',')[0] if s.isdigit()]))
 
             price = element.find("div", "prc-box-sllng")
             if price:
                 old_price = element.find("div", "prc-box-orgnl")
                 if old_price:
-                    return int(old_price.text.split()[0].split(',')[0].replace('.', ''))
+                    return int(''.join([s for s in old_price.text.split(',')[0] if s.isdigit()]))
                 return None
             return None
         else:
@@ -720,16 +720,14 @@ class AmazonScraper(WebsiteScraper):
 
     def get_product_price(self, element):
         if element:
-            price = element.text.split(',')[0].replace('.', '')
-            return int(price)
+            return int(''.join([s for s in element.text.split(',')[0] if s.isdigit()]))
         else:
             return None
 
     def get_product_old_price(self, element):
         if element:
             if len(element) > 0:
-                old_price = element[0].text.strip()[0].replace('.', '')
-                return int(old_price)
+                return int(''.join([s for s in element[0].text.split(',')[0] if s.isdigit()]))
             else:
                 return None
         else:
@@ -829,13 +827,13 @@ class TeknosaScraper(WebsiteScraper):
 
     def get_product_price(self, element):
         if element:
-            return int(element.text.split()[0].split(',')[0].replace('.', ''))
+            return int(''.join([s for s in element.text.split(',')[0] if s.isdigit()]))
         else:
             return None
 
     def get_product_old_price(self, element):
         if element:
-            return int(element.text.split()[0].split(',')[0].replace('.', ''))
+            return int(''.join([s for s in element.text.split(',')[0] if s.isdigit()]))
         else:
             return None
 
@@ -930,43 +928,19 @@ class GittigidiyorScraper(WebsiteScraper):
 
     def get_product_price(self, element):
         if element:
-            price = element.find("p", "extra-price")
-            if price:
-                return int(price.text.split(',')[0].replace('.', ''))
-
-            price = element.find("p", "fiyat")
-            if price:
-                return int(price.text.split(',')[0].replace('.', ''))
-            return None
+            return int(''.join([s for s in element.text.split(',')[0] if s.isdigit()]))
         else:
             return None
 
     def get_product_old_price(self, element):
         if element:
-            price = element.find("p", "extra-price")
-            if price:
-                old_price = element.find("p", "fiyat")
-                if old_price:
-                    return int(old_price.text.split(',')[0].replace('.', ''))
-
-                old_price = element.find("div", "discount-detail-grey")
-                if old_price:
-                    return int(old_price.text.split(',')[0].replace('.', ''))
-
-            price = element.find("p", "fiyat")
-            if price:
-                old_price = element.find("div", "discount-detail-grey")
-                if old_price:
-                    return int(old_price.text.split(',')[0].replace('.', ''))
-                else:
-                    return None
-            return None
+            return int(''.join([s for s in element.text.split(',')[0] if s.isdigit()]))
         else:
             return None
 
     def get_product_info(self, element):
         if element:
-            return ' '.join(map(lambda i: self.get_text(i), list(element)))
+            return "Kargo Ücretsiz Olabilir" if len(element) > 0 else ''
         else:
             return None
 
@@ -1060,13 +1034,13 @@ class MediamarktScraper(WebsiteScraper):
 
     def get_product_price(self, element):
         if element:
-            return int(element[0].text.split(',')[0])
+            return int(''.join([s for s in element[0].text.split(',')[0] if s.isdigit()]))
         else:
             return None
 
     def get_product_old_price(self, element):
         if element:
-            return int(element[0].text.split(',')[0])
+            return int(''.join([s for s in element[0].text.split(',')[0] if s.isdigit()]))
         else:
             return None
 
@@ -1175,11 +1149,11 @@ class FloScraper(WebsiteScraper):
         if element:
             price = element.find("div", "product__prices-third")
             if price:
-                return int(self.get_text(price).split(',')[0].replace('.', ''))
+                return int(''.join([s for s in self.get_text(price).split(',')[0] if s.isdigit()]))
 
             price = element.find("span", "product__prices-sale")
             if price:
-                return int(price.text.split(',')[0].replace('.', ''))
+                return int(''.join([s for s in price.text.split(',')[0] if s.isdigit()]))
             return None
         else:
             return None
@@ -1189,13 +1163,13 @@ class FloScraper(WebsiteScraper):
             price = element.find("div", "product__prices-third")
             if price:
                 old_price = element.find("span", "product__prices-sale")
-                return int(old_price.text.split(',')[0].replace('.', ''))
+                return int(''.join([s for s in old_price.text.split(',')[0] if s.isdigit()]))
 
             price = element.find("span", "product__prices-sale")
             if price:
                 old_price = element.find("span", "product__prices-actual")
                 if old_price:
-                    return int(old_price.text.split(',')[0].replace('.', ''))
+                    return int(''.join([s for s in old_price.text.split(',')[0] if s.isdigit()]))
             return None
         else:
             return None
