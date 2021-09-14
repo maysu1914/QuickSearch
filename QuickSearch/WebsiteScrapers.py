@@ -854,7 +854,7 @@ class GittigidiyorScraper(WebsiteScraper):
         results = []
 
         if soup and self.is_product_list_page(soup):
-            page_number = self.get_page_number(soup.find("span", "result-count"))
+            page_number = self.get_page_number(soup.select("div[data-cy=no_result_container]")[0])
             results += self.get_products(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&sf=' + str(number) for number in range(2, page_number + 1)]
@@ -908,13 +908,13 @@ class GittigidiyorScraper(WebsiteScraper):
         soup = BeautifulSoup(content, "lxml")
         products = []
 
-        for product in soup.find_all("li", "srp-item-list"):
+        for product in soup.find_all("article", "product-card"):
             data = {}
             data['source'] = '[{}]'.format(self.source_name)
-            data['name'] = self.get_product_name(product.find("h3", "product-title"))
-            data['price'] = self.get_product_price(product.find("div", "product-price"))
-            data['old_price'] = self.get_product_old_price(product.find("div", "product-price"))
-            data['info'] = self.get_product_info(product.select("li.shippingFree, [class*='-badge-position']"))
+            data['name'] = self.get_product_name(product.find("h3"))
+            data['price'] = self.get_product_price(product.find("span", "buy-price"))
+            data['old_price'] = self.get_product_old_price(product.find("s", "market-price-text"))
+            data['info'] = self.get_product_info(product.select("section.product-features"))
             data['comment_count'] = None
             data['suitable_to_search'] = self.is_suitable_to_search(data['name'], search)
             products.append(data)
