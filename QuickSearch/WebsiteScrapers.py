@@ -854,7 +854,10 @@ class GittigidiyorScraper(WebsiteScraper):
         results = []
 
         if soup and self.is_product_list_page(soup):
-            page_number = self.get_page_number(soup.select("div[data-cy=no_result_container]")[0])
+            if soup.select("div[data-cy=no_result_container]"):
+                page_number = self.get_page_number(soup.select("div[data-cy=no_result_container]")[0])
+            else:
+                page_number = 0
             results += self.get_products(content, url['search'])
             if page_number > 1:
                 page_list = [url['url'] + '&sf=' + str(number) for number in range(2, page_number + 1)]
