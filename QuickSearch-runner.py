@@ -1,7 +1,7 @@
 from QuickSearch.QuickSearch import QuickSearch
 
 if __name__ == '__main__':
-    print("QuickSearch v0.9.8.1")
+    print("QuickSearch v0.9.8.2")
     print("Copyright (c) 2021 maysu1914.")
     print("")
     print("Check new versions of QuickSearch from https://github.com/maysu1914/QuickSearch")
