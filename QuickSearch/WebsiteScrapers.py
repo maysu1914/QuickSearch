@@ -543,19 +543,20 @@ class TrendyolScraper(WebsiteScraper):
     @staticmethod
     def get_categories():
         categories = {
-            'All': 'tum--urunler',
-            'Notebooks': 'laptop',
-            'Desktop PCs': 'masaustu-bilgisayar',
-            'Smartphones': 'akilli-cep-telefonu',
-            'Monitors': 'monitor',
-            'Digital Cameras': 'dijital-fotograf-makineleri',
-            'Shoes': 'ayakkabi'
+            'All': '',
+            'Notebooks': '103108',
+            'Desktop PCs': '103670',
+            'Smartphones': '109460',
+            'Monitors': '103668',
+            'Digital Cameras': '104042',
+            'Shoes': '104543,101421,1172,101429,1128,101426,1057,144727,101422,101428,101423,105794,1025,1037,142587'
         }
         return categories
 
     @staticmethod
     def create_url(search, category):
-        url = 'https://www.trendyol.com/{}?q={}&siralama=1'.format(category, search)
+        url = 'https://www.trendyol.com/sr?q=%(s)s&qt=%(s)s&st=%(s)s&lc=%(cat)s&sst=PRICE_BY_ASC' % {'cat': category,
+                                                                                                     's': search}
         return url
 
     def get_products(self, content, search):
