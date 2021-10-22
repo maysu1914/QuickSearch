@@ -184,7 +184,8 @@ class Scraper:
 
     def get_page_number(self, result):
         if result and isinstance(result, ResultSet):
-            page = int(result[-1].text.strip())
+            numbers = [max(map(int, re.findall('\d+', e.text))) for e in result if any(re.findall('\d+', e.text))]
+            page = max(numbers)
             return self.max_page if page > self.max_page else page
         elif result:
             numbers = tuple(map(int, re.findall('\d+', result.text)))
