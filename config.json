@@ -331,7 +331,7 @@
             "page_number": {
                 "selector": {
                     "type": "select",
-                    "args": ["li.a-disabled"],
+                    "args": ["ul.a-pagination > li > a"],
                     "kwargs": {}
                 },
                 "method": "pagination",
