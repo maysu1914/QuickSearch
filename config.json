@@ -1,0 +1,648 @@
+{
+    "name": "QuickSearch",
+    "version": "v0.9.9.0",
+    "author": "maysu1914",
+    "github": "https://github.com/maysu1914/QuickSearch",
+    "sources": [{
+            "name": "Trendyol",
+            "base_url": "https://www.trendyol.com/",
+            "query": {
+                "path": "/sr?q=%(search)s&qt=%(search)s&st=%(search)s&lc=%(category)s&sst=PRICE_BY_ASC",
+                "space": " "
+            },
+            "pagination_query": "pi=%d",
+            "categories": {
+                "All": "",
+                "Notebooks": "103108",
+                "Desktop PCs": "103670",
+                "Smartphones": "109460",
+                "Monitors": "103668",
+                "Digital Cameras": "104042",
+                "Shoes": "104543,101421,1172,101429,1128,101426,1057,144727,101422,101428,101423,105794,1025,1037,142587"
+            },
+            "valid_page": {
+                "selector": {
+                    "type": "select_one",
+                    "args": ["div.dscrptn"],
+                    "kwargs": {}
+                }
+            },
+            "page_number": {
+                "selector": {
+                    "type": "select_one",
+                    "args": ["div.dscrptn"],
+                    "kwargs": {}
+                },
+                "method": "total",
+                "products_per_page": 24
+            },
+            "product": {
+                "selector": {
+                    "type": "find_all",
+                    "args": ["div", "p-card-wrppr"],
+                    "kwargs": {}
+                }
+            },
+            "attributes": {
+                "name": {
+                    "function": "get_product_name",
+                    "selector": {
+                        "type": "select",
+                        "args": [".prdct-desc-cntnr-ttl, .prdct-desc-cntnr-name"],
+                        "kwargs": {}
+                    }
+                },
+                "price": {
+                    "function": "get_product_price",
+                    "selector": {
+                        "type": "select",
+                        "args": ["div.prc-box-dscntd, div.prc-box-sllng"],
+                        "kwargs": {}
+                    }
+                },
+                "info": {
+                    "function": "get_product_info",
+                    "selector": {
+                        "type": "select",
+                        "args": ["div.stmp.fc"],
+                        "kwargs": {}
+                    }
+                },
+                "comment_count": {
+                    "function": "get_product_comment_count",
+                    "selector": {
+                        "type": "select_one",
+                        "args": ["span.ratingCount"],
+                        "kwargs": {}
+                    }
+                }
+            }
+        },
+        {
+            "name": "VatanBilgisayar",
+            "base_url": "https://www.vatanbilgisayar.com/",
+            "query": {
+                "path": "/arama/%(search)s/%(category)s?srt=UP",
+                "space": " "
+            },
+            "pagination_query": "page=%d",
+            "categories": {
+                "All": "",
+                "Notebooks": "notebook/",
+                "Desktop PCs": "masaustu-bilgisayarlar/",
+                "Smartphones": "cep-telefonu-modelleri/",
+                "Monitors": "monitor/",
+                "Digital Cameras": "fotograf-makinesi/"
+            },
+            "valid_page": {
+                "selector": {
+                    "type": "select_one",
+                    "args": ["div.product-list--list-page"],
+                    "kwargs": {}
+                }
+            },
+            "page_number": {
+                "selector": {
+                    "type": "select_one",
+                    "args": ["ul.pagination"],
+                    "kwargs": {}
+                },
+                "method": "total",
+                "products_per_page": 16
+            },
+            "product": {
+                "selector": {
+                    "type": "find_all",
+                    "args": ["div", "product-list--list-page"],
+                    "kwargs": {}
+                }
+            },
+            "attributes": {
+                "name": {
+                    "function": "get_product_name",
+                    "selector": {
+                        "type": "find",
+                        "args": ["div", "product-list__product-name"],
+                        "kwargs": {}
+                    }
+                },
+                "price": {
+                    "function": "get_product_price",
+                    "selector": {
+                        "type": "find",
+                        "args": ["span", "product-list__price"],
+                        "kwargs": {}
+                    }
+                },
+                "info": {
+                    "function": "get_product_info",
+                    "selector": {
+                        "type": "select",
+                        "args": ["span.wrapper-condition__text"],
+                        "kwargs": {}
+                    }
+                },
+                "comment_count": {
+                    "function": "get_product_comment_count",
+                    "selector": {
+                        "type": "find",
+                        "args": ["a", "comment-count"],
+                        "kwargs": {}
+                    }
+                }
+            }
+        },
+        {
+            "name": "n11",
+            "base_url": "https://www.n11.com/",
+            "query": {
+                "path": "/%(category)s?q=%(search)s&srt=PRICE_LOW",
+                "space": " "
+            },
+            "pagination_query": "pg=%d",
+            "categories": {
+                "All": "arama",
+                "Notebooks": "bilgisayar/dizustu-bilgisayar",
+                "Desktop PCs": "bilgisayar/masaustu-bilgisayar",
+                "Smartphones": "telefon-ve-aksesuarlari/cep-telefonu",
+                "Monitors": "bilgisayar/cevre-birimleri/monitor-ve-ekran",
+                "Digital Cameras": "fotograf-ve-kamera/fotograf-makinesi",
+                "Shoes": "ayakkabi-ve-canta"
+            },
+            "valid_page": {
+                "selector": {
+                    "type": "select_one",
+                    "args": ["#view > ul > li"],
+                    "kwargs": {}
+                }
+            },
+            "page_number": {
+                "selector": {
+                    "type": "select_one",
+                    "args": [".resultText > strong"],
+                    "kwargs": {}
+                },
+                "method": "total",
+                "products_per_page": 28
+            },
+            "product": {
+                "selector": {
+                    "type": "select",
+                    "args": ["#view > ul > li"],
+                    "kwargs": {}
+                }
+            },
+            "attributes": {
+                "name": {
+                    "function": "get_product_name",
+                    "selector": {
+                        "type": "find",
+                        "args": ["h3", "productName"],
+                        "kwargs": {}
+                    }
+                },
+                "price": {
+                    "function": "get_product_price",
+                    "selector": {
+                        "type": "find",
+                        "args": ["a", "newPrice"],
+                        "kwargs": {}
+                    }
+                },
+                "info": {
+                    "function": "get_product_info",
+                    "selector": {
+                        "type": "find",
+                        "args": ["span", "freeShipping"],
+                        "kwargs": {}
+                    }
+                },
+                "comment_count": {
+                    "function": "get_product_comment_count",
+                    "selector": {
+                        "type": "find",
+                        "args": ["span", "ratingText"],
+                        "kwargs": {}
+                    }
+                }
+            }
+        },
+        {
+            "name": "HepsiBurada",
+            "base_url": "https://www.hepsiburada.com/",
+            "query": {
+                "path": "/ara?q=%(search)s%(category)s&siralama=artanfiyat",
+                "space": " "
+            },
+            "pagination_query": "sayfa=%d",
+            "categories": {
+                "All": "",
+                "Notebooks": "&kategori=2147483646_3000500_98",
+                "Desktop PCs": "&kategori=2147483646_3000500_34",
+                "Smartphones": "&kategori=2147483642_371965",
+                "Monitors": "&kategori=2147483646_3013120_57",
+                "Digital Cameras": "&kategori=2147483606_60002083",
+                "Shoes": "&kategori=2147483636"
+            },
+            "valid_page": {
+                "selector": {
+                    "type": "select_one",
+                    "args": ["div.box.product"],
+                    "kwargs": {}
+                }
+            },
+            "page_number": {
+                "selector": {
+                    "type": "select",
+                    "args": ["#pagination > ul > li"],
+                    "kwargs": {}
+                },
+                "method": "pagination",
+                "products_per_page": null
+            },
+            "product": {
+                "selector": {
+                    "type": "select",
+                    "args": ["div.box.product"],
+                    "kwargs": {}
+                }
+            },
+            "attributes": {
+                "name": {
+                    "function": "get_product_name",
+                    "selector": {
+                        "type": "find",
+                        "args": ["h3", "product-title"],
+                        "kwargs": {}
+                    }
+                },
+                "price": {
+                    "function": "get_product_price",
+                    "selector": {
+                        "type": "select",
+                        "args": ["div.price-value, span.product-price"],
+                        "kwargs": {}
+                    }
+                },
+                "info": {
+                    "function": "get_product_info",
+                    "selector": {
+                        "type": "select",
+                        "args": ["div.shipping-status, .dod-badge"],
+                        "kwargs": {}
+                    }
+                },
+                "comment_count": {
+                    "function": "get_product_comment_count",
+                    "selector": {
+                        "type": "find",
+                        "args": ["span", "number-of-reviews"],
+                        "kwargs": {}
+                    }
+                }
+            }
+        },
+        {
+            "name": "AmazonTR",
+            "base_url": "https://www.amazon.com.tr/",
+            "query": {
+                "path": "/s?k=%(search)s%(category)s&s=price-asc-rank",
+                "space": " "
+            },
+            "pagination_query": "page=%d",
+            "categories": {
+                "All": "",
+                "Notebooks": "&i=computers&rh=n%3A12466439031%2Cn%3A12601898031",
+                "Desktop PCs": "&i=computers&rh=n%3A12601903031",
+                "Smartphones": "&i=electronics&rh=n%3A12466496031%2Cn%3A13709907031",
+                "Monitors": "&i=computers&rh=n%3A12466439031%2Cn%3A12601904031",
+                "Digital Cameras": "&i=electronics&rh=n%3A12466496031%2Cn%3A13709883031%2Cn%3A13709933031",
+                "Shoes": "&i=fashion&rh=n%3A12466553031"
+            },
+            "valid_page": {
+                "selector": {
+                    "type": "find",
+                    "args": ["div", {
+                        "data-component-type": "s-search-result"
+                    }],
+                    "kwargs": {}
+                }
+            },
+            "page_number": {
+                "selector": {
+                    "type": "select",
+                    "args": ["li.a-disabled"],
+                    "kwargs": {}
+                },
+                "method": "pagination",
+                "products_per_page": null
+            },
+            "product": {
+                "selector": {
+                    "type": "find_all",
+                    "args": ["div", {
+                        "data-component-type": "s-search-result"
+                    }],
+                    "kwargs": {}
+                }
+            },
+            "attributes": {
+                "name": {
+                    "function": "get_product_name",
+                    "selector": {
+                        "type": "find",
+                        "args": ["a"],
+                        "kwargs": {
+                            "class_": "a-link-normal a-text-normal"
+                        }
+                    }
+                },
+                "price": {
+                    "function": "get_product_price",
+                    "selector": {
+                        "type": "find",
+                        "args": ["span", "a-price-whole"],
+                        "kwargs": {}
+                    }
+                },
+                "info": {
+                    "function": "get_product_info",
+                    "selector": {
+                        "type": "select_one",
+                        "args": ["span[aria-label='Kargo BEDAVA']"],
+                        "kwargs": {}
+                    }
+                },
+                "comment_count": {
+                    "function": "get_product_comment_count",
+                    "selector": {
+                        "type": "select_one",
+                        "args": ["span.a-size-base"],
+                        "kwargs": {}
+                    }
+                }
+            }
+        },
+        {
+            "name": "Teknosa",
+            "base_url": "https://www.teknosa.com/",
+            "query": {
+                "path": "/arama/?s=%(search)s%(category)s&sort=price-asc",
+                "space": " "
+            },
+            "pagination_query": "page=%d",
+            "categories": {
+                "All": ":relevance",
+                "Notebooks": ":relevance:category:1020101",
+                "Desktop PCs": ":relevance:category:10201",
+                "Smartphones": ":relevance:category:100001",
+                "Monitors": ":relevance:category:1020301",
+                "Digital Cameras": ":relevance:category:10701"
+            },
+            "valid_page": {
+                "selector": {
+                    "type": "find",
+                    "args": ["div", "product-item"],
+                    "kwargs": {}
+                }
+            },
+            "page_number": {
+                "selector": {
+                    "type": "select",
+                    "args": ["ul.pagination > li > a > em"],
+                    "kwargs": {}
+                },
+                "method": "pagination",
+                "products_per_page": null
+            },
+            "product": {
+                "selector": {
+                    "type": "find_all",
+                    "args": ["div", "product-item"],
+                    "kwargs": {}
+                }
+            },
+            "attributes": {
+                "name": {
+                    "function": "get_product_name",
+                    "selector": {
+                        "type": "find",
+                        "args": ["div", "product-name"],
+                        "kwargs": {}
+                    }
+                },
+                "price": {
+                    "function": "get_product_price",
+                    "selector": {
+                        "type": "find",
+                        "args": ["span", "new-price"],
+                        "kwargs": {}
+                    }
+                },
+                "info": {
+                    "function": "get_product_info",
+                    "selector": {
+                        "type": "select",
+                        "args": ["div.product-list-badge-item, div.only-in-store-badge"],
+                        "kwargs": {}
+                    }
+                }
+            }
+        },
+        {
+            "name": "GittiGidiyor",
+            "base_url": "https://www.gittigidiyor.com/",
+            "query": {
+                "path": "/%(category)s?k=%(search)s&sra=hpa",
+                "space": " "
+            },
+            "pagination_query": "sf=%d",
+            "categories": {
+                "All": "arama/",
+                "Notebooks": "dizustu-laptop-notebook-bilgisayar",
+                "Desktop PCs": "masaustu-desktop-bilgisayar",
+                "Smartphones": "cep-telefonu",
+                "Monitors": "cevre-birimleri/monitor",
+                "Digital Cameras": "dijital-fotograf-makinesi",
+                "Shoes": "ayakkabi"
+            },
+            "valid_page": {
+                "selector": {
+                    "type": "find",
+                    "args": ["article", "product-card"],
+                    "kwargs": {}
+                }
+            },
+            "page_number": {
+                "selector": {
+                    "type": "select_one",
+                    "args": ["div[data-cy=no_result_container]"],
+                    "kwargs": {}
+                },
+                "method": "total",
+                "products_per_page": 48
+            },
+            "product": {
+                "selector": {
+                    "type": "find_all",
+                    "args": ["article", "product-card"],
+                    "kwargs": {}
+                }
+            },
+            "attributes": {
+                "name": {
+                    "function": "get_product_name",
+                    "selector": {
+                        "type": "find",
+                        "args": ["h3"],
+                        "kwargs": {}
+                    }
+                },
+                "price": {
+                    "function": "get_product_price",
+                    "selector": {
+                        "type": "find",
+                        "args": ["span", "buy-price"],
+                        "kwargs": {}
+                    }
+                },
+                "info": {
+                    "function": "get_product_info",
+                    "selector": {
+                        "type": "select",
+                        "args": ["section.product-features"],
+                        "kwargs": {}
+                    }
+                }
+            }
+        },
+        {
+            "name": "MediaMarktTR",
+            "base_url": "https://www.mediamarkt.com.tr/",
+            "query": {
+                "path": "/tr/search.html?query=%(search)s%(category)s&searchProfile=&sort=price&sourceRef=INVALID",
+                "space": "%2B"
+            },
+            "pagination_query": "sf=%d",
+            "categories": {
+                "All": "&channel=mmtrtr",
+                "Notebooks": "&searchParams=/Search.ff?query%3D{search}%26filteravailability%3D1%26filterCategoriesROOT%3DBilgisayar%25C2%25A7MediaTRtrc504925%26filterCategoriesROOT%252FBilgisayar%25C2%25A7MediaTRtrc504925%3DLaptop%25C2%25A7MediaTRtrc504926%26channel%3Dmmtrtr",
+                "Desktop PCs": "&searchParams=/Search.ff?query%3D{search}%26filteravailability%3D1%26filterCategoriesROOT%3DBilgisayar%25C2%25A7MediaTRtrc504925%26filterCategoriesROOT%252FBilgisayar%25C2%25A7MediaTRtrc504925%3DMasa%25C3%25BCst%25C3%25BC%2BBilgisayarlar%25C2%25A7MediaTRtrc504957%26channel%3Dmmtrtr",
+                "Smartphones": "&searchParams=/Search.ff?query%3D{search}%26filteravailability%3D1%26filterCategoriesROOT%3DTelefon%25C2%25A7MediaTRtrc465595%26channel%3Dmmtrtr",
+                "Monitors": "&searchParams=/Search.ff?query%3D{search}%26filteravailability%3D1%26filterCategoriesROOT%3DBilgisayar%25C2%25A7MediaTRtrc504925%26filterCategoriesROOT%252FBilgisayar%25C2%25A7MediaTRtrc504925%3D%25C3%2587evre%2BBirimleri%25C2%25A7MediaTRtrc798009%26channel%3Dmmtrtr",
+                "Digital Cameras": "&searchParams=/Search.ff?query%3D{search}%26filteravailability%3D1%26filterCategoriesROOT%3DFoto%2B%2526%2BKamera%25C2%25A7MediaTRtrc465682%26filterCategoriesROOT%252FFoto%2B%2526%2BKamera%25C2%25A7MediaTRtrc465682%3DFoto%25C4%259Fraf%2BMakineleri%25C2%25A7MediaTRtrc465683%26channel%3Dmmtrtr"
+            },
+            "valid_page": {
+                "selector": {
+                    "type": "find",
+                    "args": ["ul", "products-list"],
+                    "kwargs": {}
+                }
+            },
+            "page_number": {
+                "selector": {
+                    "type": "select",
+                    "args": ["ul.pagination > li:not(.pagination-next)"],
+                    "kwargs": {}
+                },
+                "method": "pagination",
+                "products_per_page": null
+            },
+            "product": {
+                "selector": {
+                    "type": "select",
+                    "args": ["ul.products-list > li:not([class])"],
+                    "kwargs": {}
+                }
+            },
+            "attributes": {
+                "name": {
+                    "function": "get_product_name",
+                    "selector": {
+                        "type": "find",
+                        "args": ["h2"],
+                        "kwargs": {}
+                    }
+                },
+                "price": {
+                    "function": "get_product_price",
+                    "selector": {
+                        "type": "select",
+                        "args": ["div.price.small"],
+                        "kwargs": {}
+                    }
+                },
+                "comment_count": {
+                    "function": "get_product_comment_count",
+                    "selector": {
+                        "type": "select_one",
+                        "args": ["span.see-reviews"],
+                        "kwargs": {}
+                    }
+                }
+            }
+        },
+        {
+            "name": "FLO",
+            "base_url": "https://www.flo.com.tr/",
+            "query": {
+                "path": "/search?q=%(search)s%(category)s&sort=filter_price:asc",
+                "space": " "
+            },
+            "pagination_query": "page=%d",
+            "categories": {
+                "All": "",
+                "Shoes": "&category_id=18"
+            },
+            "valid_page": {
+                "selector": {
+                    "type": "find",
+                    "args": ["div", "js-product-vertical"],
+                    "kwargs": {}
+                }
+            },
+            "page_number": {
+                "selector": {
+                    "type": "select",
+                    "args": ["ul.pagination justify-content-center > li"],
+                    "kwargs": {}
+                },
+                "method": "pagination",
+                "products_per_page": null
+            },
+            "product": {
+                "selector": {
+                    "type": "find_all",
+                    "args": ["div", "js-product-vertical"],
+                    "kwargs": {}
+                }
+            },
+            "attributes": {
+                "name": {
+                    "function": "get_product_name",
+                    "selector": {
+                        "type": "select",
+                        "args": [".product__brand, .product__name"],
+                        "kwargs": {}
+                    }
+                },
+                "price": {
+                    "function": "get_product_price",
+                    "selector": {
+                        "type": "select",
+                        "args": ["div.product__prices-third, span.product__prices-sale"],
+                        "kwargs": {}
+                    }
+                },
+                "info": {
+                    "function": "get_product_info",
+                    "selector": {
+                        "type": "select",
+                        "args": [".product__badges-item"],
+                        "kwargs": {}
+                    }
+                }
+            }
+        }
+    ]
+}

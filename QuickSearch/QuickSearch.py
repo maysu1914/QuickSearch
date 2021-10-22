@@ -1,15 +1,13 @@
 from urllib.parse import urlparse
 
-from .WebsiteScrapers import *
+from .scraper import *
 
 
 class QuickSearch:
     max_page = 3
 
-    def __init__(self, max_page=max_page):
-        self.sources = (
-            VatanbilgisayarScraper, N11Scraper, HepsiburadaScraper, TrendyolScraper, AmazonScraper, TeknosaScraper,
-            GittigidiyorScraper, MediamarktScraper, FloScraper)
+    def __init__(self, config, max_page=max_page):
+        self.config = config
         self.categories = self.get_categories()
         self.max_page = max_page
         self.executor = ThreadPoolExecutor()
@@ -29,8 +27,8 @@ class QuickSearch:
 
     def get_categories(self):
         categories = []
-        for source in self.sources:
-            for category in source.get_categories():
+        for source in self.config.get("sources"):
+            for category in source.get("categories"):
                 if category not in categories:
                     categories.append(category)
         return categories
@@ -92,8 +90,8 @@ class QuickSearch:
         return max_page_input if max_page_input else self.max_page
 
     def get_source_by_url(self):
-        for source in self.sources:
-            if urlparse(source.base_url).hostname == self.url_input.hostname:
+        for source in self.config.get("sources"):
+            if urlparse(source.get("base_url")).hostname == self.url_input.hostname:
                 return source
         else:
             return None
@@ -117,13 +115,13 @@ class QuickSearch:
         source_selections = []
         print("\nSelect the sources you want to search:")
 
-        for source in self.sources:
-            if self.category_selection in source.get_categories():
+        for source in self.config.get("sources"):
+            if self.category_selection in source.get("categories"):
                 self.sources_of_category.append(source)
 
         print(str(0) + '.', 'All')
         for index, source in enumerate(self.sources_of_category, start=1):
-            print(str(index) + '.', source.source_name)
+            print(str(index) + '.', source.get("name"))
 
         while not source_selections:
             try:
@@ -161,18 +159,18 @@ class QuickSearch:
         threads = []
 
         for source_selection in self.source_selections:
-            arguments = [self.category_selection]
-            keyword_arguments = {"max_page": self.max_page}
-            source_object = self.sources_of_category[source_selection]
-            thread = self.executor.submit(source_object(*arguments, **keyword_arguments).search, self.search_text)
+            args = (self.sources_of_category[source_selection],)
+            kwargs = {"max_page": self.max_page}
+            thread = self.executor.submit(Scraper(*args, **kwargs).search, self.category_selection, self.search_text)
             threads.append(thread)
 
         for thread in threads:
             self.raw_results += thread.result()
 
     def get_results_from_url(self):
-        keyword_arguments = {"max_page": self.max_page}
-        self.raw_results += self.url_source(**keyword_arguments).get_results(
+        args = (self.url_source,)
+        kwargs = {"max_page": self.max_page}
+        self.raw_results += Scraper(*args, **kwargs).get_results(
             {'url': self.url_input.geturl(), 'search': self.search_text})
 
     def set_results(self):
@@ -185,7 +183,7 @@ class QuickSearch:
         seen = set()  # to skip same products from different results
 
         for result in self.raw_results:
-            r = (result['source'], result['name'], result['price'], result['info'])
+            r = (result['source'], result['name'], result['price'])
             # check above data only for duplicate check
             if r not in seen:
                 seen.add(r)
@@ -193,16 +191,16 @@ class QuickSearch:
 
         for result in unique_results:
             if self.search_type_selection == 0:
-                if result['suitable_to_search']:
+                if result.get('suitable_to_search'):
                     self.correct_results.append(result)
                 else:
                     self.near_results.append(result)
             else:
                 data = (
                     result['name'],
-                    result['info'] if result['info'] else ''
+                    result['info'] if result.get('info') else ''
                 )
-                if any(WebsiteScraper.is_suitable_to_search(' '.join(data).lower(), search) for search in
+                if any(Scraper.is_suitable_to_search(' '.join(data).lower(), search) for search in
                        self.search_text.replace('[', "").replace(']', "").split(',')):
                     self.correct_results.append(result)
                 else:
@@ -214,9 +212,9 @@ class QuickSearch:
             data = (
                 product['source'],
                 product['name'],
-                str(product['price']) + ' TL' if product['price'] else 'Fiyat Yok',
-                product['info'] if product['info'] else '',
-                product['comment_count'] if product['comment_count'] else ''
+                str(product['price']) + ' TL' if product.get('price') else 'Fiyat Yok',
+                product['info'] if product.get('info') else '',
+                product['comment_count'] if product.get('comment_count') else ''
             )
             print(' '.join(data))
 
@@ -225,9 +223,9 @@ class QuickSearch:
             data = (
                 product['source'],
                 product['name'],
-                str(product['price']) + ' TL' if product['price'] else 'Fiyat Yok',
-                product['info'] if product['info'] else '',
-                product['comment_count'] if product['comment_count'] else ''
+                str(product['price']) + ' TL' if product.get('price') else 'Fiyat Yok',
+                product['info'] if product.get('info') else '',
+                product['comment_count'] if product.get('comment_count') else ''
             )
             print(' '.join(data))
 
