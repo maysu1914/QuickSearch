@@ -1,6 +1,6 @@
 {
     "name": "QuickSearch",
-    "version": "v0.9.9.3",
+    "version": "v0.9.9.4",
     "author": "maysu1914",
     "github": "https://github.com/maysu1914/QuickSearch",
     "sources": [{
@@ -40,44 +40,59 @@
                 "products_per_page": 24
             },
             "product": {
-                "selector": {
-                    "type": "find_all",
-                    "args": ["div", "p-card-wrppr"],
-                    "kwargs": {}
-                }
+                "listing": {
+                    "selector": {
+                        "type": "find_all",
+                        "args": ["div", "p-card-wrppr"],
+                        "kwargs": {}
+                    }
+                },
+                "detail": {}
             },
             "attributes": {
                 "name": {
-                    "function": "get_product_name",
-                    "selector": {
-                        "type": "select",
-                        "args": [".prdct-desc-cntnr-ttl, .prdct-desc-cntnr-name"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_name",
+                        "selector": {
+                            "type": "select",
+                            "args": [".prdct-desc-cntnr-ttl, .prdct-desc-cntnr-name"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "price": {
-                    "function": "get_product_price",
-                    "selector": {
-                        "type": "select",
-                        "args": ["div.prc-box-dscntd, div.prc-box-sllng"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_price",
+                        "selector": {
+                            "type": "select",
+                            "args": ["div.prc-box-dscntd, div.prc-box-sllng"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "info": {
-                    "function": "get_product_info",
-                    "selector": {
-                        "type": "select",
-                        "args": ["div.stmp.fc"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_info",
+                        "selector": {
+                            "type": "select",
+                            "args": ["div.stmp.fc"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "comment_count": {
-                    "function": "get_product_comment_count",
-                    "selector": {
-                        "type": "select_one",
-                        "args": ["span.ratingCount"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_comment_count",
+                        "selector": {
+                            "type": "select_one",
+                            "args": ["span.ratingCount"],
+                            "kwargs": {}
+                        }
                     }
+
                 }
             }
         },
@@ -117,44 +132,59 @@
                 "products_per_page": 16
             },
             "product": {
-                "selector": {
-                    "type": "find_all",
-                    "args": ["div", "product-list--list-page"],
-                    "kwargs": {}
-                }
+                "listing": {
+                    "selector": {
+                        "type": "find_all",
+                        "args": ["div", "product-list--list-page"],
+                        "kwargs": {}
+                    }
+                },
+                "detail": {}
             },
             "attributes": {
                 "name": {
-                    "function": "get_product_name",
-                    "selector": {
-                        "type": "find",
-                        "args": ["div", "product-list__product-name"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_name",
+                        "selector": {
+                            "type": "find",
+                            "args": ["div", "product-list__product-name"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "price": {
-                    "function": "get_product_price",
-                    "selector": {
-                        "type": "find",
-                        "args": ["span", "product-list__price"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_price",
+                        "selector": {
+                            "type": "find",
+                            "args": ["span", "product-list__price"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "info": {
-                    "function": "get_product_info",
-                    "selector": {
-                        "type": "select",
-                        "args": ["span.wrapper-condition__text"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_info",
+                        "selector": {
+                            "type": "select",
+                            "args": ["span.wrapper-condition__text"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "comment_count": {
-                    "function": "get_product_comment_count",
-                    "selector": {
-                        "type": "find",
-                        "args": ["a", "comment-count"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_comment_count",
+                        "selector": {
+                            "type": "find",
+                            "args": ["a", "comment-count"],
+                            "kwargs": {}
+                        }
                     }
+
                 }
             }
         },
@@ -195,44 +225,59 @@
                 "products_per_page": 28
             },
             "product": {
-                "selector": {
-                    "type": "select",
-                    "args": ["#view > ul > li"],
-                    "kwargs": {}
-                }
+                "listing": {
+                    "selector": {
+                        "type": "select",
+                        "args": ["#view > ul > li"],
+                        "kwargs": {}
+                    }
+                },
+                "detail": {}
             },
             "attributes": {
                 "name": {
-                    "function": "get_product_name",
-                    "selector": {
-                        "type": "find",
-                        "args": ["h3", "productName"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_name",
+                        "selector": {
+                            "type": "find",
+                            "args": ["h3", "productName"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "price": {
-                    "function": "get_product_price",
-                    "selector": {
-                        "type": "find",
-                        "args": ["a", "newPrice"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_price",
+                        "selector": {
+                            "type": "find",
+                            "args": ["a", "newPrice"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "info": {
-                    "function": "get_product_info",
-                    "selector": {
-                        "type": "find",
-                        "args": ["span", "freeShipping"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_info",
+                        "selector": {
+                            "type": "find",
+                            "args": ["span", "freeShipping"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "comment_count": {
-                    "function": "get_product_comment_count",
-                    "selector": {
-                        "type": "find",
-                        "args": ["span", "ratingText"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_comment_count",
+                        "selector": {
+                            "type": "find",
+                            "args": ["span", "ratingText"],
+                            "kwargs": {}
+                        }
                     }
+
                 }
             }
         },
@@ -273,44 +318,59 @@
                 "products_per_page": null
             },
             "product": {
-                "selector": {
-                    "type": "select",
-                    "args": ["div.box.product"],
-                    "kwargs": {}
-                }
+                "listing": {
+                    "selector": {
+                        "type": "select",
+                        "args": ["div.box.product"],
+                        "kwargs": {}
+                    }
+                },
+                "detail": {}
             },
             "attributes": {
                 "name": {
-                    "function": "get_product_name",
-                    "selector": {
-                        "type": "find",
-                        "args": ["h3", "product-title"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_name",
+                        "selector": {
+                            "type": "find",
+                            "args": ["h3", "product-title"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "price": {
-                    "function": "get_product_price",
-                    "selector": {
-                        "type": "select",
-                        "args": ["div.price-value, span.product-price"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_price",
+                        "selector": {
+                            "type": "select",
+                            "args": ["div.price-value, span.product-price"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "info": {
-                    "function": "get_product_info",
-                    "selector": {
-                        "type": "select",
-                        "args": ["div.shipping-status, .dod-badge"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_info",
+                        "selector": {
+                            "type": "select",
+                            "args": ["div.shipping-status, .dod-badge"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "comment_count": {
-                    "function": "get_product_comment_count",
-                    "selector": {
-                        "type": "find",
-                        "args": ["span", "number-of-reviews"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_comment_count",
+                        "selector": {
+                            "type": "find",
+                            "args": ["span", "number-of-reviews"],
+                            "kwargs": {}
+                        }
                     }
+
                 }
             }
         },
@@ -353,48 +413,63 @@
                 "products_per_page": null
             },
             "product": {
-                "selector": {
-                    "type": "find_all",
-                    "args": ["div", {
-                        "data-component-type": "s-search-result"
-                    }],
-                    "kwargs": {}
-                }
+                "listing": {
+                    "selector": {
+                        "type": "find_all",
+                        "args": ["div", {
+                            "data-component-type": "s-search-result"
+                        }],
+                        "kwargs": {}
+                    }
+                },
+                "detail": {}
             },
             "attributes": {
                 "name": {
-                    "function": "get_product_name",
-                    "selector": {
-                        "type": "find",
-                        "args": ["a"],
-                        "kwargs": {
-                            "class_": "a-link-normal a-text-normal"
+                    "listing": {
+                        "function": "get_product_name",
+                        "selector": {
+                            "type": "find",
+                            "args": ["a"],
+                            "kwargs": {
+                                "class_": "a-link-normal a-text-normal"
+                            }
                         }
                     }
+
                 },
                 "price": {
-                    "function": "get_product_price",
-                    "selector": {
-                        "type": "find",
-                        "args": ["span", "a-price-whole"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_price",
+                        "selector": {
+                            "type": "find",
+                            "args": ["span", "a-price-whole"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "info": {
-                    "function": "get_product_info",
-                    "selector": {
-                        "type": "select_one",
-                        "args": ["span[aria-label='Kargo BEDAVA']"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_info",
+                        "selector": {
+                            "type": "select_one",
+                            "args": ["span[aria-label='Kargo BEDAVA']"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "comment_count": {
-                    "function": "get_product_comment_count",
-                    "selector": {
-                        "type": "select_one",
-                        "args": ["span.a-size-base"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_comment_count",
+                        "selector": {
+                            "type": "select_one",
+                            "args": ["span.a-size-base"],
+                            "kwargs": {}
+                        }
                     }
+
                 }
             }
         },
@@ -434,36 +509,48 @@
                 "products_per_page": null
             },
             "product": {
-                "selector": {
-                    "type": "find_all",
-                    "args": ["div", "product-item"],
-                    "kwargs": {}
-                }
+                "listing": {
+                    "selector": {
+                        "type": "find_all",
+                        "args": ["div", "product-item"],
+                        "kwargs": {}
+                    }
+                },
+                "detail": {}
             },
             "attributes": {
                 "name": {
-                    "function": "get_product_name",
-                    "selector": {
-                        "type": "find",
-                        "args": ["div", "product-name"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_name",
+                        "selector": {
+                            "type": "find",
+                            "args": ["div", "product-name"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "price": {
-                    "function": "get_product_price",
-                    "selector": {
-                        "type": "find",
-                        "args": ["span", "new-price"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_price",
+                        "selector": {
+                            "type": "find",
+                            "args": ["span", "new-price"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "info": {
-                    "function": "get_product_info",
-                    "selector": {
-                        "type": "select",
-                        "args": ["div.product-list-badge-item, div.only-in-store-badge"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_info",
+                        "selector": {
+                            "type": "select",
+                            "args": ["div.product-list-badge-item, div.only-in-store-badge"],
+                            "kwargs": {}
+                        }
                     }
+
                 }
             }
         },
@@ -504,36 +591,48 @@
                 "products_per_page": 48
             },
             "product": {
-                "selector": {
-                    "type": "find_all",
-                    "args": ["article", "product-card"],
-                    "kwargs": {}
-                }
+                "listing": {
+                    "selector": {
+                        "type": "find_all",
+                        "args": ["article", "product-card"],
+                        "kwargs": {}
+                    }
+                },
+                "detail": {}
             },
             "attributes": {
                 "name": {
-                    "function": "get_product_name",
-                    "selector": {
-                        "type": "find",
-                        "args": ["h3"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_name",
+                        "selector": {
+                            "type": "find",
+                            "args": ["h3"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "price": {
-                    "function": "get_product_price",
-                    "selector": {
-                        "type": "find",
-                        "args": ["span", "buy-price"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_price",
+                        "selector": {
+                            "type": "find",
+                            "args": ["span", "buy-price"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "info": {
-                    "function": "get_product_info",
-                    "selector": {
-                        "type": "select",
-                        "args": ["section.product-features"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_info",
+                        "selector": {
+                            "type": "select",
+                            "args": ["section.product-features"],
+                            "kwargs": {}
+                        }
                     }
+
                 }
             }
         },
@@ -573,36 +672,48 @@
                 "products_per_page": null
             },
             "product": {
-                "selector": {
-                    "type": "select",
-                    "args": ["ul.products-list > li:not([class])"],
-                    "kwargs": {}
-                }
+                "listing": {
+                    "selector": {
+                        "type": "select",
+                        "args": ["ul.products-list > li:not([class])"],
+                        "kwargs": {}
+                    }
+                },
+                "detail": {}
             },
             "attributes": {
                 "name": {
-                    "function": "get_product_name",
-                    "selector": {
-                        "type": "find",
-                        "args": ["h2"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_name",
+                        "selector": {
+                            "type": "find",
+                            "args": ["h2"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "price": {
-                    "function": "get_product_price",
-                    "selector": {
-                        "type": "select",
-                        "args": ["div.price.small"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_price",
+                        "selector": {
+                            "type": "select",
+                            "args": ["div.price.small"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "comment_count": {
-                    "function": "get_product_comment_count",
-                    "selector": {
-                        "type": "select_one",
-                        "args": ["span.see-reviews"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_comment_count",
+                        "selector": {
+                            "type": "select_one",
+                            "args": ["span.see-reviews"],
+                            "kwargs": {}
+                        }
                     }
+
                 }
             }
         },
@@ -638,36 +749,48 @@
                 "products_per_page": null
             },
             "product": {
-                "selector": {
-                    "type": "find_all",
-                    "args": ["div", "js-product-vertical"],
-                    "kwargs": {}
-                }
+                "listing": {
+                    "selector": {
+                        "type": "find_all",
+                        "args": ["div", "js-product-vertical"],
+                        "kwargs": {}
+                    }
+                },
+                "detail": {}
             },
             "attributes": {
                 "name": {
-                    "function": "get_product_name",
-                    "selector": {
-                        "type": "select",
-                        "args": [".product__brand, .product__name"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_name",
+                        "selector": {
+                            "type": "select",
+                            "args": [".product__brand, .product__name"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "price": {
-                    "function": "get_product_price",
-                    "selector": {
-                        "type": "select",
-                        "args": ["div.product__prices-third, span.product__prices-sale"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_price",
+                        "selector": {
+                            "type": "select",
+                            "args": ["div.product__prices-third, span.product__prices-sale"],
+                            "kwargs": {}
+                        }
                     }
+
                 },
                 "info": {
-                    "function": "get_product_info",
-                    "selector": {
-                        "type": "select",
-                        "args": [".product__badges-item"],
-                        "kwargs": {}
+                    "listing": {
+                        "function": "get_product_info",
+                        "selector": {
+                            "type": "select",
+                            "args": [".product__badges-item"],
+                            "kwargs": {}
+                        }
                     }
+
                 }
             }
         }

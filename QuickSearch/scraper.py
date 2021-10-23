@@ -167,15 +167,15 @@ class Scraper:
         content = self.get_page_content(url['url'])
         soup = BeautifulSoup(content, "lxml")
         results = []
-            results += self.get_products(content, url['search'])
         if soup and self.bs_select(soup, self.source, "validations.is_listing_page"):
             page_number = self.get_page_number(self.bs_select(soup, self.source, "page_number"))
+            results += self.get_products(content, url['search'], "listing")
             if page_number > 1:
                 page_list = [self.prepare_url(url['url'], self.pagination_query % number) for number in
                              range(2, page_number + 1)]
                 contents = self.get_contents(page_list)
                 for content in contents:
-                    results += self.get_products(content, url['search'])
+                    results += self.get_products(content, url['search'], "listing")
             else:
                 pass
         else:
@@ -200,14 +200,16 @@ class Scraper:
         category = category.format(search=search) if self.is_formattable(category) else category
         return url % {'category': category, 'search': search}
 
-    def get_products(self, content, search):
+    def get_products(self, content, search, page_type):
         soup = BeautifulSoup(content, "lxml")
         products = []
 
-        for product in self.bs_select(soup, self.source, "product"):
+        for product in self.bs_select(soup, self.source, f"product.{page_type}"):
             data = {'source': '[{}]'.format(self.name)}
             for key, value in self.attributes.items():
-                data[key] = getattr(self, value["function"])(self.bs_select(product, self.attributes, key))
+                function = value[page_type]["function"]
+                key_path = f"{key}.{page_type}"
+                data[key] = getattr(self, function)(self.bs_select(product, self.attributes, key_path))
             data['suitable_to_search'] = self.is_suitable_to_search(data['name'], search)
             products.append(data)
         return products
