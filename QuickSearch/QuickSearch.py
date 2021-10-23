@@ -67,24 +67,25 @@ class QuickSearch:
             self.set_results()
             self.show_results()
         if self.search_type_selection == 1:
-            self.url_input = self.get_url_input()
+            self.url_input, self.url_source = self.get_url_input()
             self.search_text = self.get_search_input()
             self.max_page = self.get_max_page_input()
-            self.url_source = self.get_source_by_url()
             self.get_results_from_url()
             self.set_results()
             self.show_results()
 
     def get_url_input(self):
-        url_input = None
+        url_input = ""
+        url_source = ""
         # https://regexr.com/39nr7
         regex = r"[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)"
         print("\nWhich URL you want to search?")
 
-        while not url_input:
-            url_input = re.match(regex, input('The url: '))
+        while not (re.match(regex, url_input) and url_source):
+            url_input = input('The url: ')
+            url_source = self.get_source_of_url(urlparse(url_input))
 
-        return urlparse(url_input.string)
+        return url_input, url_source
 
     def get_max_page_input(self):
         try:
@@ -94,9 +95,9 @@ class QuickSearch:
 
         return max_page_input if max_page_input else self.max_page
 
-    def get_source_by_url(self):
+    def get_source_of_url(self, url):
         for source in self.config.get("sources"):
-            if urlparse(source.get("base_url")).hostname == self.url_input.hostname:
+            if urlparse(source.get("base_url")).hostname == getattr(url, "hostname", None):
                 return source
         else:
             return None
@@ -176,7 +177,7 @@ class QuickSearch:
         args = (self.url_source,)
         kwargs = {"max_page": self.max_page}
         self.raw_results += Scraper(*args, **kwargs).get_results(
-            {'url': self.url_input.geturl(), 'search': self.search_text})
+            {'url': self.url_input, 'search': self.search_text})
 
     def get_style(self, name, attribute):
         for source in self.config["sources"]:
