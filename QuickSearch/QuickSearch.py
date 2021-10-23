@@ -227,7 +227,7 @@ class QuickSearch:
         for product in self.correct_results:
             bg_color = literal_eval(self.get_style(product['source'], "bg_color"))
             fg_color = literal_eval(self.get_style(product['source'], "fg_color"))
-            print(background(color('[{}]'.format(product['source']), fg_color), bg_color), end=' ')
+            print(background(color(f" {product['source']} ", fg_color), bg_color), end=' ')
             data = (
                 product['name'],
                 str(product['price']) + ' TL' if product.get('price') else 'Fiyat Yok',
@@ -240,7 +240,7 @@ class QuickSearch:
         for product in self.near_results:
             bg_color = literal_eval(self.get_style(product['source'], "bg_color"))
             fg_color = literal_eval(self.get_style(product['source'], "fg_color"))
-            print(background(color('[{}]'.format(product['source']), fg_color), bg_color), end=' ')
+            print(background(color(f" {product['source']} ", fg_color), bg_color), end=' ')
             data = (
                 product['name'],
                 str(product['price']) + ' TL' if product.get('price') else 'Fiyat Yok',
