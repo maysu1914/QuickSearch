@@ -454,7 +454,7 @@
                         "function": "get_product_info",
                         "selector": {
                             "type": "select_one",
-                            "args": ["span[aria-label='Kargo BEDAVA']"],
+                            "args": ["span[aria-label='Kargo BEDAVA'] > span"],
                             "kwargs": {}
                         }
                     }
@@ -465,7 +465,7 @@
                         "function": "get_product_comment_count",
                         "selector": {
                             "type": "select_one",
-                            "args": ["span.a-size-base"],
+                            "args": ["span[class='a-size-base']"],
                             "kwargs": {}
                         }
                     }
