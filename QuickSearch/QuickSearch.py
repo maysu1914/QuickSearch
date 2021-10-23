@@ -127,7 +127,10 @@ class QuickSearch:
 
         print(str(0) + '.', 'All')
         for index, source in enumerate(self.sources_of_category, start=1):
-            print(str(index) + '.', source.get("name"))
+            bg_color = literal_eval(self.get_style(source["name"], "bg_color"))
+            fg_color = literal_eval(self.get_style(source["name"], "fg_color"))
+            print(str(index) + '.', end=" ")
+            print(background(color(f" {source['name']} ", fg_color), bg_color))
 
         while not source_selections:
             try:
