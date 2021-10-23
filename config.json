@@ -1,13 +1,13 @@
 {
     "name": "QuickSearch",
-    "version": "v0.9.9.1",
+    "version": "v0.9.9.2",
     "author": "maysu1914",
     "github": "https://github.com/maysu1914/QuickSearch",
     "sources": [{
             "name": "Trendyol",
             "base_url": "https://www.trendyol.com/",
             "query": {
-                "path": "/sr?q=%(search)s&qt=%(search)s&st=%(search)s&lc=%(category)s&sst=PRICE_BY_ASC",
+                "path": "/sr?wc=%(category)s&q=%(search)s&qt=%(search)s&st=%(search)s&lc=%(category)s&sst=PRICE_BY_ASC",
                 "space": " "
             },
             "pagination_query": "pi=%d",
