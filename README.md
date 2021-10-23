@@ -4,6 +4,8 @@ A project based on Python to make product searching on internet much easier and 
 ## Requirements
 Install requirements by typing "pip3 install -r requirements.txt" your terminal in the base folder
 
+Note: if you want to use the executable, put config.json to same folder of it
+
 ## Supported websites
 These websites are can be searched at the same time for now:
 
