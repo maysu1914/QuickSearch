@@ -1,4 +1,9 @@
+from ast import literal_eval
 from urllib.parse import urlparse
+
+from colorit import *
+
+init_colorit()
 
 from .scraper import *
 
@@ -173,6 +178,13 @@ class QuickSearch:
         self.raw_results += Scraper(*args, **kwargs).get_results(
             {'url': self.url_input.geturl(), 'search': self.search_text})
 
+    def get_style(self, name, attribute):
+        for source in self.config["sources"]:
+            if source.get("name") == name:
+                return source["style"][attribute]
+        else:
+            return None
+
     def set_results(self):
         # sort results by price and suitable_to_search values
         # (True value is first after than low price)
@@ -209,8 +221,10 @@ class QuickSearch:
     def show_results(self):
         print("\nResults:") if self.correct_results else ''
         for product in self.correct_results:
+            bg_color = literal_eval(self.get_style(product['source'], "bg_color"))
+            fg_color = literal_eval(self.get_style(product['source'], "fg_color"))
+            print(background(color('[{}]'.format(product['source']), fg_color), bg_color), end=' ')
             data = (
-                product['source'],
                 product['name'],
                 str(product['price']) + ' TL' if product.get('price') else 'Fiyat Yok',
                 product['info'] if product.get('info') else '',
@@ -220,8 +234,10 @@ class QuickSearch:
 
         print("\nYou may want to look at these:") if self.near_results else ''
         for product in self.near_results:
+            bg_color = literal_eval(self.get_style(product['source'], "bg_color"))
+            fg_color = literal_eval(self.get_style(product['source'], "fg_color"))
+            print(background(color('[{}]'.format(product['source']), fg_color), bg_color), end=' ')
             data = (
-                product['source'],
                 product['name'],
                 str(product['price']) + ' TL' if product.get('price') else 'Fiyat Yok',
                 product['info'] if product.get('info') else '',

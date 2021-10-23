@@ -153,15 +153,18 @@ class Scraper:
         return req.url
 
     @staticmethod
-    def bs_select(soup, dictionary, attribute_path):
+    def get_attribute_by_path(dictionary, attribute_path):
         current_attr = dictionary
         for key in attribute_path.split('.'):
             current_attr = current_attr.get(key)
             if not current_attr:
                 return None
         else:
-            current_attr = current_attr.get("selector")
-        return getattr(soup, current_attr["type"])(*current_attr["args"], **current_attr["kwargs"])
+            return current_attr
+
+    def bs_select(self, soup, dictionary, attribute_path):
+        selector = self.get_attribute_by_path(dictionary, f"{attribute_path}.selector")
+        return getattr(soup, selector["type"])(*selector["args"], **selector["kwargs"]) if selector else None
 
     def get_results(self, url):
         content = self.get_page_content(url['url'])
@@ -205,7 +208,7 @@ class Scraper:
         products = []
 
         for product in self.bs_select(soup, self.source, f"product.{page_type}"):
-            data = {'source': '[{}]'.format(self.name)}
+            data = {'source': self.name}
             for key, value in self.attributes.items():
                 function = value[page_type]["function"]
                 key_path = f"{key}.{page_type}"
