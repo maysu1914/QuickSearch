@@ -1,6 +1,6 @@
 {
     "name": "QuickSearch",
-    "version": "v0.9.9.2",
+    "version": "v0.9.9.3",
     "author": "maysu1914",
     "github": "https://github.com/maysu1914/QuickSearch",
     "sources": [{
@@ -20,12 +20,15 @@
                 "Digital Cameras": "104042",
                 "Shoes": "104543,101421,1172,101429,1128,101426,1057,144727,101422,101428,101423,105794,1025,1037,142587"
             },
-            "valid_page": {
-                "selector": {
-                    "type": "select_one",
-                    "args": ["div.dscrptn"],
-                    "kwargs": {}
-                }
+            "validations": {
+                "is_listing_page": {
+                    "selector": {
+                        "type": "select_one",
+                        "args": ["div.dscrptn"],
+                        "kwargs": {}
+                    }
+                },
+                "is_detail_page": {}
             },
             "page_number": {
                 "selector": {
@@ -94,12 +97,15 @@
                 "Monitors": "monitor/",
                 "Digital Cameras": "fotograf-makinesi/"
             },
-            "valid_page": {
-                "selector": {
-                    "type": "select_one",
-                    "args": ["div.product-list--list-page"],
-                    "kwargs": {}
-                }
+            "validations": {
+                "is_listing_page": {
+                    "selector": {
+                        "type": "select_one",
+                        "args": ["div.product-list--list-page"],
+                        "kwargs": {}
+                    }
+                },
+                "is_detail_page": {}
             },
             "page_number": {
                 "selector": {
@@ -169,12 +175,15 @@
                 "Digital Cameras": "fotograf-ve-kamera/fotograf-makinesi",
                 "Shoes": "ayakkabi-ve-canta"
             },
-            "valid_page": {
-                "selector": {
-                    "type": "select_one",
-                    "args": ["#view > ul > li"],
-                    "kwargs": {}
-                }
+            "validations": {
+                "is_listing_page": {
+                    "selector": {
+                        "type": "select_one",
+                        "args": ["#view > ul > li"],
+                        "kwargs": {}
+                    }
+                },
+                "is_detail_page": {}
             },
             "page_number": {
                 "selector": {
@@ -244,12 +253,15 @@
                 "Digital Cameras": "&kategori=2147483606_60002083",
                 "Shoes": "&kategori=2147483636"
             },
-            "valid_page": {
-                "selector": {
-                    "type": "select_one",
-                    "args": ["div.box.product"],
-                    "kwargs": {}
-                }
+            "validations": {
+                "is_listing_page": {
+                    "selector": {
+                        "type": "select_one",
+                        "args": ["div.box.product"],
+                        "kwargs": {}
+                    }
+                },
+                "is_detail_page": {}
             },
             "page_number": {
                 "selector": {
@@ -319,14 +331,17 @@
                 "Digital Cameras": "&i=electronics&rh=n%3A12466496031%2Cn%3A13709883031%2Cn%3A13709933031",
                 "Shoes": "&i=fashion&rh=n%3A12466553031"
             },
-            "valid_page": {
-                "selector": {
-                    "type": "find",
-                    "args": ["div", {
-                        "data-component-type": "s-search-result"
-                    }],
-                    "kwargs": {}
-                }
+            "validations": {
+                "is_listing_page": {
+                    "selector": {
+                        "type": "find",
+                        "args": ["div", {
+                            "data-component-type": "s-search-result"
+                        }],
+                        "kwargs": {}
+                    }
+                },
+                "is_detail_page": {}
             },
             "page_number": {
                 "selector": {
@@ -399,12 +414,15 @@
                 "Monitors": ":relevance:category:1020301",
                 "Digital Cameras": ":relevance:category:10701"
             },
-            "valid_page": {
-                "selector": {
-                    "type": "find",
-                    "args": ["div", "product-item"],
-                    "kwargs": {}
-                }
+            "validations": {
+                "is_listing_page": {
+                    "selector": {
+                        "type": "find",
+                        "args": ["div", "product-item"],
+                        "kwargs": {}
+                    }
+                },
+                "is_detail_page": {}
             },
             "page_number": {
                 "selector": {
@@ -466,12 +484,15 @@
                 "Digital Cameras": "dijital-fotograf-makinesi",
                 "Shoes": "ayakkabi"
             },
-            "valid_page": {
-                "selector": {
-                    "type": "find",
-                    "args": ["article", "product-card"],
-                    "kwargs": {}
-                }
+            "validations": {
+                "is_listing_page": {
+                    "selector": {
+                        "type": "find",
+                        "args": ["article", "product-card"],
+                        "kwargs": {}
+                    }
+                },
+                "is_detail_page": {}
             },
             "page_number": {
                 "selector": {
@@ -532,12 +553,15 @@
                 "Monitors": "&searchParams=/Search.ff?query%3D{search}%26filteravailability%3D1%26filterCategoriesROOT%3DBilgisayar%25C2%25A7MediaTRtrc504925%26filterCategoriesROOT%252FBilgisayar%25C2%25A7MediaTRtrc504925%3D%25C3%2587evre%2BBirimleri%25C2%25A7MediaTRtrc798009%26channel%3Dmmtrtr",
                 "Digital Cameras": "&searchParams=/Search.ff?query%3D{search}%26filteravailability%3D1%26filterCategoriesROOT%3DFoto%2B%2526%2BKamera%25C2%25A7MediaTRtrc465682%26filterCategoriesROOT%252FFoto%2B%2526%2BKamera%25C2%25A7MediaTRtrc465682%3DFoto%25C4%259Fraf%2BMakineleri%25C2%25A7MediaTRtrc465683%26channel%3Dmmtrtr"
             },
-            "valid_page": {
-                "selector": {
-                    "type": "find",
-                    "args": ["ul", "products-list"],
-                    "kwargs": {}
-                }
+            "validations": {
+                "is_listing_page": {
+                    "selector": {
+                        "type": "find",
+                        "args": ["ul", "products-list"],
+                        "kwargs": {}
+                    }
+                },
+                "is_detail_page": {}
             },
             "page_number": {
                 "selector": {
@@ -594,12 +618,15 @@
                 "All": "",
                 "Shoes": "&category_id=18"
             },
-            "valid_page": {
-                "selector": {
-                    "type": "find",
-                    "args": ["div", "js-product-vertical"],
-                    "kwargs": {}
-                }
+            "validations": {
+                "is_listing_page": {
+                    "selector": {
+                        "type": "find",
+                        "args": ["div", "js-product-vertical"],
+                        "kwargs": {}
+                    }
+                },
+                "is_detail_page": {}
             },
             "page_number": {
                 "selector": {

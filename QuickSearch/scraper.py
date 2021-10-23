@@ -153,23 +153,23 @@ class Scraper:
         return req.url
 
     @staticmethod
-    def bs_by_selector(soup, dictionary, key):
-        if key in dictionary:
-            selector = dictionary[key].get("selector")
-            if selector:
-                return getattr(soup, selector.get("type"))(*selector.get("args"), **selector.get("kwargs"))
-            else:
+    def bs_select(soup, dictionary, attribute_path):
+        current_attr = dictionary
+        for key in attribute_path.split('.'):
+            current_attr = current_attr.get(key)
+            if not current_attr:
                 return None
         else:
-            return None
+            current_attr = current_attr.get("selector")
+        return getattr(soup, current_attr["type"])(*current_attr["args"], **current_attr["kwargs"])
 
     def get_results(self, url):
         content = self.get_page_content(url['url'])
         soup = BeautifulSoup(content, "lxml")
         results = []
-        if soup and self.bs_by_selector(soup, self.source, "valid_page"):
-            page_number = self.get_page_number(self.bs_by_selector(soup, self.source, "page_number"))
             results += self.get_products(content, url['search'])
+        if soup and self.bs_select(soup, self.source, "validations.is_listing_page"):
+            page_number = self.get_page_number(self.bs_select(soup, self.source, "page_number"))
             if page_number > 1:
                 page_list = [self.prepare_url(url['url'], self.pagination_query % number) for number in
                              range(2, page_number + 1)]
@@ -204,10 +204,10 @@ class Scraper:
         soup = BeautifulSoup(content, "lxml")
         products = []
 
-        for product in self.bs_by_selector(soup, self.source, "product"):
+        for product in self.bs_select(soup, self.source, "product"):
             data = {'source': '[{}]'.format(self.name)}
             for key, value in self.attributes.items():
-                data[key] = getattr(self, value["function"])(self.bs_by_selector(product, self.attributes, key))
+                data[key] = getattr(self, value["function"])(self.bs_select(product, self.attributes, key))
             data['suitable_to_search'] = self.is_suitable_to_search(data['name'], search)
             products.append(data)
         return products
