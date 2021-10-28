@@ -173,7 +173,8 @@ class Scraper:
         :param element:
         :return: string
         """
-        return ''.join(element.find_all(text=True, recursive=False)).strip()
+        text = ''.join(element.find_all(text=True, recursive=False)).strip()
+        return text if text else element.text
 
     @staticmethod
     def prepare_url(url, params):
