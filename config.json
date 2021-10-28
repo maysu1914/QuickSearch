@@ -449,11 +449,9 @@
                     "listing": {
                         "function": "get_product_name",
                         "selector": {
-                            "type": "find",
-                            "args": ["a"],
-                            "kwargs": {
-                                "class_": "a-link-normal a-text-normal"
-                            }
+                            "type": "select_one",
+                            "args": ["a.a-link-normal.a-text-normal > span"],
+                            "kwargs": {}
                         }
                     }
 
