@@ -236,7 +236,7 @@ class QuickSearch:
                 product['info'] if product.get('info') else '',
                 product['comment_count'] if product.get('comment_count') else ''
             )
-            print(' '.join(data))
+            print(' • '.join(data))
 
         print("\nYou may want to look at these:") if self.near_results else ''
         for product in self.near_results:
@@ -249,6 +249,6 @@ class QuickSearch:
                 product['info'] if product.get('info') else '',
                 product['comment_count'] if product.get('comment_count') else ''
             )
-            print(' '.join(data))
 
+            print(' • '.join(data))
         print("_________________________________\n")
