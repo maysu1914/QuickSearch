@@ -61,7 +61,7 @@ class QuickSearch:
         self.search_type_selection = self.get_search_type_input()
         if self.search_type_selection == 0:
             self.category_selection = self.get_category_input()
-            self.source_selections = self.get_source_input()
+            self.source_selections = self.get_source_input_by_categories()
             self.search_text = self.get_search_input()
             self.get_results()
             self.set_results()
@@ -117,7 +117,7 @@ class QuickSearch:
 
         return self.categories[category_selection]
 
-    def get_source_input(self):
+    def get_source_input_by_categories(self):
         source_selections = []
         print("\nSelect the sources you want to search:")
 
