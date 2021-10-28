@@ -5,7 +5,7 @@ from colorit import *
 
 init_colorit()
 
-from .scraper import *
+from scraper.scraper import *
 
 
 class QuickSearch:

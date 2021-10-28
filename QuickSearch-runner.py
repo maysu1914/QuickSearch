@@ -1,6 +1,6 @@
 import json
 
-from QuickSearch.QuickSearch import QuickSearch
+from QuickSearch import QuickSearch
 
 if __name__ == '__main__':
     config = json.load(open("config.json"))
