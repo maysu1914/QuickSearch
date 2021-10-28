@@ -3,6 +3,7 @@ import itertools
 import math
 import re
 import string
+import urllib
 from concurrent.futures.thread import ThreadPoolExecutor
 from ssl import SSLError
 from urllib.parse import urljoin
@@ -12,6 +13,14 @@ from bs4 import BeautifulSoup
 from bs4.element import ResultSet
 from requests.models import PreparedRequest
 from requests.utils import requote_uri
+from selenium.webdriver import Chrome
+from selenium.webdriver.chrome.options import Options as chrome_options
+
+
+class CustomWebDriver(Chrome):
+    def open(self, url):
+        if urllib.parse.unquote(self.current_url) != url:
+            self.get(url)
 
 
 class Scraper:
@@ -22,9 +31,11 @@ class Scraper:
         self.base_url = source.get("base_url")
         self.query = source.get("query")
         self.pagination_query = source.get("pagination_query")
+        self.parser = self.source.get("parser")
         self.attributes = source.get("attributes")
         self.max_page = max_page
         self.executor = ThreadPoolExecutor()
+        self.driver = self.get_driver() if self.parser == "selenium" else None
 
     def search(self, category, search):
         results = []
@@ -91,6 +102,24 @@ class Scraper:
                     verify = False
                 continue
         return ''
+
+    @staticmethod
+    def get_driver():
+        extensions = ['driver/extensions/block_image_1_1_0_0.crx']
+        options = chrome_options()
+        # options.headless = True
+        # options.add_argument("--start-maximized")
+        for extension in extensions:
+            options.add_extension(extension)
+        driver = CustomWebDriver(executable_path="driver/chromedriver.exe", options=options)
+        driver.set_window_position(-10000, 0)
+        return driver
+
+    def get_page_content_by_browser(self, url):
+        if not self.driver:
+            self.driver = self.get_driver()
+        self.driver.open(url)
+        return self.driver.page_source
 
     def get_contents(self, url_list):
         threads = [ThreadPoolExecutor().submit(self.get_page_content, url) for url in url_list]
