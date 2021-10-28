@@ -57,8 +57,8 @@ class QuickSearch:
 
         return search_type_selection
 
-    def start(self):
-        self.search_type_selection = self.get_search_type_input()
+    def start(self, search_type=None):
+        self.search_type_selection = self.get_search_type_input() if not search_type else search_type
         if self.search_type_selection == 0:
             self.category_selection = self.get_category_input()
             self.source_selections = self.get_source_input_by_categories()
