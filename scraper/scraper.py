@@ -36,7 +36,7 @@ class Scraper:
         self.attributes = source.get("attributes")
         self.max_page = max_page
         self.executor = ThreadPoolExecutor()
-        self.driver = self.get_driver() if self.parser == "selenium" else None
+        self.driver = None
 
     def search(self, category, search):
         results = []
