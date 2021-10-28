@@ -3,6 +3,7 @@ import itertools
 import math
 import re
 import string
+import time
 import urllib
 from concurrent.futures.thread import ThreadPoolExecutor
 from ssl import SSLError
@@ -65,7 +66,6 @@ class Scraper:
                     search = (' '.join(static.split()) + ' ' + ' '.join(i)).strip()
                     url = self.create_url(search, categories[category])
                     urls.append({'search': search, 'url': requote_uri(url)})
-                # print(url)
                 return urls
             else:
                 return []
@@ -122,7 +122,13 @@ class Scraper:
         return self.driver.page_source
 
     def get_contents(self, url_list):
-        threads = [ThreadPoolExecutor().submit(self.get_page_content, url) for url in url_list]
+        threads = []
+        for index, url in enumerate(url_list):
+            threads.append(ThreadPoolExecutor().submit(self.get_page_content, url))
+            if index > 1 and index % 20 == 0:
+                time.sleep(5)
+            else:
+                time.sleep(0.2)
         for thread in concurrent.futures.as_completed(threads):
             yield thread.result()
 
