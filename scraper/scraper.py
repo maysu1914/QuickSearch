@@ -261,7 +261,7 @@ class Scraper:
         elif result:
             return int(''.join([s for s in result.text.split(',')[0] if s.isdigit()]))
         else:
-            return None
+            return 0
 
     @staticmethod
     def get_product_info(result):
