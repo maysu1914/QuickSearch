@@ -126,7 +126,8 @@ class QuickSearch:
             if self.category_selection in source.get("categories"):
                 self.sources_of_category.append(source)
 
-        print(str(0) + '.', 'All')
+        print(str(0) + '.', end=" ")
+        print(background(color(" All ", (0, 0, 0)), (255, 255, 255)))
         for index, source in enumerate(self.sources_of_category, start=1):
             bg_color = literal_eval(self.get_style(source["name"], "bg_color"))
             fg_color = literal_eval(self.get_style(source["name"], "fg_color"))
