@@ -10,6 +10,7 @@ from scraper.scraper import *
 
 class QuickSearch:
     max_page = 3
+    name = "QuickSearch"
 
     def __init__(self, config, max_page=max_page):
         self.config = config
@@ -41,7 +42,7 @@ class QuickSearch:
     def get_search_type_input(self):
         search_types = [
             'By entering the categories, sources, and a search text.',
-            'By entering a URL and a search text.',
+            'By entering a URL and a search text.'
         ]
         search_type_selection = None
         print("Which way do you prefer to search with?")
