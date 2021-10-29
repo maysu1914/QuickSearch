@@ -64,6 +64,7 @@ class QuickSearch:
             self.category_selection = self.get_category_input()
             self.source_selections = self.get_source_input_by_categories()
             self.search_text = self.get_search_input()
+            self.max_page = self.get_max_page_input()
             self.get_results()
             self.set_results()
             self.show_results()
