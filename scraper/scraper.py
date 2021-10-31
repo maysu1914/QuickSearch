@@ -171,9 +171,11 @@ class Scraper:
     @staticmethod
     def get_product_price(result):
         if isinstance(result, ResultSet):
-            return min([int(''.join([s for s in get_text(e).split(',')[0] if s.isdigit()])) for e in result])
+            numbers = [''.join([s for s in get_text(e).split(',')[0] if s.isdigit()]) for e in result]
+            return min([int(number) for number in numbers]) if all(numbers) else 0
         elif result:
-            return int(''.join([s for s in result.text.split(',')[0] if s.isdigit()]))
+            number = ''.join([s for s in result.text.split(',')[0] if s.isdigit()])
+            return int(number) if number else 0
         else:
             return 0
 
@@ -198,7 +200,8 @@ class Scraper:
     @staticmethod
     def get_discount_calculated(result):
         if isinstance(result, ResultSet):
-            values = [int(''.join([s for s in get_text(e).split(',')[0] if s.isdigit()])) for e in result]
+            numbers = [''.join([s for s in get_text(e).split(',')[0] if s.isdigit()]) for e in result]
+            values = [int(number) for number in numbers] if all(numbers) else [0]
             min_val = min(values)
             max_val = max(values)
             return int((max_val - min_val) / max_val * 100) if min_val != max_val else 0
