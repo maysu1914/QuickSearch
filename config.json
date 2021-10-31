@@ -318,7 +318,7 @@
                 "is_listing_page": {
                     "selector": {
                         "type": "select_one",
-                        "args": ["div.box.product"],
+                        "args": ["li.productListContainer-item, div.box.product"],
                         "kwargs": {}
                     }
                 },
@@ -326,18 +326,18 @@
             },
             "page_number": {
                 "selector": {
-                    "type": "select",
-                    "args": ["#pagination > ul > li"],
+                    "type": "select_one",
+                    "args": ["div.paginatorStyle-label, div.totalItems"],
                     "kwargs": {}
                 },
-                "method": "pagination",
-                "products_per_page": null
+                "method": "total",
+                "products_per_page": 24
             },
             "product": {
                 "listing": {
                     "selector": {
                         "type": "select",
-                        "args": ["div.box.product"],
+                        "args": ["li.productListContainer-item, div.box.product"],
                         "kwargs": {}
                     }
                 },
@@ -348,8 +348,8 @@
                     "listing": {
                         "function": "get_product_name",
                         "selector": {
-                            "type": "find",
-                            "args": ["h3", "product-title"],
+                            "type": "select_one",
+                            "args": ["h3[data-test-id='product-card-name'], h3.product-title"],
                             "kwargs": {}
                         }
                     }
@@ -360,11 +360,10 @@
                         "function": "get_product_price",
                         "selector": {
                             "type": "select",
-                            "args": ["div.price-value, span.product-price, span.product-old-price, del.product-old-price"],
+                            "args": ["div[data-test-id='price-current-price'], div[data-test-id='price-prev-price'] > div:not(div[data-test-id]), div.price-value, span.product-price, span.product-old-price, del.product-old-price"],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "info": {
                     "listing": {
@@ -381,12 +380,11 @@
                     "listing": {
                         "function": "get_product_comment_count",
                         "selector": {
-                            "type": "find",
-                            "args": ["span", "number-of-reviews"],
+                            "type": "select_one",
+                            "args": ["div[data-test-id='review'] > div:last-child, span.number-of-reviews"],
                             "kwargs": {}
                         }
                     }
-
                 }
             }
         },
