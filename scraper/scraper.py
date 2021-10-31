@@ -8,8 +8,9 @@ from bs4 import BeautifulSoup
 from bs4.element import ResultSet
 from requests.utils import requote_uri
 
-from scraper.utils import get_page_content, get_text, is_formattable, get_attribute_by_path, get_driver, \
-    get_page_contents, prepare_url, find_nth
+from catalogs.catalog import Catalog
+from scraper.utils import get_page_content, get_text, is_formattable, get_attribute_by_path, get_page_contents, \
+    prepare_url, find_nth
 
 
 class Scraper:
@@ -28,42 +29,47 @@ class Scraper:
 
     def search(self, category, search):
         results = []
-        urls = self.get_url(category, search)  # multiple results if search has list
+        urls = self.get_urls(category, search)  # multiple results if search has list
         threads = [self.executor.submit(self.get_results, url) for url in urls]
         for thread in threads:
             results += thread.result()
         return results
 
-    def get_url(self, category, search):
+    def get_urls(self, category, search):
         categories = self.source.get("categories")
+        urls = []
 
+        if category in categories:
+            for search_text in self.get_all_combinations(search):
+                url = self.create_url(search_text, categories[category])
+                urls.append({'search': search_text, 'url': requote_uri(url)})
+        return urls
+
+    @staticmethod
+    def get_all_combinations(search):
+        searches = []
         if '[' in search and ']' in search:
-            if category in categories:
-                urls = []
-                static = search
-                dynamic = []
+            static = search
+            dynamic = []
 
-                for a, b in zip(range(1, search.count('[') + 1), range(1, search.count(']') + 1)):
-                    start = find_nth(search, '[', a)
-                    end = find_nth(search, ']', a) + 1
-                    part = search[start:end]
-                    dynamic.append(part.strip('][').split(','))
-                    static = static.replace(part, '')
-
-                for i in list(itertools.product(*dynamic)):
-                    search = (' '.join(static.split()) + ' ' + ' '.join(i)).strip()
-                    url = self.create_url(search, categories[category])
-                    urls.append({'search': search, 'url': requote_uri(url)})
-                return urls
-            else:
-                return []
+            for a, b in zip(range(1, search.count('[') + 1), range(1, search.count(']') + 1)):
+                start = find_nth(search, '[', a)
+                end = find_nth(search, ']', a) + 1
+                part = search[start:end]
+                dynamic.append(part.strip('][').split(','))
+                static = static.replace(part, '')
+            for i in list(itertools.product(*dynamic)):
+                searches.append((' '.join(static.split()) + ' ' + ' '.join(i)).strip())
         else:
-            if category in categories:
-                url = self.create_url(search, categories[category])
-                # print(url)
-                return [{'search': search, 'url': requote_uri(url)}]
-            else:
-                return []
+            searches.append(search)
+
+        return searches
+
+    def check_the_suitability(self, product_name, searches):
+        if not isinstance(searches, list):
+            searches = [searches]
+
+        return any((self.is_suitable_to_search(product_name, search) for search in searches))
 
     @staticmethod
     def is_suitable_to_search(product_name, search):
@@ -145,7 +151,7 @@ class Scraper:
                 function = value[page_type]["function"]
                 key_path = f"{key}.{page_type}"
                 data[key] = getattr(self, function)(self.bs_select(product, self.attributes, key_path))
-            data['suitable_to_search'] = self.is_suitable_to_search(data['name'], search)
+            data['suitable_to_search'] = self.check_the_suitability(data['name'], search)
             products.append(data)
         return products
 
