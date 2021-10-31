@@ -190,3 +190,13 @@ class Scraper:
             return ' '.join(result.text.split())
         else:
             return None
+
+    @staticmethod
+    def get_discount_calculated(result):
+        if isinstance(result, ResultSet):
+            values = [int(''.join([s for s in get_text(e).split(',')[0] if s.isdigit()])) for e in result]
+            min_val = min(values)
+            max_val = max(values)
+            return int((max_val - min_val) / max_val * 100) if min_val != max_val else 0
+        else:
+            return 0
