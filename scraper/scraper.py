@@ -146,13 +146,17 @@ class Scraper:
         products = []
 
         for product in self.bs_select(soup, self.source, f"product.{page_type}"):
+            acceptable = True
             data = {'source': self.name}
             for key, value in self.attributes.items():
                 function = value[page_type]["function"]
                 key_path = f"{key}.{page_type}"
                 data[key] = getattr(self, function)(self.bs_select(product, self.attributes, key_path))
+                if value.get("required") and not data[key]:
+                    acceptable = False
             data['suitable_to_search'] = self.check_the_suitability(data['name'], search)
-            products.append(data)
+            if acceptable:
+                products.append(data)
         return products
 
     @staticmethod
