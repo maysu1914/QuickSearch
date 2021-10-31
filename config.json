@@ -374,7 +374,16 @@
                             "kwargs": {}
                         }
                     }
-
+                },
+                "discount": {
+                    "listing": {
+                        "function": "get_discount_calculated",
+                        "selector": {
+                            "type": "select",
+                            "args": ["div[data-test-id='price-current-price'], div[data-test-id='price-prev-price'] > div:not(div[data-test-id]), div.price-value, span.product-price, span.product-old-price, del.product-old-price"],
+                            "kwargs": {}
+                        }
+                    }
                 },
                 "comment_count": {
                     "listing": {
