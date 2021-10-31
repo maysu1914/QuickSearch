@@ -182,8 +182,9 @@ class QuickSearch:
     def get_results_from_url(self):
         args = (self.url_source,)
         kwargs = {"max_page": self.max_page}
+        searches = Scraper.get_all_combinations(self.search_text)
         self.raw_results += Scraper(*args, **kwargs).get_results(
-            {'url': self.url_input, 'search': self.search_text})
+            {'url': self.url_input, 'search': searches})
 
     def get_style(self, name, attribute):
         for source in self.config["sources"]:
@@ -209,21 +210,10 @@ class QuickSearch:
                 unique_results.append(result)
 
         for result in unique_results:
-            if self.search_type_selection == 0:
-                if result.get('suitable_to_search'):
-                    self.correct_results.append(result)
-                else:
-                    self.near_results.append(result)
+            if result.get('suitable_to_search'):
+                self.correct_results.append(result)
             else:
-                data = (
-                    result['name'],
-                    result['info'] if result.get('info') else ''
-                )
-                if any(Scraper.is_suitable_to_search(' '.join(data).lower(), search) for search in
-                       self.search_text.replace('[', "").replace(']', "").split(',')):
-                    self.correct_results.append(result)
-                else:
-                    self.near_results.append(result)
+                self.near_results.append(result)
 
     def show_results(self):
         print("\nResults:") if self.correct_results else ''
