@@ -40,7 +40,7 @@ def prepare_url(url, params):
 
 def get_attribute_by_path(dictionary, attribute_path):
     current_attr = dictionary
-    for key in attribute_path.split('.'):
+    for key in list(filter(lambda x: x, attribute_path.split('.'))):
         current_attr = current_attr.get(key)
         if not current_attr:
             return None
