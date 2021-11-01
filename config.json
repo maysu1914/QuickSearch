@@ -1,6 +1,6 @@
 {
     "name": "QuickSearch",
-    "version": "v0.9.92.0",
+    "version": "v0.9.92.1",
     "author": "maysu1914",
     "github": "https://github.com/maysu1914/QuickSearch",
     "sources": [{
@@ -265,8 +265,8 @@
                     "listing": {
                         "function": "get_product_price",
                         "selector": {
-                            "type": "find",
-                            "args": ["a", "newPrice"],
+                            "type": "select",
+                            "args": ["del, ins, p.view-instant-price"],
                             "kwargs": {}
                         }
                     }
