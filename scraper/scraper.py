@@ -85,9 +85,7 @@ class Scraper:
         for number in search_numbers:
             search_words = search_words.replace(number, '')
 
-        search_words = [word if len(word) > 2 else None for word in search_words.split()]
-
-        search_words = [i for i in search_words if i]
+        search_words = [word for word in search_words.split() if len(word) >= acceptable_length]
 
         for number in search_numbers:
             count = search.count(number)
