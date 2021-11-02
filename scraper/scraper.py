@@ -68,12 +68,12 @@ class Scraper:
     def check_the_suitability(self, product_name, searches):
         if not isinstance(searches, list):
             searches = [searches]
-
         return any((self.is_suitable_to_search(product_name, search) for search in searches))
 
     @staticmethod
     def is_suitable_to_search(product_name, search):
-        if product_name:
+        acceptable_length = 3
+        if product_name and len(search) >= acceptable_length:
             product_name = product_name.lower()
             search = search.lower()
         else:
