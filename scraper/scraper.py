@@ -127,7 +127,7 @@ class Scraper:
             page = max(numbers)
             return self.max_page if page > self.max_page else page
         elif result:
-            numbers = tuple(map(int, re.findall('\d+', result.text)))
+            numbers = tuple(map(int, re.findall('\d+', result.text.replace(',', '').replace('.', ''))))
             page = math.ceil(max(numbers) / self.source["page_number"]["products_per_page"]) if numbers else 1
             return self.max_page if page > self.max_page else page
         else:
