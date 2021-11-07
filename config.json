@@ -321,7 +321,7 @@
                 "is_listing_page": {
                     "selector": {
                         "type": "select_one",
-                        "args": ["li.productListContainer-item, div.box.product"],
+                        "args": ["li.productListContent-item, div.box.product"],
                         "kwargs": {}
                     }
                 },
@@ -340,7 +340,7 @@
                 "listing": {
                     "selector": {
                         "type": "select",
-                        "args": ["li.productListContainer-item, div.box.product"],
+                        "args": ["li.productListContent-item, div.box.product"],
                         "kwargs": {}
                     }
                 },
