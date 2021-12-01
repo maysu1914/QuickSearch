@@ -408,7 +408,7 @@
             },
             "base_url": "https://www.amazon.com.tr/",
             "query": {
-                "path": "/s?k=%(search)s%(category)s&s=price-asc-rank",
+                "path": "/s?k=%(search)s%(category)s",
                 "space": " "
             },
             "pagination_query": "page=%d",
