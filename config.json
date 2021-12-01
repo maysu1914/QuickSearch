@@ -851,6 +851,88 @@
 
                 }
             }
+        },
+        {
+            "name": "letgo",
+            "type": "secondhand",
+            "style": {
+                "bg_color": "(254,58,86)",
+                "fg_color": "(255,255,255)"
+            },
+            "base_url": "https://www.letgo.com/",
+            "query": {
+                "path": "/tr-tr/c/%(category)s?searchTerm=%(search)s",
+                "space": " "
+            },
+            "pagination_query": "page=%d",
+            "categories": {
+                "All": "all"
+            },
+            "validations": {
+                "is_listing_page": {
+                    "selector": {
+                        "type": "select_one",
+                        "args": ["[data-testid='feed-grid-item']"],
+                        "kwargs": {}
+                    }
+                },
+                "is_detail_page": {}
+            },
+            "page_number": {
+                "selector": {
+                    "type": "select_one",
+                    "args": ["h1[data-testid='feed-grid-title']"],
+                    "kwargs": {}
+                },
+                "method": "total",
+                "products_per_page": 36
+            },
+            "product": {
+                "listing": {
+                    "selector": {
+                        "type": "select",
+                        "args": ["[data-testid='feed-grid-item']"],
+                        "kwargs": {}
+                    }
+                },
+                "detail": {}
+            },
+            "attributes": {
+                "name": {
+                    "required": true,
+                    "listing": {
+                        "function": "get_product_name",
+                        "selector": {
+                            "type": "select",
+                            "args": ["p[data-testid='feed-grid-item-name']"],
+                            "kwargs": {}
+                        }
+                    }
+
+                },
+                "price": {
+                    "listing": {
+                        "function": "get_product_price",
+                        "selector": {
+                            "type": "select",
+                            "args": ["p[data-testid='feed-grid-item-price']"],
+                            "kwargs": {}
+                        }
+                    }
+
+                },
+                "info": {
+                    "listing": {
+                        "function": "get_product_info",
+                        "selector": {
+                            "type": "select",
+                            "args": ["p[data-testid='feed-grid-item-location']"],
+                            "kwargs": {}
+                        }
+                    }
+
+                }
+            }
         }
     ]
 }
