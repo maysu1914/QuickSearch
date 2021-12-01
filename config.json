@@ -5,6 +5,7 @@
     "github": "https://github.com/maysu1914/QuickSearch",
     "sources": [{
             "name": "Trendyol",
+            "type": "marketplace",
             "style": {
                 "bg_color": "(255,103,29)",
                 "fg_color": "(0,0,0)"
@@ -103,6 +104,7 @@
         },
         {
             "name": "VatanBilgisayar",
+            "type": "marketplace",
             "style": {
                 "bg_color": "(0,50,119)",
                 "fg_color": "(255,255,255)"
@@ -200,6 +202,7 @@
         },
         {
             "name": "n11",
+            "type": "marketplace",
             "style": {
                 "bg_color": "(238,62,54)",
                 "fg_color": "(0,0,0)"
@@ -298,6 +301,7 @@
         },
         {
             "name": "HepsiBurada",
+            "type": "marketplace",
             "style": {
                 "bg_color": "(255,96,1)",
                 "fg_color": "(255,255,255)"
@@ -402,6 +406,7 @@
         },
         {
             "name": "AmazonTR",
+            "type": "marketplace",
             "style": {
                 "bg_color": "(255,153,0)",
                 "fg_color": "(255,255,255)"
@@ -504,6 +509,7 @@
         },
         {
             "name": "Teknosa",
+            "type": "marketplace",
             "style": {
                 "bg_color": "(245,130,33)",
                 "fg_color": "(0,88,169)"
@@ -590,6 +596,7 @@
         },
         {
             "name": "GittiGidiyor",
+            "type": "marketplace",
             "style": {
                 "bg_color": "(128,188,0)",
                 "fg_color": "(0,113,206)"
@@ -677,6 +684,7 @@
         },
         {
             "name": "MediaMarktTR",
+            "type": "marketplace",
             "style": {
                 "bg_color": "(223,1,1)",
                 "fg_color": "(255,255,255)"
@@ -763,6 +771,7 @@
         },
         {
             "name": "FLO",
+            "type": "marketplace",
             "style": {
                 "bg_color": "(255,103,29)",
                 "fg_color": "(255,255,255)"
