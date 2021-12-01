@@ -321,7 +321,7 @@
                 "is_listing_page": {
                     "selector": {
                         "type": "select_one",
-                        "args": ["li.productListContent-item, div.box.product"],
+                        "args": ["li.productListContent-item, div.box.product, div.deal-of-the-day-details"],
                         "kwargs": {}
                     }
                 },
@@ -340,7 +340,7 @@
                 "listing": {
                     "selector": {
                         "type": "select",
-                        "args": ["li.productListContent-item, div.box.product"],
+                        "args": ["li.productListContent-item, div.box.product, div.deal-of-the-day-details"],
                         "kwargs": {}
                     }
                 },
@@ -353,18 +353,17 @@
                         "function": "get_product_name",
                         "selector": {
                             "type": "select_one",
-                            "args": ["h3[data-test-id='product-card-name'], h3.product-title"],
+                            "args": ["h3[data-test-id='product-card-name'], h3.product-title, h3.deal-of-the-day-name"],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "price": {
                     "listing": {
                         "function": "get_product_price",
                         "selector": {
                             "type": "select",
-                            "args": ["div[data-test-id='price-current-price'], div[data-test-id='price-prev-price'] > div:not(div[data-test-id]), div.price-value, span.product-price, span.product-old-price, del.product-old-price"],
+                            "args": ["div[data-test-id='price-current-price'], div[data-test-id='price-prev-price'] > div:first-child, div.price-value, span.product-price, span.product-old-price, del.product-old-price"],
                             "kwargs": {}
                         }
                     }
@@ -384,7 +383,7 @@
                         "function": "get_discount_calculated",
                         "selector": {
                             "type": "select",
-                            "args": ["div[data-test-id='price-current-price'], div[data-test-id='price-prev-price'] > div:not(div[data-test-id]), div.price-value, span.product-price, span.product-old-price, del.product-old-price"],
+                            "args": ["div[data-test-id='price-current-price'], div[data-test-id='price-prev-price'] > div:first-child, div.price-value, span.product-price, span.product-old-price, del.product-old-price"],
                             "kwargs": {}
                         }
                     }
