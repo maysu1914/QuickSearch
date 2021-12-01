@@ -861,7 +861,7 @@
             },
             "base_url": "https://www.letgo.com/",
             "query": {
-                "path": "/tr-tr/c/%(category)s?searchTerm=%(search)s",
+                "path": "/tr-tr/c/%(category)s?searchTerm=%(search)s&sort=price_asc",
                 "space": " "
             },
             "pagination_query": "page=%d",
