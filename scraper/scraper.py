@@ -8,7 +8,6 @@ from bs4 import BeautifulSoup
 from bs4.element import ResultSet
 from requests.utils import requote_uri
 
-from catalogs.catalog import Catalog
 from scraper.utils import get_page_content, get_text, is_formattable, get_attribute_by_path, get_page_contents, \
     prepare_url, find_nth
 
