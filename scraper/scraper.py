@@ -24,6 +24,7 @@ class Scraper:
         self.pagination_query = source.get("pagination_query")
         self.parser = self.source.get("parser")
         self.attributes = source.get("attributes")
+        self.first_next = get_attribute_by_path(source, "page_number.first_next", default=2)
         self.max_page = max_page
         self.executor = ThreadPoolExecutor()
         self.request_service = RequestService(sleep=source.get("sleep_after_request"))
@@ -122,7 +123,7 @@ class Scraper:
             results += self.get_products(content, url['search'], "listing")
             if page_number > 1:
                 page_list = [prepare_url(url['url'], self.pagination_query % number) for number in
-                             range(2, page_number + 1)]
+                             range(self.first_next, page_number + 1)]
                 contents = self.request_service.get_page_contents(page_list)
                 for content in contents:
                     results += self.get_products(content, url['search'], "listing")
