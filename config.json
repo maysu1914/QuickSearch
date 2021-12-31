@@ -15,6 +15,7 @@
                 "path": "/sr?wc=%(category)s&q=%(search)s&qt=%(search)s&st=%(search)s&lc=%(category)s&sst=PRICE_BY_ASC",
                 "space": " "
             },
+            "sleep_after_request": 0.25,
             "pagination_query": "pi=%d",
             "categories": {
                 "All": "",
@@ -114,6 +115,7 @@
                 "path": "/arama/%(search)s/%(category)s?srt=UP",
                 "space": " "
             },
+            "sleep_after_request": 0,
             "pagination_query": "page=%d",
             "categories": {
                 "All": "",
@@ -212,6 +214,7 @@
                 "path": "/%(category)s?q=%(search)s&srt=PRICE_LOW",
                 "space": " "
             },
+            "sleep_after_request": 0.5,
             "pagination_query": "pg=%d",
             "categories": {
                 "All": "arama",
@@ -311,6 +314,7 @@
                 "path": "/ara?q=%(search)s%(category)s&siralama=artanfiyat",
                 "space": " "
             },
+            "sleep_after_request": 0.4,
             "pagination_query": "sayfa=%d",
             "categories": {
                 "All": "",
@@ -416,6 +420,7 @@
                 "path": "/s?k=%(search)s%(category)s",
                 "space": " "
             },
+            "sleep_after_request": 0,
             "pagination_query": "page=%d",
             "categories": {
                 "All": "",
@@ -519,6 +524,7 @@
                 "path": "/arama/?s=%(search)s%(category)s&sort=price-asc",
                 "space": " "
             },
+            "sleep_after_request": 0,
             "pagination_query": "page=%d",
             "categories": {
                 "All": ":relevance",
@@ -606,6 +612,7 @@
                 "path": "/%(category)s?k=%(search)s&sra=hpa",
                 "space": " "
             },
+            "sleep_after_request": 0,
             "pagination_query": "sf=%d",
             "categories": {
                 "All": "arama/",
@@ -694,6 +701,7 @@
                 "path": "/tr/search.html?query=%(search)s%(category)s&searchProfile=&sort=price&sourceRef=INVALID",
                 "space": "%2B"
             },
+            "sleep_after_request": 0,
             "pagination_query": "sf=%d",
             "categories": {
                 "All": "&channel=mmtrtr",
@@ -781,6 +789,7 @@
                 "path": "/search?q=%(search)s%(category)s&sort=filter_price:asc",
                 "space": " "
             },
+            "sleep_after_request": 0,
             "pagination_query": "page=%d",
             "categories": {
                 "All": "",
