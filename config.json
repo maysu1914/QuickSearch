@@ -533,17 +533,17 @@
             "pagination_query": "page=%d",
             "categories": {
                 "All": ":relevance",
-                "Notebooks": ":relevance:category:1020101",
-                "Desktop PCs": ":relevance:category:10201",
-                "Smartphones": ":relevance:category:100001",
-                "Monitors": ":relevance:category:1020301",
-                "Digital Cameras": ":relevance:category:10701"
+                "Notebooks": ":relevance:category:116004",
+                "Desktop PCs": ":relevance:category:116011",
+                "Smartphones": ":relevance:category:100",
+                "Monitors": ":relevance:category:116010011",
+                "Digital Cameras": ":relevance:category:107"
             },
             "validations": {
                 "is_listing_page": {
                     "selector": {
-                        "type": "find",
-                        "args": ["div", "product-item"],
+                        "type": "select_one",
+                        "args": ["div#product-item"],
                         "kwargs": {}
                     }
                 },
@@ -562,8 +562,8 @@
             "product": {
                 "listing": {
                     "selector": {
-                        "type": "find_all",
-                        "args": ["div", "product-item"],
+                        "type": "select",
+                        "args": ["div#product-item"],
                         "kwargs": {}
                     }
                 },
@@ -575,8 +575,8 @@
                     "listing": {
                         "function": "get_product_name",
                         "selector": {
-                            "type": "find",
-                            "args": ["div", "product-name"],
+                            "type": "select_one",
+                            "args": ["h3.prd-title.prd-title-style"],
                             "kwargs": {}
                         }
                     }
@@ -586,8 +586,8 @@
                     "listing": {
                         "function": "get_product_price",
                         "selector": {
-                            "type": "find",
-                            "args": ["span", "new-price"],
+                            "type": "select",
+                            "args": ["div.prd-prc1, div.prd-prc2"],
                             "kwargs": {}
                         }
                     }
@@ -598,7 +598,7 @@
                         "function": "get_product_info",
                         "selector": {
                             "type": "select",
-                            "args": ["div.product-list-badge-item, div.only-in-store-badge"],
+                            "args": ["i.prd-badge, div.prd-features > span"],
                             "kwargs": {}
                         }
                     }
