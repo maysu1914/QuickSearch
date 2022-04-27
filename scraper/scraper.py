@@ -182,7 +182,8 @@ class Scraper:
     def get_product_price(result):
         if isinstance(result, ResultSet):
             numbers = [''.join([s for s in get_text(e).split(',')[0] if s.isdigit()]) for e in result]
-            return min([int(number) for number in numbers if number]) if numbers else 0
+            numbers = [int(number) for number in numbers if number]
+            return min(numbers) if numbers else 0
         elif result:
             number = ''.join([s for s in result.text.split(',')[0] if s.isdigit()])
             return int(number) if number else 0
