@@ -27,7 +27,7 @@ class Scraper:
         self.first_next = get_attribute_by_path(source, "page_number.first_next", default=2)
         self.max_page = max_page
         self.executor = ThreadPoolExecutor()
-        self.request_service = RequestService(sleep=source.get("sleep_after_request"))
+        self.request_service = RequestService(sleep=source.get("sleep_after_request", 0))
         self.driver = None
 
     def search(self, category, search):
