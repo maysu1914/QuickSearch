@@ -422,7 +422,7 @@
             "base_url": "https://www.amazon.com.tr/",
             "query": {
                 "path": "/s?k=%(search)s%(category)s",
-                "space": " "
+                "space": "+"
             },
             "sleep_after_request": 0,
             "pagination_query": "page=%d",
