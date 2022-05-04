@@ -1,20 +1,21 @@
 from ast import literal_eval
+from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urlparse
 
 from colorit import *
 
-init_colorit()
+from QuickSearch.ui.ui import PromptUI, PromptURL, PromptCategory
+from scraper.scraper import Scraper
 
-from scraper.scraper import *
+init_colorit()
 
 
 class QuickSearch:
-    max_page = 3
     name = "QuickSearch"
+    max_page = 3
 
     def __init__(self, config, max_page=max_page):
         self.config = config
-        self.categories = self.get_categories()
         self.max_page = max_page
         self.executor = ThreadPoolExecutor()
 
@@ -24,14 +25,21 @@ class QuickSearch:
         self.url_source = None
 
         self.category_selection = None
-        self.sources_of_category = []
         self.source_selections = []
         self.search_text = None
         self.raw_results = []
         self.correct_results = []
         self.near_results = []
 
-    def get_categories(self):
+    @property
+    def search_types(self):
+        search_types = (
+            'By entering the categories, sources, and a search text.',
+            'By entering a URL and a search text.')
+        return search_types
+
+    @property
+    def categories(self):
         categories = []
         for source in self.config.get("sources"):
             for category in source.get("categories"):
@@ -39,55 +47,79 @@ class QuickSearch:
                     categories.append(category)
         return categories
 
+    @property
+    def hostnames(self):
+        hostnames = []
+        for source in self.config.get("sources"):
+            hostname = urlparse(source.get("base_url")).hostname
+            hostnames.append(hostname)
+        return hostnames
+
     def get_search_type_input(self):
-        search_types = [
-            'By entering the categories, sources, and a search text.',
-            'By entering a URL and a search text.'
-        ]
-        search_type_selection = None
-        print("Which way do you prefer to search with?")
+        choices = self.search_types
+        title = 'Which way do you prefer to search with?'
+        prompt = 'Search Type: '
 
-        for index, search_type in enumerate(search_types):
-            print(str(index) + '.', search_type)
+        prompt = PromptUI(title=title, prompt=prompt, choices=choices)
+        prompt.render()
 
-        while search_type_selection not in list(range(len(search_types))):
-            try:
-                search_type_selection = int(input('Search Type: ').strip())
-            except ValueError:
-                search_type_selection = None
+        while not prompt.is_valid():
+            prompt.get_input()
 
-        return search_type_selection
+        return prompt.data
 
-    def start(self, search_type=None):
-        self.search_type_selection = self.get_search_type_input() if not search_type else search_type
-        if self.search_type_selection == 0:
-            self.category_selection = self.get_category_input()
-            self.source_selections = self.get_source_input_by_categories()
-            self.search_text = self.get_search_input()
-            self.max_page = self.get_max_page_input()
-            self.get_results()
-            self.set_results()
-            self.show_results()
-        if self.search_type_selection == 1:
-            self.url_input, self.url_source = self.get_url_input()
-            self.search_text = self.get_search_input()
-            self.max_page = self.get_max_page_input()
-            self.get_results_from_url()
-            self.set_results()
-            self.show_results()
+    def get_category_input(self):
+        choices = self.categories
+        title = '\nWhat category do you want to search?'
+        prompt = 'Category: '
+
+        prompt = PromptUI(title=title, prompt=prompt, choices=choices,
+                          raw_data=False)
+        prompt.render()
+
+        while not prompt.is_valid():
+            prompt.get_input()
+
+        return prompt.data
+
+    def get_source_input_by_category(self):
+        sources = self.get_sources_of_category(self.category_selection)
+        choices = []
+        for source in sources:
+            bg_color = literal_eval(self.get_style(source["name"], "bg_color"))
+            fg_color = literal_eval(self.get_style(source["name"], "fg_color"))
+            choices.append(background(color(f" {source['name']} ", fg_color), bg_color))
+        choices.insert(0, background(color(f" All ", (0, 0, 0)), (255, 255, 255)))
+
+        title = '\nSelect the sources you want to search:'
+        prompt = 'Sources: '
+
+        prompt = PromptCategory(title=title, prompt=prompt, choices=choices,
+                                raw_data=True)
+        prompt.render()
+
+        while not prompt.is_valid():
+            prompt.get_input()
+
+        return [int(i) - 1 for i in prompt.data]
 
     def get_url_input(self):
-        url_input = ""
-        url_source = ""
-        # https://regexr.com/39nr7
-        regex = r"[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)"
-        print("\nWhich URL you want to search?")
+        choices = self.hostnames
+        title = '\nWhich URL you want to search?'
+        prompt = 'The url: '
 
-        while not (re.match(regex, url_input) and url_source):
-            url_input = input('The url: ')
-            url_source = self.get_source_of_url(urlparse(url_input))
+        prompt = PromptURL(title=title, prompt=prompt, choices=choices)
+        prompt.render()
 
-        return url_input, url_source
+        while not prompt.is_valid():
+            prompt.get_input()
+
+        url_source = self.get_source_of_url(urlparse(prompt.data))
+        return prompt.data, url_source
+
+    def get_search_input(self):
+        search_input = input('\nSearch Text: ').strip()
+        return search_input
 
     def get_max_page_input(self):
         try:
@@ -104,74 +136,37 @@ class QuickSearch:
         else:
             return None
 
-    def get_category_input(self):
-        category_selection = []
-        print("\nWhat category do you want to search?")
-
-        for index, category in enumerate(self.categories):
-            print(str(index) + '.', category)
-
-        while category_selection not in list(range(0, len(self.categories))):
-            try:
-                category_selection = int(input('Category: ').strip())
-            except ValueError:
-                category_selection = None
-
-        return self.categories[category_selection]
-
-    def get_source_input_by_categories(self):
-        source_selections = []
-        print("\nSelect the sources you want to search:")
-
+    def get_sources_of_category(self, category):
+        sources = []
         for source in self.config.get("sources"):
-            if self.category_selection in source.get("categories"):
-                self.sources_of_category.append(source)
+            if category in source.get("categories"):
+                sources.append(source)
+        return sources
 
-        print(str(0) + '.', end=" ")
-        print(background(color(" All ", (0, 0, 0)), (255, 255, 255)))
-        for index, source in enumerate(self.sources_of_category, start=1):
-            bg_color = literal_eval(self.get_style(source["name"], "bg_color"))
-            fg_color = literal_eval(self.get_style(source["name"], "fg_color"))
-            print(str(index) + '.', end=" ")
-            print(background(color(f" {source['name']} ", fg_color), bg_color))
-
-        while not source_selections:
-            try:
-                # make set to handle duplicate inputs
-                source_selections = {int(source_selection) for source_selection in input('Sources: ').split(',')}
-                # if All option is selected
-                if 0 in source_selections:
-                    # filter the selections to accept only negatives
-                    # get positive of them by mapping
-                    # make set to use set subtraction feature in the next code
-                    # convert user selection numbers to indexes by subtracting 1
-                    excludes = set(
-                        map(lambda i: abs(i) - 1, filter(lambda i: True if i < 0 else False, source_selections)))
-                    # add all sources by len and exclude the unwanted
-                    source_selections = set(range(len(self.sources_of_category))) - set(excludes)
-                else:
-                    # don't accept exclusion if already precise selection made
-                    # filter the selections to leave only positives
-                    source_selections = filter(lambda i: True if i > 0 else False, source_selections)
-                    # store the index rather than storing selection
-                    source_selections = [source_selection - 1 for source_selection in source_selections]
-                    # to trigger possible IndexError exception
-                    [self.sources_of_category[source_selection] for source_selection in source_selections]
-            except (ValueError, IndexError):
-                source_selections = []
-
-        return source_selections
-
-    @staticmethod
-    def get_search_input():
-        search_input = input('\nSearch Text: ').strip()
-        return search_input
+    def start(self, search_type=None):
+        self.search_type_selection = self.get_search_type_input() if not search_type else search_type
+        if self.search_type_selection == '0':
+            self.category_selection = self.get_category_input()
+            self.source_selections = self.get_source_input_by_category()
+            self.search_text = self.get_search_input()
+            self.max_page = self.get_max_page_input()
+            self.get_results()
+            self.set_results()
+            self.show_results()
+        if self.search_type_selection == '1':
+            self.url_input, self.url_source = self.get_url_input()
+            self.search_text = self.get_search_input()
+            self.max_page = self.get_max_page_input()
+            self.get_results_from_url()
+            self.set_results()
+            self.show_results()
 
     def get_results(self):
         threads = []
+        sources = self.get_sources_of_category(self.category_selection)
 
         for source_selection in self.source_selections:
-            args = (self.sources_of_category[source_selection],)
+            args = (sources[source_selection],)
             kwargs = {"max_page": self.max_page}
             thread = self.executor.submit(Scraper(*args, **kwargs).search, self.category_selection, self.search_text)
             threads.append(thread)
