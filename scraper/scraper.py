@@ -1,7 +1,6 @@
 import itertools
 import math
 import re
-from concurrent.futures.thread import ThreadPoolExecutor
 from urllib.parse import urljoin
 
 import requests
@@ -9,15 +8,16 @@ from bs4 import BeautifulSoup
 from bs4.element import ResultSet
 from requests.utils import requote_uri
 
-from scraper.services import RequestService
+from scraper.services import RequestMixin
 from scraper.utils import get_text, is_formattable, get_attribute_by_path, prepare_url, find_nth
 
 
-class Scraper:
-    threads = []
+class Scraper(RequestMixin):
 
-    def __init__(self, source, max_page=5):
+    def __init__(self, source, *args, **kwargs):
+        super(Scraper, self).__init__(source, *args, **kwargs)
         self.source = source
+        self.max_page = kwargs.get('max_page', 5)
         self.name = source.get("name")
         self.base_url = source.get("base_url")
         self.query = source.get("query")
@@ -25,18 +25,12 @@ class Scraper:
         self.parser = self.source.get("parser")
         self.attributes = source.get("attributes")
         self.first_next = get_attribute_by_path(source, "page_number.first_next", default=2)
-        self.max_page = max_page
-        self.executor = ThreadPoolExecutor()
-        self.request_service = RequestService(sleep=source.get("sleep_after_request", 0))
         self.driver = None
 
     def search(self, category, search):
         error_count = 0
         results = []
         urls = self.get_urls(category, search)  # multiple results if search has list
-        # threads = [self.executor.submit(self.get_results, url) for url in urls]
-        # for thread in threads:
-        #     results += thread.result()
         for url in urls:
             try:
                 results += self.get_results(url)
@@ -115,7 +109,7 @@ class Scraper:
         return getattr(soup, selector["type"])(*selector["args"], **selector["kwargs"]) if selector else None
 
     def get_results(self, url):
-        content = next(self.request_service.get_page_contents([url.get('url')]))
+        content = next(self.get_page_contents([url.get('url')]))
         soup = BeautifulSoup(content, "lxml")
         results = []
         if soup and self.bs_select(soup, self.source, "validations.is_listing_page"):
@@ -124,7 +118,7 @@ class Scraper:
             if page_number > 1:
                 page_list = [prepare_url(url['url'], self.pagination_query % number) for number in
                              range(self.first_next, page_number + 1)]
-                contents = self.request_service.get_page_contents(page_list)
+                contents = self.get_page_contents(page_list)
                 for content in contents:
                     results += self.get_products(content, url['search'], "listing")
             else:
