@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 
 from colorit import init_colorit, background, color
 
-from QuickSearch.ui.ui import PromptUI, PromptURL, PromptSource
+from cli_prompts import PromptUI, PromptURL, PromptSource
 from scraper.scraper import Scraper
 from scraper.utils import get_attribute_by_path
 
