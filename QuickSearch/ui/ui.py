@@ -23,6 +23,9 @@ class PromptUI:
         if self.choices:
             self._set_choices()
 
+        if not raw_data and data:
+            self._make_data_raw()
+
     def _set_choices(self):
         if isinstance(self.choices, (list, tuple)):
             self.choices = self._get_list()
@@ -30,6 +33,14 @@ class PromptUI:
             pass
         else:
             raise TypeError('choices must be a list or a dict, not %s' % type(self.choices))
+
+    def _make_data_raw(self):
+        for k, v in self.choices.items():
+            if self._data == v:
+                self._data = k
+                break
+        else:
+            self._data = None
 
     def list_choices(self):
         for k, v in self.choices.items():
