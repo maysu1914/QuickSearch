@@ -51,6 +51,10 @@ class PromptUI:
         if prompt and show_text:
             prompt_message = prompt
         self._data = input(prompt_message).strip()
+        self._normalize_data()
+
+    def _normalize_data(self):
+        pass
 
     def is_valid(self):
         if self.choices:
@@ -107,11 +111,7 @@ class PromptURL(PromptUI):
 
 class PromptCategory(PromptUI):
 
-    def get_input(self, show_text=True):
-        super(PromptCategory, self).get_input(show_text=show_text)
-        self.normalize_data()
-
-    def normalize_data(self):
+    def _normalize_data(self):
         try:
             source_selections = {source_selection for source_selection in self._data.split(',')}
             if '0' in source_selections:
