@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 
 from colorit import init_colorit, background, color
 
-from QuickSearch.ui.ui import PromptUI, PromptURL, PromptCategory
+from QuickSearch.ui.ui import PromptUI, PromptURL, PromptSource
 from scraper.scraper import Scraper
 from scraper.utils import get_attribute_by_path
 
@@ -118,7 +118,7 @@ class QuickSearch:
         title = '\nSelect the sources you want to search:'
         prompt = 'Sources: '
 
-        prompt = PromptCategory(title=title, prompt=prompt, choices=choices, data=data)
+        prompt = PromptSource(title=title, prompt=prompt, choices=choices, data=data)
         prompt.render()
 
         while not prompt.is_valid():

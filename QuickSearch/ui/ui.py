@@ -120,7 +120,7 @@ class PromptURL(PromptUI):
             print(title)
 
 
-class PromptCategory(PromptUI):
+class PromptSource(PromptUI):
 
     def _normalize_data(self):
         try:
