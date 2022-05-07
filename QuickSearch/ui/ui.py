@@ -139,6 +139,8 @@ class PromptSource(PromptUI):
 
     def is_valid(self):
         if self.choices:
+            if isinstance(self._data, list):
+                self._data = ''.join(self._data)
             try:
                 if self._data and set(self._data.split(', ')).issubset(set(self.choices.keys())):
                     self._valid = True
