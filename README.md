@@ -1,4 +1,4 @@
-# QuickSearch
+# quick_search
 A project based on Python to make product searching on internet much easier and quicker. Searching every website regularly for a product may tire the user, with this project you can search your product or products very easy and quick.
 
 ## Requirements

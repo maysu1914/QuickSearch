@@ -8,11 +8,11 @@ from bs4 import BeautifulSoup
 from bs4.element import ResultSet
 from requests.utils import requote_uri
 
-from scraper.services import RequestMixin
-from scraper.utils import get_text, is_formattable, get_attribute_by_path, prepare_url, find_nth
+from scraper.mixins import RequestMixin, ToolsMixin
+from scraper.utils import get_attribute_by_path
 
 
-class Scraper(RequestMixin):
+class Scraper(ToolsMixin, RequestMixin):
 
     def __init__(self, source, *args, **kwargs):
         super(Scraper, self).__init__(source, *args, **kwargs)
@@ -51,16 +51,15 @@ class Scraper(RequestMixin):
                 urls.append({'search': search_text, 'url': requote_uri(url)})
         return urls
 
-    @staticmethod
-    def get_all_combinations(search):
+    def get_all_combinations(self, search):
         searches = []
         if '[' in search and ']' in search:
             static = search
             dynamic = []
 
             for a, b in zip(range(1, search.count('[') + 1), range(1, search.count(']') + 1)):
-                start = find_nth(search, '[', a)
-                end = find_nth(search, ']', a) + 1
+                start = self.find_nth(search, '[', a)
+                end = self.find_nth(search, ']', a) + 1
                 part = search[start:end]
                 dynamic.append(part.strip('][').split(','))
                 static = static.replace(part, '')
@@ -108,6 +107,15 @@ class Scraper(RequestMixin):
         selector = get_attribute_by_path(dictionary, f"{attribute_path}.selector")
         return getattr(soup, selector["type"])(*selector["args"], **selector["kwargs"]) if selector else None
 
+    @staticmethod
+    def get_text(element):
+        """
+        it will parse the text of element without children's
+        returns the whole texts if no text found
+        """
+        text = ''.join(element.find_all(text=True, recursive=False)).strip()
+        return text if text else element.text
+
     def get_results(self, url):
         content = next(self.get_page_contents([url.get('url')]))
         soup = BeautifulSoup(content, "lxml")
@@ -116,7 +124,7 @@ class Scraper(RequestMixin):
             page_number = self.get_page_number(self.bs_select(soup, self.source, "page_number"))
             results += self.get_products(content, url['search'], "listing")
             if page_number > 1:
-                page_list = [prepare_url(url['url'], self.pagination_query % number) for number in
+                page_list = [self.prepare_url(url['url'], self.pagination_query % number) for number in
                              range(self.first_next, page_number + 1)]
                 contents = self.get_page_contents(page_list)
                 for content in contents:
@@ -142,7 +150,7 @@ class Scraper(RequestMixin):
     def create_url(self, search, category):
         url = urljoin(self.base_url, self.query["path"])
         search = self.query["space"].join(search.split())
-        category = category.format(search=search) if is_formattable(category) else category
+        category = category.format(search=search) if self.is_formattable(category) else category
         return url % {'category': category, 'search': search}
 
     def get_products(self, content, search, page_type):
@@ -163,8 +171,7 @@ class Scraper(RequestMixin):
                 products.append(data)
         return products
 
-    @staticmethod
-    def get_product_name(result):
+    def get_product_name(self, result):
         if isinstance(result, ResultSet):
             return ' '.join(map(lambda i: ' '.join(i.text.split()), result))
         elif result:
@@ -172,10 +179,9 @@ class Scraper(RequestMixin):
         else:
             return None
 
-    @staticmethod
-    def get_product_price(result):
+    def get_product_price(self, result):
         if isinstance(result, ResultSet):
-            numbers = [''.join([s for s in get_text(e).split(',')[0] if s.isdigit()]) for e in result]
+            numbers = [''.join([s for s in self.get_text(e).split(',')[0] if s.isdigit()]) for e in result]
             numbers = [int(number) for number in numbers if number]
             return min(numbers) if numbers else 0
         elif result:
@@ -184,8 +190,7 @@ class Scraper(RequestMixin):
         else:
             return 0
 
-    @staticmethod
-    def get_product_info(result):
+    def get_product_info(self, result):
         if isinstance(result, ResultSet):
             return ' '.join(map(lambda i: ' '.join(i.text.split()), result))
         elif result:
@@ -193,8 +198,7 @@ class Scraper(RequestMixin):
         else:
             return None
 
-    @staticmethod
-    def get_product_comment_count(result):
+    def get_product_comment_count(self, result):
         if isinstance(result, ResultSet):
             return ' '.join(map(lambda i: ' '.join(i.text.split()), result))
         elif result:
@@ -202,10 +206,9 @@ class Scraper(RequestMixin):
         else:
             return None
 
-    @staticmethod
-    def get_discount_calculated(result):
+    def get_discount_calculated(self, result):
         if isinstance(result, ResultSet):
-            numbers = [''.join([s for s in get_text(e).split(',')[0] if s.isdigit()]) for e in result]
+            numbers = [''.join([s for s in self.get_text(e).split(',')[0] if s.isdigit()]) for e in result]
             values = [int(number) for number in numbers] if numbers and all(numbers) else [0]
             min_val = min(values)
             max_val = max(values)

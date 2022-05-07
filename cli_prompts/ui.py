@@ -23,6 +23,9 @@ class PromptUI:
         if self.choices:
             self._set_choices()
 
+        if not raw_data and data:
+            self._make_data_raw()
+
     def _set_choices(self):
         if isinstance(self.choices, (list, tuple)):
             self.choices = self._get_list()
@@ -30,6 +33,14 @@ class PromptUI:
             pass
         else:
             raise TypeError('choices must be a list or a dict, not %s' % type(self.choices))
+
+    def _make_data_raw(self):
+        for k, v in self.choices.items():
+            if self._data == v:
+                self._data = k
+                break
+        else:
+            self._data = None
 
     def list_choices(self):
         for k, v in self.choices.items():
@@ -51,6 +62,10 @@ class PromptUI:
         if prompt and show_text:
             prompt_message = prompt
         self._data = input(prompt_message).strip()
+        self._normalize_data()
+
+    def _normalize_data(self):
+        pass
 
     def is_valid(self):
         if self.choices:
@@ -105,13 +120,9 @@ class PromptURL(PromptUI):
             print(title)
 
 
-class PromptCategory(PromptUI):
+class PromptSource(PromptUI):
 
-    def get_input(self, show_text=True):
-        super(PromptCategory, self).get_input(show_text=show_text)
-        self.normalize_data()
-
-    def normalize_data(self):
+    def _normalize_data(self):
         try:
             source_selections = {source_selection for source_selection in self._data.split(',')}
             if '0' in source_selections:
@@ -128,6 +139,8 @@ class PromptCategory(PromptUI):
 
     def is_valid(self):
         if self.choices:
+            if isinstance(self._data, list):
+                self._data = ''.join(self._data)
             try:
                 if self._data and set(self._data.split(', ')).issubset(set(self.choices.keys())):
                     self._valid = True
