@@ -6,6 +6,7 @@ from functools import lru_cache
 
 import requests
 from requests.adapters import HTTPAdapter
+from requests.models import PreparedRequest
 from urllib3.util.retry import Retry
 
 
@@ -35,6 +36,15 @@ class RequestMixin:
         retries = Retry(total=3, backoff_factor=0.5)
         session.mount('https://', HTTPAdapter(max_retries=retries))
         return session
+
+    @staticmethod
+    def prepare_url(url, params):
+        """
+        it will prepare an url with query strings by given params
+        """
+        req = PreparedRequest()
+        req.prepare_url(url, params)
+        return req.url
 
     def _request(self, url, **kwargs):
         print(url)
