@@ -13,7 +13,7 @@ from urllib3.util.retry import Retry
 
 class RequestMixin:
     def __init__(self, source, *args, **kwargs):
-        self.sleep = source.get("sleep_after_request", 0)
+        self.sleep = source.get('sleep_after_request', 0)
         self.thread_service = ThreadPoolExecutor()
 
     @staticmethod
@@ -50,7 +50,7 @@ class RequestMixin:
     def _request(self, url, **kwargs):
         print(url)
         method = kwargs.pop('method', 'GET')
-        kwargs.update({"headers": self._get_headers()})
+        kwargs.update({'headers': self._get_headers()})
         session = self._get_session()
         return session.request(method, url, **kwargs)
 
