@@ -18,13 +18,13 @@ class Scraper(ToolsMixin, RequestMixin):
         super(Scraper, self).__init__(source, *args, **kwargs)
         self.source = source
         self.max_page = kwargs.get('max_page', 5)
-        self.name = source.get("name")
-        self.base_url = source.get("base_url")
-        self.query = source.get("query")
-        self.pagination_query = source.get("pagination_query")
-        self.parser = self.source.get("parser")
-        self.attributes = source.get("attributes")
-        self.first_next = get_attribute_by_path(source, "page_number.first_next", default=2)
+        self.name = source.get('name')
+        self.base_url = source.get('base_url')
+        self.query = source.get('query')
+        self.pagination_query = source.get('pagination_query')
+        self.parser = self.source.get('parser')
+        self.attributes = source.get('attributes')
+        self.first_next = get_attribute_by_path(source, 'page_number.first_next', default=2)
         self.driver = None
 
     def search(self, category, search):
@@ -42,7 +42,7 @@ class Scraper(ToolsMixin, RequestMixin):
         return results
 
     def get_urls(self, category, search):
-        categories = self.source.get("categories")
+        categories = self.source.get('categories')
         urls = []
 
         if category in categories:
@@ -105,7 +105,7 @@ class Scraper(ToolsMixin, RequestMixin):
     @staticmethod
     def bs_select(soup, dictionary, attribute_path):
         selector = get_attribute_by_path(dictionary, f"{attribute_path}.selector")
-        return getattr(soup, selector["type"])(*selector["args"], **selector["kwargs"]) if selector else None
+        return getattr(soup, selector['type'])(*selector['args'], **selector['kwargs']) if selector else None
 
     @staticmethod
     def get_text(element):
@@ -118,17 +118,17 @@ class Scraper(ToolsMixin, RequestMixin):
 
     def get_results(self, url):
         content = next(self.get_page_contents([url.get('url')]))
-        soup = BeautifulSoup(content, "lxml")
+        soup = BeautifulSoup(content, 'lxml')
         results = []
-        if soup and self.bs_select(soup, self.source, "validations.is_listing_page"):
-            page_number = self.get_page_number(self.bs_select(soup, self.source, "page_number"))
-            results += self.get_products(content, url['search'], "listing")
+        if soup and self.bs_select(soup, self.source, 'validations.is_listing_page'):
+            page_number = self.get_page_number(self.bs_select(soup, self.source, 'page_number'))
+            results += self.get_products(content, url['search'], 'listing')
             if page_number > 1:
                 page_list = [self.prepare_url(url['url'], self.pagination_query % number) for number in
                              range(self.first_next, page_number + 1)]
                 contents = self.get_page_contents(page_list)
                 for content in contents:
-                    results += self.get_products(content, url['search'], "listing")
+                    results += self.get_products(content, url['search'], 'listing')
             else:
                 pass
         else:
@@ -142,29 +142,29 @@ class Scraper(ToolsMixin, RequestMixin):
             return self.max_page if page > self.max_page else page
         elif result:
             numbers = tuple(map(int, re.findall('\d+', result.text.replace(',', '').replace('.', ''))))
-            page = math.ceil(max(numbers) / self.source["page_number"]["products_per_page"]) if numbers else 1
+            page = math.ceil(max(numbers) / self.source['page_number']['products_per_page']) if numbers else 1
             return self.max_page if page > self.max_page else page
         else:
             return 1
 
     def create_url(self, search, category):
-        url = urljoin(self.base_url, self.query["path"])
-        search = self.query["space"].join(search.split())
+        url = urljoin(self.base_url, self.query['path'])
+        search = self.query['space'].join(search.split())
         category = category.format(search=search) if self.is_formattable(category) else category
         return url % {'category': category, 'search': search}
 
     def get_products(self, content, search, page_type):
-        soup = BeautifulSoup(content, "lxml")
+        soup = BeautifulSoup(content, 'lxml')
         products = []
 
         for product in self.bs_select(soup, self.source, f"product.{page_type}"):
             acceptable = True
             data = {'source': self.name}
             for key, value in self.attributes.items():
-                function = value[page_type]["function"]
+                function = value[page_type]['function']
                 key_path = f"{key}.{page_type}"
                 data[key] = getattr(self, function)(self.bs_select(product, self.attributes, key_path))
-                if value.get("required") and not data[key]:
+                if value.get('required') and not data[key]:
                     acceptable = False
             data['suitable_to_search'] = self.check_the_suitability(data['name'], search)
             if acceptable:

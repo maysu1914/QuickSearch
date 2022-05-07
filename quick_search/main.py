@@ -13,7 +13,7 @@ init_colorit()
 
 
 class QuickSearch:
-    name = "QuickSearch"
+    name = 'QuickSearch'
 
     def __init__(self, config, search_type=None, url=None, category=None,
                  sources=None, search_text=None, max_page=None,
@@ -41,8 +41,8 @@ class QuickSearch:
     @property
     def categories(self):
         categories = []
-        for source in self.config.get("sources"):
-            for category in source.get("categories"):
+        for source in self.config.get('sources'):
+            for category in source.get('categories'):
                 if category not in categories:
                     categories.append(category)
         return categories
@@ -50,14 +50,14 @@ class QuickSearch:
     @property
     def hostnames(self):
         hostnames = []
-        for source in self.config.get("sources"):
-            hostname = urlparse(source.get("base_url")).hostname
+        for source in self.config.get('sources'):
+            hostname = urlparse(source.get('base_url')).hostname
             hostnames.append(hostname)
         return hostnames
 
     def get_source_of_url(self, url):
-        for source in self.config.get("sources"):
-            if urlparse(source.get("base_url")).hostname == getattr(url, "hostname", None):
+        for source in self.config.get('sources'):
+            if urlparse(source.get('base_url')).hostname == getattr(url, 'hostname', None):
                 return source
         else:
             return None
@@ -65,18 +65,18 @@ class QuickSearch:
     @lru_cache
     def get_sources_of_category(self, category):
         sources = [{'name': 'All', 'style': {'bg_color': '(255, 255, 255)', 'fg_color': '(0, 0, 0)'}}]
-        for source in self.config.get("sources"):
-            if category in source.get("categories"):
+        for source in self.config.get('sources'):
+            if category in source.get('categories'):
                 sources.append(source)
         return sources
 
     def get_style(self, source_name, attribute):
         if isinstance(source_name, dict):
-            return get_attribute_by_path(source_name, f'style.{attribute}')
+            return get_attribute_by_path(source_name, f"style.{attribute}")
         else:
-            for source in self.config["sources"]:
-                if source.get("name") == source_name:
-                    return source["style"][attribute]
+            for source in self.config['sources']:
+                if source.get('name') == source_name:
+                    return source['style'][attribute]
             else:
                 return None
 
@@ -111,8 +111,8 @@ class QuickSearch:
         sources = self.get_sources_of_category(self.category)
         choices = []
         for source in sources:
-            bg_color = literal_eval(self.get_style(source, "bg_color"))
-            fg_color = literal_eval(self.get_style(source, "fg_color"))
+            bg_color = literal_eval(self.get_style(source, 'bg_color'))
+            fg_color = literal_eval(self.get_style(source, 'fg_color'))
             choices.append(background(color(f" {source['name']} ", fg_color), bg_color))
 
         title = '\nSelect the sources you want to search:'
@@ -225,10 +225,10 @@ class QuickSearch:
         return correct_results, near_results
 
     def show_results(self, correct_results, near_results):
-        print("\nResults:") if correct_results else ''
+        print('\nResults:') if correct_results else ''
         for product in correct_results:
-            bg_color = literal_eval(self.get_style(product['source'], "bg_color"))
-            fg_color = literal_eval(self.get_style(product['source'], "fg_color"))
+            bg_color = literal_eval(self.get_style(product['source'], 'bg_color'))
+            fg_color = literal_eval(self.get_style(product['source'], 'fg_color'))
             print(background(color(f" {product['source']} ", fg_color), bg_color), end=' ')
             data = (
                 product['name'],
@@ -238,10 +238,10 @@ class QuickSearch:
             )
             print(' • '.join(data))
 
-        print("\nYou may want to look at these:") if near_results else ''
+        print('\nYou may want to look at these:') if near_results else ''
         for product in near_results:
-            bg_color = literal_eval(self.get_style(product['source'], "bg_color"))
-            fg_color = literal_eval(self.get_style(product['source'], "fg_color"))
+            bg_color = literal_eval(self.get_style(product['source'], 'bg_color'))
+            fg_color = literal_eval(self.get_style(product['source'], 'fg_color'))
             print(background(color(f" {product['source']} ", fg_color), bg_color), end=' ')
             data = (
                 product['name'],
@@ -251,4 +251,4 @@ class QuickSearch:
             )
 
             print(' • '.join(data))
-        print("_________________________________\n")
+        print('_________________________________\n')

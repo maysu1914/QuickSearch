@@ -44,7 +44,7 @@ class PromptUI:
 
     def list_choices(self):
         for k, v in self.choices.items():
-            print(f'{k}. {v}')
+            print(f"{k}. {v}")
 
     def _get_title(self):
         return self.title
