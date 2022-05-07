@@ -1,2 +1,2 @@
 CALL venv\Scripts\activate.bat
-python QuickSearch-runner.py
+python quick_search-runner.py
