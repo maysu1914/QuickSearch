@@ -1,5 +1,6 @@
 import concurrent
 import math
+import string
 import time
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
@@ -67,3 +68,18 @@ class RequestMixin:
                 print('Too much error occurred while getting the page contents!', e, url_list)
                 if error_count >= math.ceil(len(url_list) / 3):
                     raise
+
+
+class ToolsMixin:
+
+    @staticmethod
+    def is_formattable(text):
+        return any([tup[1] for tup in string.Formatter().parse(text) if tup[1] is not None])
+
+    @staticmethod
+    def find_nth(haystack, needle, n):
+        start = haystack.find(needle)
+        while start >= 0 and n > 1:
+            start = haystack.find(needle, start + len(needle))
+            n -= 1
+        return start
