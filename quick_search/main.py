@@ -203,21 +203,8 @@ class QuickSearch:
     def normalize_results(results):
         correct_results = []
         near_results = []
-        # sort results by price and suitable_to_search values
-        # (True value is first after than low price)
-        results = sorted(results, key=lambda i: (i['price'] == 0, i['price'], -i['suitable_to_search']))
-
-        unique_results = []
-        seen = set()  # to skip same products from different results
 
         for item in results:
-            r = (item['source'], item['name'], item['price'])
-            # check above data only for duplicate check
-            if r not in seen:
-                seen.add(r)
-                unique_results.append(item)
-
-        for item in unique_results:
             if item.get('suitable_to_search'):
                 correct_results.append(item)
             else:
