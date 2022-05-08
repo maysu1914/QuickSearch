@@ -225,8 +225,15 @@ class QuickSearch:
         return correct_results, near_results
 
     def show_results(self, correct_results, near_results):
-        print('\nResults:') if correct_results else ''
-        for product in correct_results:
+        if correct_results:
+            print('\nResults:')
+            self._show_results(correct_results)
+        if near_results:
+            print('\nYou may want to look at these:')
+            self._show_results(near_results)
+
+    def _show_results(self, results):
+        for product in results:
             bg_color = literal_eval(self.get_style(product['source'], 'bg_color'))
             fg_color = literal_eval(self.get_style(product['source'], 'fg_color'))
             print(background(color(f" {product['source']} ", fg_color), bg_color), end=' ')
@@ -236,19 +243,5 @@ class QuickSearch:
                 product['info'] if product.get('info') else '',
                 product['comment_count'] if product.get('comment_count') else ''
             )
-            print(' • '.join(data))
-
-        print('\nYou may want to look at these:') if near_results else ''
-        for product in near_results:
-            bg_color = literal_eval(self.get_style(product['source'], 'bg_color'))
-            fg_color = literal_eval(self.get_style(product['source'], 'fg_color'))
-            print(background(color(f" {product['source']} ", fg_color), bg_color), end=' ')
-            data = (
-                product['name'],
-                str(product['price']) + ' TL' if product.get('price') else 'Fiyat Yok',
-                product['info'] if product.get('info') else '',
-                product['comment_count'] if product.get('comment_count') else ''
-            )
-
             print(' • '.join(data))
         print('_________________________________\n')
