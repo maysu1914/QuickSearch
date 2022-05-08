@@ -1,4 +1,6 @@
+import hashlib
 import itertools
+import json
 import math
 import re
 from urllib.parse import urljoin
@@ -39,6 +41,7 @@ class Scraper(ToolsMixin, RequestMixin):
                 if error_count >= math.ceil(len(urls) / 4):
                     print(f"Too much error occurred in {self.name}", e)
                     break
+        results = self.filter_results(results)
         return results
 
     def get_urls(self, category, search):
@@ -135,6 +138,20 @@ class Scraper(ToolsMixin, RequestMixin):
             pass
         return results
 
+    def filter_results(self, results):
+        seen = set()
+        filtered_results = []
+        # sort results by price and suitable_to_search values
+        # (True value is first after than low price)
+        results = sorted(results, key=lambda i: (i['price'] == 0, i['price'], -i['suitable_to_search']))
+        for item in results:
+            if item['hash'] in seen:
+                continue
+            else:
+                filtered_results.append(item)
+                seen.add(item['hash'])
+        return filtered_results
+
     def get_page_number(self, result):
         if result and isinstance(result, ResultSet):
             numbers = [max(map(int, re.findall('\d+', e.text))) for e in result if any(re.findall('\d+', e.text))]
@@ -168,8 +185,16 @@ class Scraper(ToolsMixin, RequestMixin):
                     acceptable = False
             data['suitable_to_search'] = self.check_the_suitability(data['name'], search)
             if acceptable:
-                products.append(data)
+                products.append(self.add_hash(data, keys=['name', 'price']))
         return products
+
+    def add_hash(self, product, keys=None):
+        keys = keys or product.keys()
+        hash = hashlib.md5()
+        encoded = json.dumps([product.get(key) for key in keys], sort_keys=True).encode()
+        hash.update(encoded)
+        product['hash'] = hash.hexdigest()
+        return product
 
     def get_product_name(self, result):
         if isinstance(result, ResultSet):
