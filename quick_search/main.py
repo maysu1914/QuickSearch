@@ -168,9 +168,9 @@ class QuickSearch:
 
     def process(self):
         if self.search_type == '0':
-            correct_results, near_results = self.normalize_results(self.results)
+            correct_results, near_results = self.divide_results(self.results)
         elif self.search_type == '1':
-            correct_results, near_results = self.normalize_results(self.results_from_url)
+            correct_results, near_results = self.divide_results(self.results_from_url)
         else:
             raise NotImplementedError('unknown type of %s' % self.search_type)
         self.show_results(correct_results, near_results)
@@ -200,7 +200,7 @@ class QuickSearch:
         return results
 
     @staticmethod
-    def normalize_results(results):
+    def divide_results(results):
         correct_results = []
         near_results = []
 
