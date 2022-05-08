@@ -244,4 +244,3 @@ class QuickSearch:
                 product['comment_count'] if product.get('comment_count') else ''
             )
             print(' • '.join(data))
-        print('_________________________________\n')

@@ -12,3 +12,4 @@ if __name__ == '__main__':
     while True:
         qs = QuickSearch(config=config, max_page=3)
         qs.start()
+        print('_________________________________\n')
