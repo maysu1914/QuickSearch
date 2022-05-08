@@ -141,9 +141,6 @@ class Scraper(ToolsMixin, RequestMixin):
     def filter_results(self, results):
         seen = set()
         filtered_results = []
-        # sort results by price and suitable_to_search values
-        # (True value is first after than low price)
-        results = sorted(results, key=lambda i: (i['price'] == 0, i['price'], -i['suitable_to_search']))
         for item in results:
             if item['hash'] in seen:
                 continue
