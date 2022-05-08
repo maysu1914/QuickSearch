@@ -168,9 +168,9 @@ class QuickSearch:
 
     def process(self):
         if self.search_type == '0':
-            correct_results, near_results = self.normalize_results(self.results)
+            correct_results, near_results = self.divide_results(self.results)
         elif self.search_type == '1':
-            correct_results, near_results = self.normalize_results(self.results_from_url)
+            correct_results, near_results = self.divide_results(self.results_from_url)
         else:
             raise NotImplementedError('unknown type of %s' % self.search_type)
         self.show_results(correct_results, near_results)
@@ -200,24 +200,11 @@ class QuickSearch:
         return results
 
     @staticmethod
-    def normalize_results(results):
+    def divide_results(results):
         correct_results = []
         near_results = []
-        # sort results by price and suitable_to_search values
-        # (True value is first after than low price)
-        results = sorted(results, key=lambda i: (i['price'] == 0, i['price'], -i['suitable_to_search']))
-
-        unique_results = []
-        seen = set()  # to skip same products from different results
 
         for item in results:
-            r = (item['source'], item['name'], item['price'])
-            # check above data only for duplicate check
-            if r not in seen:
-                seen.add(r)
-                unique_results.append(item)
-
-        for item in unique_results:
             if item.get('suitable_to_search'):
                 correct_results.append(item)
             else:
@@ -225,8 +212,15 @@ class QuickSearch:
         return correct_results, near_results
 
     def show_results(self, correct_results, near_results):
-        print('\nResults:') if correct_results else ''
-        for product in correct_results:
+        if correct_results:
+            print('\nResults:')
+            self._show_results(correct_results)
+        if near_results:
+            print('\nYou may want to look at these:')
+            self._show_results(near_results)
+
+    def _show_results(self, results):
+        for product in results:
             bg_color = literal_eval(self.get_style(product['source'], 'bg_color'))
             fg_color = literal_eval(self.get_style(product['source'], 'fg_color'))
             print(background(color(f" {product['source']} ", fg_color), bg_color), end=' ')
@@ -237,18 +231,3 @@ class QuickSearch:
                 product['comment_count'] if product.get('comment_count') else ''
             )
             print(' • '.join(data))
-
-        print('\nYou may want to look at these:') if near_results else ''
-        for product in near_results:
-            bg_color = literal_eval(self.get_style(product['source'], 'bg_color'))
-            fg_color = literal_eval(self.get_style(product['source'], 'fg_color'))
-            print(background(color(f" {product['source']} ", fg_color), bg_color), end=' ')
-            data = (
-                product['name'],
-                str(product['price']) + ' TL' if product.get('price') else 'Fiyat Yok',
-                product['info'] if product.get('info') else '',
-                product['comment_count'] if product.get('comment_count') else ''
-            )
-
-            print(' • '.join(data))
-        print('_________________________________\n')
