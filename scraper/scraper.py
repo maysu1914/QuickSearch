@@ -1,4 +1,6 @@
+import hashlib
 import itertools
+import json
 import math
 import re
 from urllib.parse import urljoin
@@ -168,8 +170,16 @@ class Scraper(ToolsMixin, RequestMixin):
                     acceptable = False
             data['suitable_to_search'] = self.check_the_suitability(data['name'], search)
             if acceptable:
-                products.append(data)
+                products.append(self.add_hash(data, keys=['name', 'price']))
         return products
+
+    def add_hash(self, product, keys=None):
+        keys = keys or product.keys()
+        hash = hashlib.md5()
+        encoded = json.dumps([product.get(key) for key in keys], sort_keys=True).encode()
+        hash.update(encoded)
+        product['hash'] = hash.hexdigest()
+        return product
 
     def get_product_name(self, result):
         if isinstance(result, ResultSet):
