@@ -177,8 +177,8 @@ class QuickSearch:
 
     @property
     def results(self):
-        threads = []
         sources = self.get_sources_of_category(self.category)
+        threads = []
         results = []
 
         for source_selection in self.sources:
@@ -203,6 +203,7 @@ class QuickSearch:
     def divide_results(results):
         correct_results = []
         near_results = []
+        results = sorted(results, key=lambda i: (i['price'] == 0, i['price']))
 
         for item in results:
             if item.get('suitable_to_search'):
