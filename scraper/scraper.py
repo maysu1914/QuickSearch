@@ -41,6 +41,7 @@ class Scraper(ToolsMixin, RequestMixin):
                 if error_count >= math.ceil(len(urls) / 4):
                     print(f"Too much error occurred in {self.name}", e)
                     break
+        results = self.filter_results(results)
         return results
 
     def get_urls(self, category, search):
@@ -136,6 +137,20 @@ class Scraper(ToolsMixin, RequestMixin):
         else:
             pass
         return results
+
+    def filter_results(self, results):
+        seen = set()
+        filtered_results = []
+        # sort results by price and suitable_to_search values
+        # (True value is first after than low price)
+        results = sorted(results, key=lambda i: (i['price'] == 0, i['price'], -i['suitable_to_search']))
+        for item in results:
+            if item['hash'] in seen:
+                continue
+            else:
+                filtered_results.append(item)
+                seen.add(item['hash'])
+        return filtered_results
 
     def get_page_number(self, result):
         if result and isinstance(result, ResultSet):
