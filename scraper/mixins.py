@@ -4,6 +4,7 @@ import string
 import time
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
+from urllib.parse import urlparse, parse_qs
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -43,8 +44,11 @@ class RequestMixin:
         """
         it will prepare an url with query strings by given params
         """
+        parsed_url = urlparse(url)
+        parsed_params = parse_qs(parsed_url.query)
+        parsed_params.update({k: v[0] for k, v in parse_qs(params).items() if v})
         req = PreparedRequest()
-        req.prepare_url(url, params)
+        req.prepare_url(url.split('?')[0], parsed_params)
         return req.url
 
     def _request(self, url, **kwargs):
