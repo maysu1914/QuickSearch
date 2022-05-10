@@ -15,19 +15,41 @@ from scraper.utils import get_attribute_by_path
 
 
 class Scraper(ToolsMixin, RequestMixin):
+    default_first_page = 1
 
     def __init__(self, source, *args, **kwargs):
         super(Scraper, self).__init__(source, *args, **kwargs)
         self.source = source
-        self.max_page = kwargs.get('max_page', 5)
-        self.name = source.get('name')
-        self.base_url = source.get('base_url')
-        self.query = source.get('query')
-        self.pagination_query = source.get('pagination_query')
-        self.parser = self.source.get('parser')
-        self.attributes = source.get('attributes')
-        self.first_next = get_attribute_by_path(source, 'page_number.first_next', default=2)
+        self.max_page = kwargs.get('max_page', 3)
         self.driver = None
+
+    @property
+    def name(self):
+        return self.source.get('name')
+
+    @property
+    def base_url(self):
+        return self.source.get('base_url')
+
+    @property
+    def query(self):
+        return self.source.get('query')
+
+    @property
+    def pagination_query(self):
+        return self.source.get('pagination_query')
+
+    @property
+    def parser(self):
+        return self.source.get('parser')
+
+    @property
+    def attributes(self):
+        return self.source.get('attributes')
+
+    @property
+    def first_page(self):
+        return get_attribute_by_path(self.source, 'page_number.first_page', self.default_first_page)
 
     def search(self, category, search):
         error_count = 0
@@ -53,6 +75,10 @@ class Scraper(ToolsMixin, RequestMixin):
                 url = self.create_url(search_text, categories[category])
                 urls.append({'search': search_text, 'url': requote_uri(url)})
         return urls
+
+    def generate_paginated_urls(self, url, start_page, end_page):
+        for number in range(start_page, end_page):
+            yield self.prepare_url(url, self.pagination_query % number)
 
     def get_all_combinations(self, search):
         searches = []
@@ -127,9 +153,10 @@ class Scraper(ToolsMixin, RequestMixin):
             page_number = self.get_page_number(self.bs_select(soup, self.source, 'page_number'))
             results += self.get_products(content, url['search'], 'listing')
             if page_number > 1:
-                page_list = [self.prepare_url(url['url'], self.pagination_query % number) for number in
-                             range(self.first_next, page_number + 1)]
-                contents = self.get_page_contents(page_list)
+                start_page = self.first_page + 1
+                end_page = self.first_page + page_number
+                url_generator = self.generate_paginated_urls(url['url'], start_page, end_page)
+                contents = self.get_page_contents(url_generator)
                 for content in contents:
                     results += self.get_products(content, url['search'], 'listing')
             else:
