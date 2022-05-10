@@ -1,6 +1,6 @@
 {
     "name": "QuickSearch",
-    "version": "v0.11.1.1",
+    "version": "v0.11.2.0",
     "author": "maysu1914",
     "github": "https://github.com/maysu1914/QuickSearch",
     "sources": [{
@@ -42,7 +42,7 @@
                     "args": ["div.dscrptn"],
                     "kwargs": {}
                 },
-                "first_next": 2,
+                "first_page": 1,
                 "method": "total",
                 "products_per_page": 24
             },
@@ -142,7 +142,7 @@
                     "args": ["ul.pagination"],
                     "kwargs": {}
                 },
-                "first_next": 2,
+                "first_page": 1,
                 "method": "total",
                 "products_per_page": 16
             },
@@ -243,7 +243,7 @@
                     "args": [".resultText > strong"],
                     "kwargs": {}
                 },
-                "first_next": 2,
+                "first_page": 1,
                 "method": "total",
                 "products_per_page": 28
             },
@@ -344,7 +344,7 @@
                     "args": ["div.paginatorStyle-label, div.totalItems"],
                     "kwargs": {}
                 },
-                "first_next": 2,
+                "first_page": 1,
                 "method": "total",
                 "products_per_page": 24
             },
@@ -453,7 +453,7 @@
                     "args": ["span.s-pagination-item"],
                     "kwargs": {}
                 },
-                "first_next": 2,
+                "first_page": 1,
                 "method": "pagination",
                 "products_per_page": null
             },
@@ -551,13 +551,13 @@
             },
             "page_number": {
                 "selector": {
-                    "type": "select",
-                    "args": ["ul.pagination > li > a > em"],
+                    "type": "select_one",
+                    "args": ["div.plp-paging-info > b"],
                     "kwargs": {}
                 },
-                "first_next": 1,
-                "method": "pagination",
-                "products_per_page": null
+                "first_page": 0,
+                "method": "total",
+                "products_per_page": 20
             },
             "product": {
                 "listing": {
@@ -645,7 +645,7 @@
                     "args": ["div[data-cy=no_result_container]"],
                     "kwargs": {}
                 },
-                "first_next": 2,
+                "first_page": 1,
                 "method": "total",
                 "products_per_page": 48
             },
@@ -734,7 +734,7 @@
                     "args": ["ul.pagination > li:not(.pagination-next)"],
                     "kwargs": {}
                 },
-                "first_next": 2,
+                "first_page": 1,
                 "method": "pagination",
                 "products_per_page": null
             },
@@ -819,7 +819,7 @@
                     "args": ["ul.pagination justify-content-center > li"],
                     "kwargs": {}
                 },
-                "first_next": 2,
+                "first_page": 1,
                 "method": "pagination",
                 "products_per_page": null
             },
@@ -902,7 +902,7 @@
                     "args": ["h1[data-testid='feed-grid-title']"],
                     "kwargs": {}
                 },
-                "first_next": 2,
+                "first_page": 1,
                 "method": "total",
                 "products_per_page": 36
             },
