@@ -1,8 +1,4 @@
-import re
-from urllib.parse import urlparse
-
-
-class PromptUI:
+class Prompt:
 
     def __init__(self, title=None, prompt=None, choices=None, data=None,
                  raw_data=True):
@@ -94,70 +90,3 @@ class PromptUI:
 
         if self.choices:
             self.list_choices()
-
-
-class PromptURL(PromptUI):
-
-    def is_valid(self):
-        # https://regexr.com/39nr7
-        regex = r'[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)'
-        if self._data and re.match(regex, self._data):
-            hostname = urlparse(self._data).hostname
-            if self.choices:
-                if hostname in self.choices.values():
-                    self._valid = True
-                else:
-                    self._valid = False
-            else:
-                self._valid = True
-        else:
-            self._valid = False
-        return self._valid
-
-    def render(self):
-        title = self._get_title()
-        if title:
-            print(title)
-
-
-class PromptSource(PromptUI):
-
-    def _normalize_data(self):
-        try:
-            source_selections = {source_selection for source_selection in self._data.split(',')}
-            if '0' in source_selections:
-                source_selections.update(self.choices.keys())
-                source_selections.discard('0')
-            source_selections = {int(i) for i in source_selections}
-            negatives = set([i for i in source_selections if i < 0])
-            discarded_positives = set([abs(i) for i in negatives])
-            source_selections -= negatives | discarded_positives
-            source_selections = {str(i) for i in source_selections}
-            self._data = ', '.join(source_selections)
-        except ValueError:
-            pass
-
-    def is_valid(self):
-        if self.choices:
-            if isinstance(self._data, list):
-                self._data = ''.join(self._data)
-            try:
-                if self._data and set(self._data.split(', ')).issubset(set(self.choices.keys())):
-                    self._valid = True
-                else:
-                    self._valid = False
-            except ValueError:
-                self._valid = False
-        else:
-            self._valid = True
-        return self._valid
-
-    @property
-    def data(self):
-        if self._valid:
-            if self.choices and not self._raw_data:
-                return [self.choices[i] for i in self._data.split(', ')]
-            else:
-                return self._data.split(', ')
-        else:
-            raise ValueError('the data is not valid')
