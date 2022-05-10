@@ -1,3 +1,4 @@
+import re
 from ast import literal_eval
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
@@ -5,11 +6,78 @@ from urllib.parse import urlparse
 
 from colorit import init_colorit, background, color
 
-from cli_prompts import PromptUI, PromptURL, PromptSource
-from scraper.scraper import Scraper
+from cli_prompts import Prompt
+from scraper.models import Scraper
 from scraper.utils import get_attribute_by_path
 
 init_colorit()
+
+
+class PromptURL(Prompt):
+
+    def is_valid(self):
+        # https://regexr.com/39nr7
+        regex = r'[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)'
+        if self._data and re.match(regex, self._data):
+            hostname = urlparse(self._data).hostname
+            if self.choices:
+                if hostname in self.choices.values():
+                    self._valid = True
+                else:
+                    self._valid = False
+            else:
+                self._valid = True
+        else:
+            self._valid = False
+        return self._valid
+
+    def render(self):
+        title = self._get_title()
+        if title:
+            print(title)
+
+
+class PromptSource(Prompt):
+
+    def _normalize_data(self):
+        try:
+            source_selections = {source_selection for source_selection in self._data.split(',')}
+            if '0' in source_selections:
+                source_selections.update(self.choices.keys())
+                source_selections.discard('0')
+            source_selections = {int(i) for i in source_selections}
+            negatives = set([i for i in source_selections if i < 0])
+            discarded_positives = set([abs(i) for i in negatives])
+            source_selections -= negatives | discarded_positives
+            source_selections = {str(i) for i in source_selections}
+            self._data = ', '.join(source_selections)
+        except ValueError:
+            pass
+
+    def is_valid(self):
+        if self.choices:
+            if isinstance(self._data, list):
+                self._data = ''.join(self._data)
+            try:
+                if self._data and set(self._data.split(', ')).issubset(set(self.choices.keys())):
+                    self._valid = True
+                else:
+                    self._valid = False
+            except ValueError:
+                self._valid = False
+        else:
+            self._valid = True
+        return self._valid
+
+    @property
+    def data(self):
+        if self._valid:
+            if self.choices and not self._raw_data:
+                return [self.choices[i] for i in self._data.split(', ')]
+            else:
+                return self._data.split(', ')
+        else:
+            raise ValueError('the data is not valid')
 
 
 class QuickSearch:
@@ -85,7 +153,7 @@ class QuickSearch:
         title = 'Which way do you prefer to search with?'
         prompt = 'Search Type: '
 
-        prompt = PromptUI(title=title, prompt=prompt, choices=choices, data=data)
+        prompt = Prompt(title=title, prompt=prompt, choices=choices, data=data)
         prompt.render()
 
         while not prompt.is_valid():
@@ -98,8 +166,8 @@ class QuickSearch:
         title = '\nWhat category do you want to search?'
         prompt = 'Category: '
 
-        prompt = PromptUI(title=title, prompt=prompt, choices=choices, data=data,
-                          raw_data=False)
+        prompt = Prompt(title=title, prompt=prompt, choices=choices, data=data,
+                        raw_data=False)
         prompt.render()
 
         while not prompt.is_valid():
@@ -225,10 +293,8 @@ class QuickSearch:
             bg_color = literal_eval(self.get_style(product['source'], 'bg_color'))
             fg_color = literal_eval(self.get_style(product['source'], 'fg_color'))
             print(background(color(f" {product['source']} ", fg_color), bg_color), end=' ')
-            data = (
-                product['name'],
-                str(product['price']) + ' TL' if product.get('price') else 'Fiyat Yok',
-                product['info'] if product.get('info') else '',
-                product['comment_count'] if product.get('comment_count') else ''
-            )
+            data = [product['name'], str(product['price']) + ' TL' if product.get('price') else 'Fiyat Yok',
+                    product['info'] if product.get('info') else '',
+                    product['comment_count'] if product.get('comment_count') else '',
+                    f"%{product['discount']} indirim" if product.get('discount') else '']
             print(' • '.join(data))
