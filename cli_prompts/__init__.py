@@ -1,3 +1,3 @@
-from cli_prompts.ui import PromptUI, PromptURL, PromptSource
+from cli_prompts.models import Prompt
 
-__all__ = ['PromptUI', 'PromptURL', 'PromptSource']
+__all__ = ['Prompt']
