@@ -117,7 +117,7 @@ class Scraper(ToolsMixin, RequestMixin):
         returns the whole texts if no text found
         """
         text = ''.join(element.find_all(text=True, recursive=False)).strip()
-        return text if text else element.text
+        return text or element.text
 
     def get_results(self, url):
         content = next(self.get_page_contents([url.get('url')]))
