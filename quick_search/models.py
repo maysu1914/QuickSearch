@@ -10,6 +10,8 @@ from cli_prompts import Prompt
 from scraper.models import Scraper
 from scraper.utils import get_attribute_by_path
 
+EXECUTOR = ThreadPoolExecutor()
+
 init_colorit()
 
 
@@ -75,59 +77,54 @@ class PromptSource(Prompt):
 
 
 class QuickSearch:
-    name = 'QuickSearch'
 
-    def __init__(self, config, search_type=None, url=None, category=None,
-                 sources=None, search_text=None, max_page=None,
-                 thread_pool_executor=None):
+    def __init__(self, config, max_page=None):
         self.config = config
-        if not isinstance(thread_pool_executor, ThreadPoolExecutor):
-            self.executor = ThreadPoolExecutor()
-        else:
-            self.executor = thread_pool_executor
-
-        self.search_type = search_type
-        self.url = url
-        self.category = category
-        self.sources = sources
-        self.search_text = search_text
+        self.sources = config['sources']
         self.max_page = max_page
 
-    @property
-    def search_types(self):
+    def get_search_types(self):
         search_types = (
             'By entering the categories, sources, and a search text.',
-            'By entering a URL and a search text.')
+            'By entering a URL and a search text.'
+        )
         return search_types
 
-    @property
-    def categories(self):
+    def get_categories(self):
         categories = []
-        for source in self.config.get('sources'):
+        for source in self.sources:
             for category in source.get('categories'):
                 if category not in categories:
                     categories.append(category)
         return categories
 
-    @property
-    def hostnames(self):
+    def get_hostnames(self):
         hostnames = []
-        for source in self.config.get('sources'):
+        for source in self.sources:
             hostname = urlparse(source.get('base_url')).hostname
             hostnames.append(hostname)
         return hostnames
 
-    def get_source_of_url(self, url):
-        for source in self.config.get('sources'):
-            if urlparse(source.get('base_url')).hostname == getattr(url, 'hostname', None):
+    def get_source_by_url(self, url):
+        if getattr(url, 'hostname', None):
+            url = urlparse(url)
+        for source in self.sources:
+            base_url = urlparse(source.get('base_url'))
+            if base_url.hostname == url.hostname:
                 return source
-        else:
-            return None
 
     @lru_cache
     def get_sources_of_category(self, category):
-        sources = [{'name': 'All', 'style': {'bg_color': '(255, 255, 255)', 'fg_color': '(0, 0, 0)'}}]
-        for source in self.config.get('sources'):
+        sources = [
+            {
+                'name': 'All',
+                'style': {
+                    'bg_color': '(255, 255, 255)',
+                    'fg_color': '(0, 0, 0)'
+                }
+            }
+        ]
+        for source in self.sources:
             if category in source.get('categories'):
                 sources.append(source)
         return sources
@@ -136,14 +133,14 @@ class QuickSearch:
         if isinstance(source_name, dict):
             return get_attribute_by_path(source_name, f"style.{attribute}")
         else:
-            for source in self.config['sources']:
+            for source in self.sources:
                 if source.get('name') == source_name:
                     return source['style'][attribute]
             else:
                 return None
 
     def get_search_type_input(self, data=None):
-        choices = self.search_types
+        choices = self.get_search_types()
         title = 'Which way do you prefer to search with?'
         prompt = 'Search Type: '
 
@@ -156,7 +153,7 @@ class QuickSearch:
         return prompt.data
 
     def get_category_input(self, data=None):
-        choices = self.categories
+        choices = self.get_categories()
         title = '\nWhat category do you want to search?'
         prompt = 'Category: '
 
@@ -169,18 +166,22 @@ class QuickSearch:
 
         return prompt.data
 
-    def get_source_input_by_category(self, data=None):
-        sources = self.get_sources_of_category(self.category)
+    def get_source_input_by_category(self, category):
+        sources = self.get_sources_of_category(category)
         choices = []
         for source in sources:
             bg_color = literal_eval(self.get_style(source, 'bg_color'))
             fg_color = literal_eval(self.get_style(source, 'fg_color'))
-            choices.append(background(color(f" {source['name']} ", fg_color), bg_color))
+            choices.append(
+                background(color(f" {source['name']} ", fg_color), bg_color)
+            )
 
         title = '\nSelect the sources you want to search:'
         prompt = 'Sources: '
 
-        prompt = PromptSource(title=title, prompt=prompt, choices=choices, data=data)
+        prompt = PromptSource(
+            title=title, prompt=prompt, choices=choices
+        )
         prompt.render()
 
         while not prompt.is_valid():
@@ -189,18 +190,19 @@ class QuickSearch:
         return prompt.data
 
     def get_url_input(self, data=None):
-        choices = self.hostnames
+        choices = self.get_hostnames()
         title = '\nWhich URL you want to search?'
         prompt = 'The url: '
 
-        prompt = PromptURL(title=title, prompt=prompt, choices=choices, data=data)
+        prompt = PromptURL(
+            title=title, prompt=prompt, choices=choices, data=data
+        )
         prompt.render()
 
         while not prompt.is_valid():
             prompt.get_input()
 
-        source = self.get_source_of_url(urlparse(prompt.data))
-        return prompt.data, [source]
+        return prompt.data
 
     def get_search_input(self):
         search_input = input('\nSearch Text: ').strip()
@@ -215,38 +217,33 @@ class QuickSearch:
         return max_page_input
 
     def start(self):
-        self.search_type = self.get_search_type_input(data=self.search_type)
-        if self.search_type == '0':
-            self.category = self.get_category_input(data=self.category)
-            self.sources = self.get_source_input_by_category(data=self.sources)
-        elif self.search_type == '1':
-            self.url, self.sources = self.get_url_input(data=self.url)
-        else:
-            raise NotImplementedError('unknown type of %s' % self.search_type)
+        search_type = self.get_search_type_input()
+        max_page = self.get_max_page_input() or self.max_page
 
-        self.search_text = self.search_text or self.get_search_input()
-        self.max_page = self.get_max_page_input() or self.max_page
-        self.process()
-
-    def process(self):
-        if self.search_type == '0':
-            correct_results, near_results = self.divide_results(self.results)
-        elif self.search_type == '1':
-            correct_results, near_results = self.divide_results(self.results_from_url)
+        if search_type == '0':
+            category = self.get_category_input()
+            sources = self.get_source_input_by_category(category)
+            search_text = self.get_search_input()
+            results = self.get_results(sources, category, search_text, max_page)
         else:
-            raise NotImplementedError('unknown type of %s' % self.search_type)
+            url = self.get_url_input()
+            source = self.get_source_by_url(url)
+            search_text = self.get_search_input()
+            results = self.get_results_by_url(
+                url, source, search_text, max_page
+            )
+
+        correct_results, near_results = self.divide_results(results)
         self.show_results(correct_results, near_results)
 
-    @property
-    def results(self):
-        sources = self.get_sources_of_category(self.category)
+    def get_results(self, sources, category, search_text, max_page):
         threads = []
         results = []
 
-        for source_selection in self.sources:
-            source = sources[int(source_selection)]
-            scraper = Scraper(source, max_page=self.max_page)
-            thread = self.executor.submit(scraper.search, self.category, self.search_text)
+        for source_selection in sources:
+            source = self.sources[int(source_selection) - 1]
+            scraper = Scraper(source, max_page=max_page)
+            thread = EXECUTOR.submit(scraper.search, category, search_text)
             threads.append(thread)
 
         for thread in threads:
@@ -254,11 +251,10 @@ class QuickSearch:
 
         return results
 
-    @property
-    def results_from_url(self):
-        scraper = Scraper(self.sources[0], max_page=self.max_page)
-        combinations = scraper.get_all_combinations(self.search_text)
-        results = scraper.get_results({'url': self.url, 'search': combinations})
+    def get_results_by_url(self, url, source, search_text, max_page):
+        scraper = Scraper(source, max_page=max_page)
+        combinations = scraper.get_all_combinations(search_text)
+        results = scraper.get_results({'url': url, 'search': combinations})
         return results
 
     @staticmethod
@@ -282,13 +278,36 @@ class QuickSearch:
             print('\nYou may want to look at these:')
             self._show_results(near_results)
 
+    def _get_styled_text(self, text, fg_color=None, bg_color=None):
+        text = fg_color and color(text, fg_color) or text
+        text = bg_color and background(text, bg_color) or text
+        return text
+
     def _show_results(self, results):
         for product in results:
-            bg_color = literal_eval(self.get_style(product['source'], 'bg_color'))
-            fg_color = literal_eval(self.get_style(product['source'], 'fg_color'))
-            print(background(color(f" {product['source']} ", fg_color), bg_color), end=' ')
-            data = [product['name'], str(product['price']) + ' TL' if product.get('price') else 'Fiyat Yok',
-                    product['info'] if product.get('info') else '',
-                    product['comment_count'] if product.get('comment_count') else '',
-                    f"%{product['discount']} indirim" if product.get('discount') else '']
-            print(' • '.join(data))
+            bg_color = literal_eval(
+                self.get_style(product['source'], 'bg_color')
+            )
+            fg_color = literal_eval(
+                self.get_style(product['source'], 'fg_color')
+            )
+            source = self._get_styled_text(
+                f" {product['source']} ", fg_color, bg_color
+            )
+            print(source, end=' ')
+
+            name = product['name']
+            price = product['price']
+            currency = 'TL'
+            info = product.get('info')
+            comment_count = product.get('comment_count')
+            discount = product.get('discount')
+
+            line = "%s • %s • %s • %s • %s" % (
+                name,
+                price and "%s %s" % (price, currency) or 'Fiyat Yok',
+                info or '',
+                comment_count or '',
+                discount and "%%s indirim" % discount or ''
+            )
+            print(line)
