@@ -41,7 +41,7 @@ class PromptSource(Prompt):
 
     def _normalize_data(self):
         try:
-            source_selections = {source_selection for source_selection in self._data.split(',')}
+            source_selections = {s for s in self._data.split(',')}
             if '0' in source_selections:
                 source_selections.update(self.choices.keys())
                 source_selections.discard('0')
@@ -50,21 +50,15 @@ class PromptSource(Prompt):
             discarded_positives = set([abs(i) for i in negatives])
             source_selections -= negatives | discarded_positives
             source_selections = {str(i) for i in source_selections}
-            self._data = ', '.join(source_selections)
+            self._data = source_selections
         except ValueError:
             pass
 
     def is_valid(self):
+        data = self._data
         if self.choices:
-            if isinstance(self._data, list):
-                self._data = ''.join(self._data)
-            try:
-                if self._data and set(self._data.split(', ')).issubset(set(self.choices.keys())):
-                    self._valid = True
-                else:
-                    self._valid = False
-            except ValueError:
-                self._valid = False
+            if data and set(data).issubset(set(self.choices.keys())):
+                self._valid = True
         else:
             self._valid = True
         return self._valid
@@ -73,9 +67,9 @@ class PromptSource(Prompt):
     def data(self):
         if self._valid:
             if self.choices and not self._raw_data:
-                return [self.choices[i] for i in self._data.split(', ')]
+                return [self.choices[i] for i in self._data]
             else:
-                return self._data.split(', ')
+                return self._data
         else:
             raise ValueError('the data is not valid')
 
