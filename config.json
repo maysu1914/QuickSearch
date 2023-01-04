@@ -3,7 +3,8 @@
     "version": "v0.11.2.1",
     "author": "maysu1914",
     "github": "https://github.com/maysu1914/QuickSearch",
-    "sources": [{
+    "sources": [
+        {
             "name": "Trendyol",
             "type": "marketplace",
             "style": {
@@ -20,17 +21,16 @@
             "categories": {
                 "All": "",
                 "Notebooks": "103108",
-                "Desktop PCs": "103670",
                 "Smartphones": "109460",
-                "Monitors": "103668",
-                "Digital Cameras": "104042",
-                "Shoes": "104543,101421,1172,101429,1128,101426,1057,144727,101422,101428,101423,105794,1025,1037,142587"
+                "Monitors": "103668"
             },
             "validations": {
                 "is_listing_page": {
                     "selector": {
                         "type": "select_one",
-                        "args": ["div.dscrptn"],
+                        "args": [
+                            "div.dscrptn"
+                        ],
                         "kwargs": {}
                     }
                 },
@@ -39,7 +39,9 @@
             "page_number": {
                 "selector": {
                     "type": "select_one",
-                    "args": ["div.dscrptn"],
+                    "args": [
+                        "div.dscrptn"
+                    ],
                     "kwargs": {}
                 },
                 "first_page": 1,
@@ -50,7 +52,10 @@
                 "listing": {
                     "selector": {
                         "type": "find_all",
-                        "args": ["div", "p-card-wrppr"],
+                        "args": [
+                            "div",
+                            "p-card-wrppr"
+                        ],
                         "kwargs": {}
                     }
                 },
@@ -63,44 +68,48 @@
                         "function": "get_product_name",
                         "selector": {
                             "type": "select",
-                            "args": [".prdct-desc-cntnr-ttl, .prdct-desc-cntnr-name"],
+                            "args": [
+                                ".prdct-desc-cntnr-ttl, .prdct-desc-cntnr-name"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "price": {
                     "listing": {
                         "function": "get_product_price",
                         "selector": {
                             "type": "select",
-                            "args": ["div.prc-box-dscntd, div.prc-box-sllng"],
+                            "args": [
+                                "div.prc-box-dscntd, div.prc-box-sllng"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "info": {
                     "listing": {
                         "function": "get_product_info",
                         "selector": {
                             "type": "select",
-                            "args": ["div.stmp.fc"],
+                            "args": [
+                                "div.stmp.fc, .low-price-in-last-month"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "comment_count": {
                     "listing": {
                         "function": "get_product_comment_count",
                         "selector": {
                             "type": "select_one",
-                            "args": ["span.ratingCount"],
+                            "args": [
+                                "span.ratingCount"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 }
             }
         },
@@ -121,16 +130,16 @@
             "categories": {
                 "All": "",
                 "Notebooks": "notebook/",
-                "Desktop PCs": "masaustu-bilgisayarlar/",
                 "Smartphones": "cep-telefonu-modelleri/",
-                "Monitors": "monitor/",
-                "Digital Cameras": "fotograf-makinesi/"
+                "Monitors": "monitor/"
             },
             "validations": {
                 "is_listing_page": {
                     "selector": {
                         "type": "select_one",
-                        "args": ["div.product-list--list-page"],
+                        "args": [
+                            "div.product-list--list-page"
+                        ],
                         "kwargs": {}
                     }
                 },
@@ -139,7 +148,9 @@
             "page_number": {
                 "selector": {
                     "type": "select_one",
-                    "args": ["ul.pagination"],
+                    "args": [
+                        ".wrapper-detailpage-header__item-left"
+                    ],
                     "kwargs": {}
                 },
                 "first_page": 1,
@@ -150,7 +161,10 @@
                 "listing": {
                     "selector": {
                         "type": "find_all",
-                        "args": ["div", "product-list--list-page"],
+                        "args": [
+                            "div",
+                            "product-list--list-page"
+                        ],
                         "kwargs": {}
                     }
                 },
@@ -162,45 +176,51 @@
                     "listing": {
                         "function": "get_product_name",
                         "selector": {
-                            "type": "find",
-                            "args": ["div", "product-list__product-name"],
+                            "type": "select",
+                            "args": [
+                                "div.product-list__product-name, div.product-list__product-code"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "price": {
                     "listing": {
                         "function": "get_product_price",
                         "selector": {
                             "type": "find",
-                            "args": ["span", "product-list__price"],
+                            "args": [
+                                "span",
+                                "product-list__price"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "info": {
                     "listing": {
                         "function": "get_product_info",
                         "selector": {
                             "type": "select",
-                            "args": ["span.wrapper-condition__text"],
+                            "args": [
+                                "div.price-basket-camp--helper, span.wrapper-condition__text"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "comment_count": {
                     "listing": {
                         "function": "get_product_comment_count",
                         "selector": {
                             "type": "find",
-                            "args": ["a", "comment-count"],
+                            "args": [
+                                "a",
+                                "comment-count"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 }
             }
         },
@@ -221,17 +241,16 @@
             "categories": {
                 "All": "arama",
                 "Notebooks": "bilgisayar/dizustu-bilgisayar",
-                "Desktop PCs": "bilgisayar/masaustu-bilgisayar",
                 "Smartphones": "telefon-ve-aksesuarlari/cep-telefonu",
-                "Monitors": "bilgisayar/cevre-birimleri/monitor-ve-ekran",
-                "Digital Cameras": "fotograf-ve-kamera/fotograf-makinesi",
-                "Shoes": "ayakkabi-ve-canta"
+                "Monitors": "bilgisayar/cevre-birimleri/monitor-ve-ekran"
             },
             "validations": {
                 "is_listing_page": {
                     "selector": {
                         "type": "select_one",
-                        "args": ["#view > ul > li"],
+                        "args": [
+                            "#view > ul > li"
+                        ],
                         "kwargs": {}
                     }
                 },
@@ -240,7 +259,9 @@
             "page_number": {
                 "selector": {
                     "type": "select_one",
-                    "args": [".resultText > strong"],
+                    "args": [
+                        ".resultText > strong"
+                    ],
                     "kwargs": {}
                 },
                 "first_page": 1,
@@ -251,7 +272,9 @@
                 "listing": {
                     "selector": {
                         "type": "select",
-                        "args": ["#view > ul > li"],
+                        "args": [
+                            "#view > ul > li"
+                        ],
                         "kwargs": {}
                     }
                 },
@@ -264,44 +287,51 @@
                         "function": "get_product_name",
                         "selector": {
                             "type": "find",
-                            "args": ["h3", "productName"],
+                            "args": [
+                                "h3",
+                                "productName"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "price": {
                     "listing": {
                         "function": "get_product_price",
                         "selector": {
                             "type": "select",
-                            "args": ["del, ins, p.view-instant-price"],
+                            "args": [
+                                "del, ins, p.view-instant-price"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "info": {
                     "listing": {
                         "function": "get_product_info",
                         "selector": {
                             "type": "find",
-                            "args": ["span", "freeShipping"],
+                            "args": [
+                                "span",
+                                "cargoBadgeText"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "comment_count": {
                     "listing": {
                         "function": "get_product_comment_count",
                         "selector": {
                             "type": "find",
-                            "args": ["span", "ratingText"],
+                            "args": [
+                                "span",
+                                "ratingText"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 }
             }
         },
@@ -322,17 +352,16 @@
             "categories": {
                 "All": "",
                 "Notebooks": "&kategori=98",
-                "Desktop PCs": "&kategori=34",
                 "Smartphones": "&kategori=371965",
-                "Monitors": "&kategori=57",
-                "Digital Cameras": "&kategori=60002083",
-                "Shoes": "&kategori=2147483636"
+                "Monitors": "&kategori=57"
             },
             "validations": {
                 "is_listing_page": {
                     "selector": {
                         "type": "select_one",
-                        "args": ["li.productListContent-item, div.box.product, div.deal-of-the-day-details"],
+                        "args": [
+                            "a[class*=moria-ProductCard]"
+                        ],
                         "kwargs": {}
                     }
                 },
@@ -341,7 +370,9 @@
             "page_number": {
                 "selector": {
                     "type": "select_one",
-                    "args": ["div.paginatorStyle-label, div.totalItems"],
+                    "args": [
+                        "b[class*=searchResultSummaryBar]"
+                    ],
                     "kwargs": {}
                 },
                 "first_page": 1,
@@ -352,7 +383,9 @@
                 "listing": {
                     "selector": {
                         "type": "select",
-                        "args": ["li.productListContent-item, div.box.product, div.deal-of-the-day-details"],
+                        "args": [
+                            "a[class*=moria-ProductCard]"
+                        ],
                         "kwargs": {}
                     }
                 },
@@ -365,7 +398,9 @@
                         "function": "get_product_name",
                         "selector": {
                             "type": "select_one",
-                            "args": ["h3[data-test-id='product-card-name'], h3.product-title, h3.deal-of-the-day-name"],
+                            "args": [
+                                "h3[data-test-id='product-card-name'], h3.product-title, h3.deal-of-the-day-name"
+                            ],
                             "kwargs": {}
                         }
                     }
@@ -375,7 +410,9 @@
                         "function": "get_product_price",
                         "selector": {
                             "type": "select",
-                            "args": ["div[data-test-id='price-current-price'], div[data-test-id='price-prev-price'] > div:first-child, div.price-value, span.product-price, span.product-old-price, del.product-old-price"],
+                            "args": [
+                                "div[data-test-id='price-current-price'], div[data-test-id='price-prev-price'] > div:first-child, div.price-value, span.product-price, span.product-old-price, del.product-old-price"
+                            ],
                             "kwargs": {}
                         }
                     }
@@ -385,7 +422,9 @@
                         "function": "get_product_info",
                         "selector": {
                             "type": "select",
-                            "args": ["div.shipping-status, .dod-badge"],
+                            "args": [
+                                "div.shipping-status, .dod-badge, div[data-test-id=product-image-footer-label]"
+                            ],
                             "kwargs": {}
                         }
                     }
@@ -395,7 +434,9 @@
                         "function": "get_discount_calculated",
                         "selector": {
                             "type": "select",
-                            "args": ["div[data-test-id='price-current-price'], div[data-test-id='price-prev-price'] > div:first-child, div.price-value, span.product-price, span.product-old-price, del.product-old-price"],
+                            "args": [
+                                "div[data-test-id='price-current-price'], div[data-test-id='price-prev-price'] > div:first-child, div.price-value, span.product-price, span.product-old-price, del.product-old-price"
+                            ],
                             "kwargs": {}
                         }
                     }
@@ -405,7 +446,9 @@
                         "function": "get_product_comment_count",
                         "selector": {
                             "type": "select_one",
-                            "args": ["div[data-test-id='review'] > div:last-child, span.number-of-reviews"],
+                            "args": [
+                                "div[data-test-id='review'] > div:last-child, span.number-of-reviews"
+                            ],
                             "kwargs": {}
                         }
                     }
@@ -439,9 +482,12 @@
                 "is_listing_page": {
                     "selector": {
                         "type": "find",
-                        "args": ["div", {
-                            "data-component-type": "s-search-result"
-                        }],
+                        "args": [
+                            "div",
+                            {
+                                "data-component-type": "s-search-result"
+                            }
+                        ],
                         "kwargs": {}
                     }
                 },
@@ -450,7 +496,9 @@
             "page_number": {
                 "selector": {
                     "type": "select",
-                    "args": ["span.s-pagination-item"],
+                    "args": [
+                        "span.s-pagination-item"
+                    ],
                     "kwargs": {}
                 },
                 "first_page": 1,
@@ -461,9 +509,12 @@
                 "listing": {
                     "selector": {
                         "type": "find_all",
-                        "args": ["div", {
-                            "data-component-type": "s-search-result"
-                        }],
+                        "args": [
+                            "div",
+                            {
+                                "data-component-type": "s-search-result"
+                            }
+                        ],
                         "kwargs": {}
                     }
                 },
@@ -476,44 +527,49 @@
                         "function": "get_product_name",
                         "selector": {
                             "type": "select_one",
-                            "args": ["a.a-link-normal.a-text-normal > span"],
+                            "args": [
+                                "a.a-link-normal.a-text-normal > span"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "price": {
                     "listing": {
                         "function": "get_product_price",
                         "selector": {
                             "type": "find",
-                            "args": ["span", "a-price-whole"],
+                            "args": [
+                                "span",
+                                "a-price-whole"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "info": {
                     "listing": {
                         "function": "get_product_info",
                         "selector": {
                             "type": "select_one",
-                            "args": ["span[aria-label='Kargo BEDAVA'] > span"],
+                            "args": [
+                                "span[aria-label='Kargo BEDAVA'] > span"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "comment_count": {
                     "listing": {
                         "function": "get_product_comment_count",
                         "selector": {
                             "type": "select_one",
-                            "args": ["span[class='a-size-base']"],
+                            "args": [
+                                "span[class='a-size-base']"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 }
             }
         },
@@ -543,7 +599,9 @@
                 "is_listing_page": {
                     "selector": {
                         "type": "select_one",
-                        "args": ["div#product-item"],
+                        "args": [
+                            "div#product-item"
+                        ],
                         "kwargs": {}
                     }
                 },
@@ -552,7 +610,9 @@
             "page_number": {
                 "selector": {
                     "type": "select_one",
-                    "args": ["div.plp-paging-info > b"],
+                    "args": [
+                        "div.plp-paging-info > b"
+                    ],
                     "kwargs": {}
                 },
                 "first_page": 0,
@@ -563,7 +623,9 @@
                 "listing": {
                     "selector": {
                         "type": "select",
-                        "args": ["div#product-item"],
+                        "args": [
+                            "div#product-item"
+                        ],
                         "kwargs": {}
                     }
                 },
@@ -576,33 +638,36 @@
                         "function": "get_product_name",
                         "selector": {
                             "type": "select_one",
-                            "args": ["h3.prd-title.prd-title-style"],
+                            "args": [
+                                "h3.prd-title.prd-title-style"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "price": {
                     "listing": {
                         "function": "get_product_price",
                         "selector": {
                             "type": "select",
-                            "args": ["div.prd-prc1, div.prd-prc2"],
+                            "args": [
+                                "div.prd-prc1, div.prd-prc2"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "info": {
                     "listing": {
                         "function": "get_product_info",
                         "selector": {
                             "type": "select",
-                            "args": ["i.prd-badge, div.prd-features > span"],
+                            "args": [
+                                "i.prd-badge, div.prd-features > span"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 }
             }
         },
@@ -633,7 +698,10 @@
                 "is_listing_page": {
                     "selector": {
                         "type": "find",
-                        "args": ["article", "product-card"],
+                        "args": [
+                            "article",
+                            "product-card"
+                        ],
                         "kwargs": {}
                     }
                 },
@@ -642,7 +710,9 @@
             "page_number": {
                 "selector": {
                     "type": "select_one",
-                    "args": ["div[data-cy=no_result_container]"],
+                    "args": [
+                        "div[data-cy=no_result_container]"
+                    ],
                     "kwargs": {}
                 },
                 "first_page": 1,
@@ -653,7 +723,10 @@
                 "listing": {
                     "selector": {
                         "type": "find_all",
-                        "args": ["article", "product-card"],
+                        "args": [
+                            "article",
+                            "product-card"
+                        ],
                         "kwargs": {}
                     }
                 },
@@ -666,33 +739,37 @@
                         "function": "get_product_name",
                         "selector": {
                             "type": "find",
-                            "args": ["h3"],
+                            "args": [
+                                "h3"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "price": {
                     "listing": {
                         "function": "get_product_price",
                         "selector": {
                             "type": "find",
-                            "args": ["span", "buy-price"],
+                            "args": [
+                                "span",
+                                "buy-price"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "info": {
                     "listing": {
                         "function": "get_product_info",
                         "selector": {
                             "type": "select",
-                            "args": ["section.product-features"],
+                            "args": [
+                                "section.product-features"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 }
             }
         },
@@ -722,7 +799,10 @@
                 "is_listing_page": {
                     "selector": {
                         "type": "find",
-                        "args": ["ul", "products-list"],
+                        "args": [
+                            "ul",
+                            "products-list"
+                        ],
                         "kwargs": {}
                     }
                 },
@@ -731,7 +811,9 @@
             "page_number": {
                 "selector": {
                     "type": "select",
-                    "args": ["ul.pagination > li:not(.pagination-next)"],
+                    "args": [
+                        "ul.pagination > li:not(.pagination-next)"
+                    ],
                     "kwargs": {}
                 },
                 "first_page": 1,
@@ -742,7 +824,9 @@
                 "listing": {
                     "selector": {
                         "type": "select",
-                        "args": ["ul.products-list > li:not([class])"],
+                        "args": [
+                            "ul.products-list > li:not([class])"
+                        ],
                         "kwargs": {}
                     }
                 },
@@ -755,33 +839,36 @@
                         "function": "get_product_name",
                         "selector": {
                             "type": "find",
-                            "args": ["h2"],
+                            "args": [
+                                "h2"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "price": {
                     "listing": {
                         "function": "get_product_price",
                         "selector": {
                             "type": "select",
-                            "args": ["div.price.small"],
+                            "args": [
+                                "div.price.small"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "comment_count": {
                     "listing": {
                         "function": "get_product_comment_count",
                         "selector": {
                             "type": "select_one",
-                            "args": ["span.see-reviews"],
+                            "args": [
+                                "span.see-reviews"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 }
             }
         },
@@ -807,7 +894,10 @@
                 "is_listing_page": {
                     "selector": {
                         "type": "find",
-                        "args": ["div", "js-product-vertical"],
+                        "args": [
+                            "div",
+                            "js-product-vertical"
+                        ],
                         "kwargs": {}
                     }
                 },
@@ -816,7 +906,9 @@
             "page_number": {
                 "selector": {
                     "type": "select",
-                    "args": ["ul.pagination justify-content-center > li"],
+                    "args": [
+                        "ul.pagination justify-content-center > li"
+                    ],
                     "kwargs": {}
                 },
                 "first_page": 1,
@@ -827,7 +919,10 @@
                 "listing": {
                     "selector": {
                         "type": "find_all",
-                        "args": ["div", "js-product-vertical"],
+                        "args": [
+                            "div",
+                            "js-product-vertical"
+                        ],
                         "kwargs": {}
                     }
                 },
@@ -840,33 +935,36 @@
                         "function": "get_product_name",
                         "selector": {
                             "type": "select",
-                            "args": [".product__brand, .product__name"],
+                            "args": [
+                                ".product__brand, .product__name"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "price": {
                     "listing": {
                         "function": "get_product_price",
                         "selector": {
                             "type": "select",
-                            "args": ["div.product__prices-third, span.product__prices-sale"],
+                            "args": [
+                                "div.product__prices-third, span.product__prices-sale"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "info": {
                     "listing": {
                         "function": "get_product_info",
                         "selector": {
                             "type": "select",
-                            "args": [".product__badges-item"],
+                            "args": [
+                                ".product__badges-item"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 }
             }
         },
@@ -890,7 +988,9 @@
                 "is_listing_page": {
                     "selector": {
                         "type": "select_one",
-                        "args": ["[data-testid='feed-grid-item']"],
+                        "args": [
+                            "[data-testid='feed-grid-item']"
+                        ],
                         "kwargs": {}
                     }
                 },
@@ -899,7 +999,9 @@
             "page_number": {
                 "selector": {
                     "type": "select_one",
-                    "args": ["h1[data-testid='feed-grid-title']"],
+                    "args": [
+                        "h1[data-testid='feed-grid-title']"
+                    ],
                     "kwargs": {}
                 },
                 "first_page": 1,
@@ -910,7 +1012,9 @@
                 "listing": {
                     "selector": {
                         "type": "select",
-                        "args": ["[data-testid='feed-grid-item']"],
+                        "args": [
+                            "[data-testid='feed-grid-item']"
+                        ],
                         "kwargs": {}
                     }
                 },
@@ -923,33 +1027,36 @@
                         "function": "get_product_name",
                         "selector": {
                             "type": "select",
-                            "args": ["p[data-testid='feed-grid-item-name']"],
+                            "args": [
+                                "p[data-testid='feed-grid-item-name']"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "price": {
                     "listing": {
                         "function": "get_product_price",
                         "selector": {
                             "type": "select",
-                            "args": ["p[data-testid='feed-grid-item-price']"],
+                            "args": [
+                                "p[data-testid='feed-grid-item-price']"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 },
                 "info": {
                     "listing": {
                         "function": "get_product_info",
                         "selector": {
                             "type": "select",
-                            "args": ["p[data-testid='feed-grid-item-location']"],
+                            "args": [
+                                "p[data-testid='feed-grid-item-location']"
+                            ],
                             "kwargs": {}
                         }
                     }
-
                 }
             }
         }
