@@ -106,7 +106,7 @@ class QuickSearch:
         return hostnames
 
     def get_source_by_url(self, url):
-        if getattr(url, 'hostname', None):
+        if not getattr(url, 'hostname', None):
             url = urlparse(url)
         for source in self.sources:
             base_url = urlparse(source.get('base_url'))
