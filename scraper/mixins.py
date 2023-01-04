@@ -14,6 +14,7 @@ from urllib3.util.retry import Retry
 
 class RequestMixin:
     def __init__(self, source, *args, **kwargs):
+        self.session = self._get_session()
         self.sleep = source.get('sleep_after_request', 0)
         self.thread_service = ThreadPoolExecutor()
 
@@ -32,7 +33,6 @@ class RequestMixin:
         return headers
 
     @staticmethod
-    @lru_cache
     def _get_session():
         session = requests.Session()
         retries = Retry(total=3, backoff_factor=0.5)
@@ -55,8 +55,7 @@ class RequestMixin:
         print(url)
         method = kwargs.pop('method', 'GET')
         kwargs.update({'headers': self._get_headers()})
-        session = self._get_session()
-        return session.request(method, url, **kwargs)
+        return self.session.request(method, url, **kwargs)
 
     def get_page_contents(self, url_list):
         error_count = 0
