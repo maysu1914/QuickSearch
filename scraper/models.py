@@ -178,11 +178,11 @@ class Scraper(ToolsMixin, RequestMixin):
 
     def get_page_number(self, result):
         if result and isinstance(result, ResultSet):
-            numbers = [max(map(int, re.findall('\d+', e.text))) for e in result if any(re.findall('\d+', e.text))]
+            numbers = [max(map(int, re.findall(r'\d+', e.text))) for e in result if any(re.findall(r'\d+', e.text))]
             page = max(numbers)
             return self.max_page if page > self.max_page else page
         elif result:
-            numbers = tuple(map(int, re.findall('\d+', result.text.replace(',', '').replace('.', ''))))
+            numbers = tuple(map(int, re.findall(r'\d+', result.text.replace(',', '').replace('.', ''))))
             page = math.ceil(max(numbers) / self.source['page_number']['products_per_page']) if numbers else 1
             return self.max_page if page > self.max_page else page
         else:
