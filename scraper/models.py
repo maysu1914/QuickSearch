@@ -113,7 +113,7 @@ class Scraper(ToolsMixin, RequestMixin):
         else:
             return False
 
-        search_numbers = re.findall('\d+', search)
+        search_numbers = re.findall(r'\d+', search)
         search_words = search.lower()
 
         for number in search_numbers:
