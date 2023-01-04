@@ -308,6 +308,6 @@ class QuickSearch:
                 price and "%s %s" % (price, currency) or 'Fiyat Yok',
                 info or '',
                 comment_count or '',
-                discount and "%%s indirim" % discount or ''
+                discount and "%%%s indirim" % discount or ''
             )
             print(line)
