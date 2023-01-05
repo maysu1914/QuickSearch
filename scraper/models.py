@@ -241,7 +241,7 @@ class Scraper(ToolsMixin, RequestMixin):
 
     def get_product_info(self, result):
         if isinstance(result, ResultSet):
-            return ' '.join(map(lambda i: ' '.join(i.text.split()), result))
+            return ', '.join(map(lambda i: ' '.join(i.text.split()), result))
         elif result:
             return ' '.join(result.text.split())
         else:
