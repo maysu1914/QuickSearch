@@ -668,11 +668,11 @@
             },
             "base_url": "https://www.mediamarkt.com.tr/",
             "query": {
-                "path": "/tr/search.html?query=%(search)s%(category)s&searchProfile=&sort=price&sourceRef=INVALID",
+                "path": "/tr/search.html?query=%(search)s%(category)s&searchProfile=VALID&sort=price&sourceRef=INVALID",
                 "space": "%2B"
             },
             "sleep_after_request": 0,
-            "pagination_query": "sf=%d",
+            "pagination_query": "page=%d",
             "categories": {
                 "All": "&channel=mmtrtr",
                 "Notebooks": "&searchParams=/Search.ff?query%3D{search}%26filteravailability%3D1%26filterCategoriesROOT%3DBilgisayar%25C2%25A7MediaTRtrc504925%26filterCategoriesROOT%252FBilgisayar%25C2%25A7MediaTRtrc504925%3DLaptop%25C2%25A7MediaTRtrc504926%26channel%3Dmmtrtr",
