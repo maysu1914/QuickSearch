@@ -4,6 +4,9 @@ A project based on Python to make product searching on internet much easier and 
 ## Requirements
 Install requirements by typing "pip3 install -r requirements.txt" your terminal in the base folder
 
+## Executable Creation
+    pyinstaller --onefile --add-data "config.json;." quick_search-runner.py
+
 ## Supported websites
 These websites are can be searched at the same time for now:
 
@@ -15,17 +18,14 @@ These websites are can be searched at the same time for now:
 - teknosa.com
 - gittigidiyor.com
 - mediamarkt.com.tr
-- flo.com.tr
 - All (you can exclude any one of the above by entering of negatives of their indexes)
 
 ## Supported categories
 You can search your product in a particular category for getting much clear results.
 
 - Notebooks
-- Desktop PCs
 - Smartphones
 - Monitors
-- Shoes
 - All
 
 ## Special search style
