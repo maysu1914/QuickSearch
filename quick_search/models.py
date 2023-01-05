@@ -278,34 +278,35 @@ class QuickSearch:
             print('\nYou may want to look at these:')
             self._show_results(near_results)
 
-    def _get_styled_text(self, text, fg_color=None, bg_color=None):
+    def get_styled_text(self, text, fg_color=None, bg_color=None):
         text = fg_color and color(text, fg_color) or text
         text = bg_color and background(text, bg_color) or text
         return text
 
-    def _show_results(self, results):
-        for product in results:
-            bg_color = literal_eval(
-                self.get_style(product['source'], 'bg_color')
-            )
-            fg_color = literal_eval(
-                self.get_style(product['source'], 'fg_color')
-            )
-            source = self._get_styled_text(
-                f" {product['source']} ", fg_color, bg_color
-            )
-            print(source, end=' ')
+    def get_fixed_size_text(self, text, size):
+        pre_space = int((size - len(text)) / 2)
+        post_space = size - (len(text) + pre_space)
+        return "%s%s%s" % (pre_space * ' ', text, post_space * ' ')
 
+    def _show_results(self, results):
+        price_style = ((255, 255, 255), (0, 128, 0),)
+        for product in results:
+            source = self.get_styled_text(
+                self.get_fixed_size_text(product['source'], 16),
+                literal_eval(self.get_style(product['source'], 'fg_color')),
+                literal_eval(self.get_style(product['source'], 'bg_color'))
+            )
             name = product['name']
-            price = product['price']
             currency = 'TL'
+            price = product['price'] and "%s %s" % (product['price'], currency)
             info = product.get('info')
             comment_count = product.get('comment_count')
             discount = product.get('discount')
 
-            line = "%s • %s • %s • %s • %s" % (
+            line = "%s %s • %s • %s • %s • %s" % (
+                source,
                 name,
-                price and "%s %s" % (price, currency) or 'Fiyat Yok',
+                self.get_styled_text(price or 'Fiyat Yok', *price_style),
                 info or '',
                 comment_count or '',
                 discount and "%%%s indirim" % discount or ''
