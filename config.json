@@ -580,10 +580,8 @@
             "categories": {
                 "All": ":relevance",
                 "Notebooks": ":relevance:category:116004",
-                "Desktop PCs": ":relevance:category:116011",
                 "Smartphones": ":relevance:category:100",
-                "Monitors": ":relevance:category:116010011",
-                "Digital Cameras": ":relevance:category:107"
+                "Monitors": ":relevance:category:116010011"
             },
             "validations": {
                 "is_listing_page": {
@@ -678,18 +676,15 @@
             "categories": {
                 "All": "&channel=mmtrtr",
                 "Notebooks": "&searchParams=/Search.ff?query%3D{search}%26filteravailability%3D1%26filterCategoriesROOT%3DBilgisayar%25C2%25A7MediaTRtrc504925%26filterCategoriesROOT%252FBilgisayar%25C2%25A7MediaTRtrc504925%3DLaptop%25C2%25A7MediaTRtrc504926%26channel%3Dmmtrtr",
-                "Desktop PCs": "&searchParams=/Search.ff?query%3D{search}%26filteravailability%3D1%26filterCategoriesROOT%3DBilgisayar%25C2%25A7MediaTRtrc504925%26filterCategoriesROOT%252FBilgisayar%25C2%25A7MediaTRtrc504925%3DMasa%25C3%25BCst%25C3%25BC%2BBilgisayarlar%25C2%25A7MediaTRtrc504957%26channel%3Dmmtrtr",
                 "Smartphones": "&searchParams=/Search.ff?query%3D{search}%26filteravailability%3D1%26filterCategoriesROOT%3DTelefon%25C2%25A7MediaTRtrc465595%26channel%3Dmmtrtr",
-                "Monitors": "&searchParams=/Search.ff?query%3D{search}%26filteravailability%3D1%26filterCategoriesROOT%3DBilgisayar%25C2%25A7MediaTRtrc504925%26filterCategoriesROOT%252FBilgisayar%25C2%25A7MediaTRtrc504925%3D%25C3%2587evre%2BBirimleri%25C2%25A7MediaTRtrc798009%26channel%3Dmmtrtr",
-                "Digital Cameras": "&searchParams=/Search.ff?query%3D{search}%26filteravailability%3D1%26filterCategoriesROOT%3DFoto%2B%2526%2BKamera%25C2%25A7MediaTRtrc465682%26filterCategoriesROOT%252FFoto%2B%2526%2BKamera%25C2%25A7MediaTRtrc465682%3DFoto%25C4%259Fraf%2BMakineleri%25C2%25A7MediaTRtrc465683%26channel%3Dmmtrtr"
+                "Monitors": "&searchParams=/Search.ff?query%3D{search}%26filteravailability%3D1%26filterCategoriesROOT%3DBilgisayar%25C2%25A7MediaTRtrc504925%26filterCategoriesROOT%252FBilgisayar%25C2%25A7MediaTRtrc504925%3D%25C3%2587evre%2BBirimleri%25C2%25A7MediaTRtrc798009%26channel%3Dmmtrtr"
             },
             "validations": {
                 "is_listing_page": {
                     "selector": {
-                        "type": "find",
+                        "type": "select_one",
                         "args": [
-                            "ul",
-                            "products-list"
+                            "ul.products-list > li:not([class])"
                         ],
                         "kwargs": {}
                     }
@@ -698,15 +693,15 @@
             },
             "page_number": {
                 "selector": {
-                    "type": "select",
+                    "type": "select_one",
                     "args": [
-                        "ul.pagination > li:not(.pagination-next)"
+                        "hgroup > h1 > em"
                     ],
                     "kwargs": {}
                 },
                 "first_page": 1,
-                "method": "pagination",
-                "products_per_page": null
+                "method": "total",
+                "products_per_page": 20
             },
             "product": {
                 "listing": {
@@ -726,7 +721,7 @@
                     "listing": {
                         "function": "get_product_name",
                         "selector": {
-                            "type": "find",
+                            "type": "select_one",
                             "args": [
                                 "h2"
                             ],
@@ -738,7 +733,7 @@
                     "listing": {
                         "function": "get_product_price",
                         "selector": {
-                            "type": "select",
+                            "type": "select_one",
                             "args": [
                                 "div.price.small"
                             ],
