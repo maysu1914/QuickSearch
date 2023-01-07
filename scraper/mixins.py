@@ -22,22 +22,27 @@ class RequestMixin:
     @staticmethod
     @lru_cache
     def _get_headers():
+        user_agent_values = [
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 'Safari/537.36',
+            'AppleWebKit/537.36 (KHTML, like Gecko)', 'Chrome/100.0.4896.127'
+        ]
+        accept_values = [
+            'text/html', 'application/xhtml+xml', 'application/xml;q=0.9',
+            'image/avif', 'image/webp', 'image/apng', '*/*;q=0.8',
+            'application/signed-exchange;v=b3;q=0.9'
+        ]
         headers = {
-            'user-agent': ' '.join(['Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-                                    'AppleWebKit/537.36 (KHTML, like Gecko)',
-                                    'Chrome/100.0.4896.127', 'Safari/537.36']),
-            'accept': ','.join(
-                ['text/html', 'application/xhtml+xml', 'application/xml;q=0.9', 'image/avif', 'image/webp',
-                 'image/apng', '*/*;q=0.8', 'application/signed-exchange;v=b3;q=0.9']),
+            'user-agent': ' '.join(user_agent_values),
+            'accept': ','.join(accept_values),
             'accept-language': 'en-US,en;q=0.9,tr;q=0.8,de;q=0.7'
         }
         return headers
 
-    @staticmethod
-    def _get_session():
+    def _get_session(self):
         session = requests.Session()
         retries = Retry(total=3, backoff_factor=0.5)
         session.mount('https://', HTTPAdapter(max_retries=retries))
+        session.headers = self._get_headers()
         return session
 
     @staticmethod
@@ -47,7 +52,9 @@ class RequestMixin:
         """
         parsed_url = urlparse(url)
         parsed_params = parse_qs(parsed_url.query)
-        parsed_params.update({k: v[0] for k, v in parse_qs(params).items() if v})
+        parsed_params.update(
+            {k: v[0] for k, v in parse_qs(params).items() if v}
+        )
         req = PreparedRequest()
         req.prepare_url(url.split('?')[0], parsed_params)
         return req.url
@@ -55,7 +62,6 @@ class RequestMixin:
     def _request(self, url, **kwargs):
         logging.info(url)
         method = kwargs.pop('method', 'GET')
-        kwargs.update({'headers': self._get_headers()})
         return self.session.request(method, url, **kwargs)
 
     def get_page_contents(self, url_list):
