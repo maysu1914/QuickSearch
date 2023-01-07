@@ -1,4 +1,5 @@
 import concurrent
+import logging
 import math
 import string
 import time
@@ -52,7 +53,7 @@ class RequestMixin:
         return req.url
 
     def _request(self, url, **kwargs):
-        print(url)
+        logging.info(url)
         method = kwargs.pop('method', 'GET')
         kwargs.update({'headers': self._get_headers()})
         return self.session.request(method, url, **kwargs)
@@ -68,7 +69,11 @@ class RequestMixin:
                 yield thread.result().content
             except requests.exceptions.RequestException as e:
                 error_count += 1
-                print('Too much error occurred while getting the page contents!', e, url_list)
+                logging.error(
+                    'Too much error occurred while getting the page contents!',
+                    e,
+                    url_list
+                )
                 if error_count >= math.ceil(len(url_list) / 3):
                     raise
 

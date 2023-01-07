@@ -1,6 +1,7 @@
 import hashlib
 import itertools
 import json
+import logging
 import math
 import re
 from urllib.parse import urljoin
@@ -61,7 +62,7 @@ class Scraper(ToolsMixin, RequestMixin):
             except requests.exceptions.RequestException as e:
                 error_count += 1
                 if error_count >= math.ceil(len(urls) / 4):
-                    print(f"Too much error occurred in {self.name}", e)
+                    logging.error(f"Too much error occurred in {self.name}", e)
                     break
         results = self.filter_results(results)
         return results
