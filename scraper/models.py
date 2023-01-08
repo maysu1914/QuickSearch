@@ -17,12 +17,12 @@ from scraper.utils import get_attribute_by_path
 
 class Scraper(ToolsMixin, RequestMixin):
     default_first_page = 1
+    minimum_search_word_length = 3
 
     def __init__(self, source, *args, **kwargs):
         super(Scraper, self).__init__(source, *args, **kwargs)
         self.source = source
         self.max_page = kwargs.get('max_page', 3)
-        self.driver = None
 
     @property
     def name(self):
@@ -105,30 +105,35 @@ class Scraper(ToolsMixin, RequestMixin):
             searches = [searches]
         return any((self.is_suitable_to_search(product_name, search) for search in searches))
 
-    @staticmethod
-    def is_suitable_to_search(product_name, search):
-        acceptable_length = 3
-        if product_name and len(search) >= acceptable_length:
-            product_name = product_name.lower()
-            search = search.lower()
-        else:
+    def is_suitable_to_search(self, product_name, search):
+        product_name = product_name.lower()
+        search = search.lower()
+
+        # find all numbers
+        numbers = re.findall(r'\d+', search)
+
+        # remove numbers, they won't be included minimum word length limit
+        _search = search
+        for number in numbers:
+            _search = _search.replace(number, '', 1)
+
+        # minimum word length limit will be applied only to texts
+        _search = [
+            word for word in _search.split()
+            if len(word) >= self.minimum_search_word_length
+        ]
+
+        if not _search:
             return False
 
-        search_numbers = re.findall(r'\d+', search)
-        search_words = search.lower()
-
-        for number in search_numbers:
-            search_words = search_words.replace(number, '')
-
-        search_words = [word for word in search_words.split() if len(word) >= acceptable_length]
-
-        for number in search_numbers:
-            count = search.count(number)
-            if product_name.count(number) < count:
+        # not suitable if the numbers are not exist at same count in the text
+        for number in numbers:
+            if product_name.count(number) < search.count(number):
                 return False
-        for word in search_words:
-            count = search.count(word)
-            if product_name.count(word) < count:
+
+        # not suitable if the words are not exist at same count in the text
+        for word in _search:
+            if product_name.count(word) < search.count(word):
                 return False
         return True
 
