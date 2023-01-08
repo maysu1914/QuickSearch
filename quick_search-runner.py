@@ -13,6 +13,7 @@ except Exception:
 
 if __name__ == '__main__':
     os.path.exists('logs') or os.mkdir('logs')
+    print("""Logs path: "%s"\n""" % os.path.abspath("logs"))
     logging.basicConfig(
         filename='logs/%s.log' % datetime.now().strftime('%Y-%m-%d %H-%M-%S.%f'),
         format='[%(asctime)s] - %(levelname)s\t- %(message)s',
