@@ -572,8 +572,8 @@
             },
             "base_url": "https://www.teknosa.com/",
             "query": {
-                "path": "/arama/?s=%(search)s%(category)s&sort=price-asc",
-                "space": " "
+                "path": "/arama/?s=%(search)s%(category)s",
+                "space": "+"
             },
             "sleep_after_request": 0,
             "pagination_query": "page=%d",
