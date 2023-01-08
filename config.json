@@ -260,7 +260,7 @@
                 "selector": {
                     "type": "select_one",
                     "args": [
-                        ".resultText > strong"
+                        ".resultText strong"
                     ],
                     "kwargs": {}
                 },
