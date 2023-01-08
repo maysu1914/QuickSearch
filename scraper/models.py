@@ -123,7 +123,7 @@ class Scraper(ToolsMixin, RequestMixin):
             if len(word) >= self.minimum_search_word_length
         ]
 
-        if not _search:
+        if not (_search or numbers):
             return False
 
         # not suitable if the numbers are not exist at same count in the text
