@@ -174,7 +174,7 @@ class Scraper(ToolsMixin, RequestMixin):
     def filter_results(self, results):
         seen = set()
         filtered_results = []
-        for item in results:
+        for item in sorted(results, key=lambda i: not i['suitable_to_search']):
             if item['hash'] in seen:
                 continue
             else:
