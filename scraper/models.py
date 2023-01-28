@@ -12,7 +12,7 @@ from bs4.element import ResultSet
 from requests.utils import requote_uri
 
 from scraper.mixins import RequestMixin, ToolsMixin
-from scraper.utils import get_attribute_by_path
+from scraper.utils import get_attribute_by_path, log_time
 
 
 class Scraper(ToolsMixin, RequestMixin):
@@ -52,6 +52,7 @@ class Scraper(ToolsMixin, RequestMixin):
     def first_page(self):
         return get_attribute_by_path(self.source, 'page_number.first_page', self.default_first_page)
 
+    @log_time(fake_args=['source'])
     def search(self, category, search):
         error_count = 0
         results = []
@@ -151,6 +152,7 @@ class Scraper(ToolsMixin, RequestMixin):
         text = ''.join(element.find_all(text=True, recursive=False)).strip()
         return text or element.text
 
+    @log_time(fake_args=['source'])
     def get_results(self, url):
         content = next(self.get_page_contents([url.get('url')]))
         soup = BeautifulSoup(content, 'lxml')
@@ -171,6 +173,7 @@ class Scraper(ToolsMixin, RequestMixin):
             pass
         return results
 
+    @log_time(log_args=False, log_kwargs=False)
     def filter_results(self, results):
         seen = set()
         filtered_results = []
@@ -200,6 +203,7 @@ class Scraper(ToolsMixin, RequestMixin):
         category = category.format(search=search) if self.is_formattable(category) else category
         return url % {'category': category, 'search': search}
 
+    @log_time(log_args=False, log_kwargs=False)
     def get_products(self, content, search, page_type):
         soup = BeautifulSoup(content, 'lxml')
         products = []
@@ -213,8 +217,10 @@ class Scraper(ToolsMixin, RequestMixin):
                 data[key] = getattr(self, function)(self.bs_select(product, self.attributes, key_path))
                 if value.get('required') and not data[key]:
                     acceptable = False
-            data['suitable_to_search'] = self.check_the_suitability(data['name'], search)
             if acceptable:
+                data['suitable_to_search'] = self.check_the_suitability(
+                    data['name'], search
+                )
                 products.append(self.add_hash(data, keys=['name', 'price']))
         return products
 

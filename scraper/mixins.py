@@ -12,6 +12,8 @@ from requests.adapters import HTTPAdapter
 from requests.models import PreparedRequest
 from urllib3.util.retry import Retry
 
+from scraper.utils import log_time
+
 
 class RequestMixin:
     def __init__(self, source, *args, **kwargs):
@@ -59,8 +61,8 @@ class RequestMixin:
         req.prepare_url(url.split('?')[0], parsed_params)
         return req.url
 
+    @log_time(log_args=[1])
     def _request(self, url, **kwargs):
-        logging.info(url)
         method = kwargs.pop('method', 'GET')
         return self.session.request(method, url, **kwargs)
 
@@ -88,7 +90,12 @@ class ToolsMixin:
 
     @staticmethod
     def is_formattable(text):
-        return any([tup[1] for tup in string.Formatter().parse(text) if tup[1] is not None])
+        return any(
+            [
+                tup[1] for tup in string.Formatter().parse(text)
+                if tup[1] is not None
+            ]
+        )
 
     @staticmethod
     def find_nth(haystack, needle, n):

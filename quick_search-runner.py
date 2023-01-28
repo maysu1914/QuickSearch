@@ -18,7 +18,7 @@ if __name__ == '__main__':
         filename='logs/%s.log' % datetime.now().strftime('%Y-%m-%d %H-%M-%S.%f'),
         format='[%(asctime)s] - %(levelname)s\t- %(message)s',
         encoding='utf-8',
-        level=logging.DEBUG
+        level=logging.INFO
     )
     config = json.load(open('config.json'))
     while True:

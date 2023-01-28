@@ -1,5 +1,6 @@
 import re
 from ast import literal_eval
+from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 from urllib.parse import urlparse
@@ -8,9 +9,9 @@ from colorit import init_colorit, background, color
 
 from cli_prompts import Prompt
 from scraper.models import Scraper
-from scraper.utils import get_attribute_by_path
+from scraper.utils import get_attribute_by_path, log_time
 
-EXECUTOR = ThreadPoolExecutor()
+EXECUTOR = ThreadPoolExecutor(max_workers=32)
 
 init_colorit()
 
@@ -236,21 +237,24 @@ class QuickSearch:
         correct_results, near_results = self.divide_results(results)
         self.show_results(correct_results, near_results)
 
+    @log_time()
     def get_results(self, sources, category, search_text, max_page):
         threads = []
         results = []
 
+        category_sources = self.get_sources_of_category(category)
         for source_selection in sources:
-            source = self.sources[int(source_selection) - 1]
+            source = category_sources[int(source_selection)]
             scraper = Scraper(source, max_page=max_page)
             thread = EXECUTOR.submit(scraper.search, category, search_text)
             threads.append(thread)
 
-        for thread in threads:
+        for thread in futures.as_completed(threads):
             results += thread.result()
 
         return results
 
+    @log_time()
     def get_results_by_url(self, url, source, search_text, max_page):
         scraper = Scraper(source, max_page=max_page)
         combinations = scraper.get_all_combinations(search_text)
