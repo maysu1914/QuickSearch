@@ -21,6 +21,18 @@ if __name__ == '__main__':
         level=logging.INFO
     )
     config = json.load(open('config.json'))
+
+
+    def my_handler(type, value, tb):
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        logging.exception("Uncaught exception: {},{},{}".format(
+            exc_type, fname, exc_tb.tb_lineno
+        ))
+
+
+    # Install exception handler
+    sys.excepthook = my_handler
     while True:
         qs = QuickSearch(config=config, max_page=3)
         qs.start()
