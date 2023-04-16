@@ -11,7 +11,7 @@ from cli_prompts import Prompt
 from scraper.models import Scraper
 from scraper.utils import get_attribute_by_path, log_time
 
-EXECUTOR = ThreadPoolExecutor(max_workers=32)
+EXECUTOR = ThreadPoolExecutor(max_workers=8)
 
 init_colorit()
 
@@ -245,7 +245,9 @@ class QuickSearch:
         category_sources = self.get_sources_of_category(category)
         for source_selection in sources:
             source = category_sources[int(source_selection)]
-            scraper = Scraper(source, max_page=max_page)
+            scraper = Scraper(
+                source, max_page=max_page, thread_service=EXECUTOR
+            )
             thread = EXECUTOR.submit(scraper.search, category, search_text)
             threads.append(thread)
 
@@ -254,7 +256,7 @@ class QuickSearch:
 
         return results
 
-    @log_time()
+    # @log_time()
     def get_results_by_url(self, url, source, search_text, max_page):
         scraper = Scraper(source, max_page=max_page)
         combinations = scraper.get_all_combinations(search_text)

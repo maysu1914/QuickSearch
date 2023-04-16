@@ -152,7 +152,7 @@ class Scraper(ToolsMixin, RequestMixin):
         text = ''.join(element.find_all(text=True, recursive=False)).strip()
         return text or element.text
 
-    @log_time(fake_args=['source'])
+    # @log_time(fake_args=['source'])
     def get_results(self, url):
         content = next(self.get_page_contents([url.get('url')]))
         soup = BeautifulSoup(content, 'lxml')
@@ -173,7 +173,7 @@ class Scraper(ToolsMixin, RequestMixin):
             pass
         return results
 
-    @log_time(log_args=False, log_kwargs=False)
+    # @log_time(log_args=False, log_kwargs=False)
     def filter_results(self, results):
         seen = set()
         filtered_results = []
@@ -203,7 +203,7 @@ class Scraper(ToolsMixin, RequestMixin):
         category = category.format(search=search) if self.is_formattable(category) else category
         return url % {'category': category, 'search': search}
 
-    @log_time(log_args=False, log_kwargs=False)
+    # @log_time(log_args=False, log_kwargs=False)
     def get_products(self, content, search, page_type):
         soup = BeautifulSoup(content, 'lxml')
         products = []
