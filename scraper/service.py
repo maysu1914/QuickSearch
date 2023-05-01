@@ -93,9 +93,9 @@ class Scraper(ToolsMixin, RequestMixin):
                 end = self.find_nth(search, ']', a) + 1
                 part = search[start:end]
                 dynamic.append(part.strip('][').split(','))
-                static = static.replace(part, '')
+                static = static.replace(part, '%s')
             for i in list(itertools.product(*dynamic)):
-                searches.append((' '.join(static.split()) + ' ' + ' '.join(i)).strip())
+                searches.append((' '.join(static.split()) % i).strip())
         else:
             searches.append(search)
 
