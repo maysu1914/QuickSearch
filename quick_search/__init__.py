@@ -1,3 +1,3 @@
-from .models import QuickSearch
+from .main import QuickSearch
 
 __all__ = ['QuickSearch']
