@@ -1,18 +1,19 @@
+import asyncio
 import hashlib
 import itertools
 import json
-import logging
 import math
 import re
 from urllib.parse import urljoin
 
-import requests
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet
 from requests.utils import requote_uri
 
 from scraper.mixins import RequestMixin, ToolsMixin
 from scraper.utils import get_attribute_by_path, log_time
+
+asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
 class Scraper(ToolsMixin, RequestMixin):
@@ -50,37 +51,8 @@ class Scraper(ToolsMixin, RequestMixin):
 
     @property
     def first_page(self):
-        return get_attribute_by_path(self.source, 'page_number.first_page', self.default_first_page)
-
-    @log_time(fake_args=['source'])
-    def search(self, category, search):
-        error_count = 0
-        results = []
-        urls = self.get_urls(category, search)  # multiple results if search has list
-        for url in urls:
-            try:
-                results += self.get_results(url)
-            except requests.exceptions.RequestException as e:
-                error_count += 1
-                if error_count >= math.ceil(len(urls) / 4):
-                    logging.error(f"Too much error occurred in {self.name}", e)
-                    break
-        results = self.filter_results(results)
-        return results
-
-    def get_urls(self, category, search):
-        categories = self.source.get('categories')
-        urls = []
-
-        if category in categories:
-            for search_text in self.get_all_combinations(search):
-                url = self.create_url(search_text, categories[category])
-                urls.append({'search': search_text, 'url': requote_uri(url)})
-        return urls
-
-    def generate_paginated_urls(self, url, start_page, end_page):
-        for number in range(start_page, end_page):
-            yield self.prepare_url(url, self.pagination_query % number)
+        return get_attribute_by_path(self.source, 'page_number.first_page',
+                                     self.default_first_page)
 
     def get_all_combinations(self, search):
         searches = []
@@ -101,10 +73,28 @@ class Scraper(ToolsMixin, RequestMixin):
 
         return searches
 
+    def get_urls(self, category, search):
+        categories = self.source.get('categories')
+        urls = []
+
+        if category in categories:
+            for search_text in self.get_all_combinations(search):
+                url = self.create_url(search_text, categories[category])
+                urls.append({'search': search_text, 'url': requote_uri(url)})
+        return urls
+
+    def generate_paginated_urls(self, url, start_page, end_page):
+        urls = []
+        for number in range(start_page, end_page):
+            urls.append(self.prepare_url(url, self.pagination_query % number))
+        return urls
+
     def check_the_suitability(self, product_name, searches):
         if not isinstance(searches, list):
             searches = [searches]
-        return any((self.is_suitable_to_search(product_name, search) for search in searches))
+        return any(
+            (self.is_suitable_to_search(product_name, search) for search in
+             searches))
 
     def is_suitable_to_search(self, product_name, search):
         product_name = product_name.lower()
@@ -140,8 +130,10 @@ class Scraper(ToolsMixin, RequestMixin):
 
     @staticmethod
     def bs_select(soup, dictionary, attribute_path):
-        selector = get_attribute_by_path(dictionary, f"{attribute_path}.selector")
-        return getattr(soup, selector['type'])(*selector['args'], **selector['kwargs']) if selector else None
+        selector = get_attribute_by_path(dictionary,
+                                         f"{attribute_path}.selector")
+        return getattr(soup, selector['type'])(*selector['args'], **selector[
+            'kwargs']) if selector else None
 
     @staticmethod
     def get_text(element):
@@ -152,26 +144,75 @@ class Scraper(ToolsMixin, RequestMixin):
         text = ''.join(element.find_all(text=True, recursive=False)).strip()
         return text or element.text
 
-    # @log_time(fake_args=['source'])
-    def get_results(self, url):
-        content = next(self.get_page_contents([url.get('url')]))
-        soup = BeautifulSoup(content, 'lxml')
+    @log_time(fake_args=['source'])
+    def search(self, category, search):
         results = []
-        if soup and self.bs_select(soup, self.source, 'validations.is_listing_page'):
-            page_number = self.get_page_number(self.bs_select(soup, self.source, 'page_number'))
-            results += self.get_products(content, url['search'], 'listing')
-            if page_number > 1:
-                start_page = self.first_page + 1
-                end_page = self.first_page + page_number
-                url_generator = self.generate_paginated_urls(url['url'], start_page, end_page)
-                contents = self.get_page_contents(url_generator)
-                for content in contents:
-                    results += self.get_products(content, url['search'], 'listing')
-            else:
-                pass
-        else:
-            pass
+        # multiple results if search has list
+        urls = self.get_urls(category, search)
+        self.set_pre_results(urls)
+        for url in urls:
+            results += url.pop('products', [])
+        results += self.get_results(urls)
+        results = self.filter_results(results)
         return results
+
+    def set_pre_results(self, urls):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        bulk_req = asyncio.ensure_future(
+            self.get_page_contents([url['url'] for url in urls])
+        )
+        responses = loop.run_until_complete(bulk_req)
+        for url, response in zip(urls, responses):
+            soup = BeautifulSoup(response.content, 'lxml')
+            is_listing_page = self.bs_select(
+                soup, self.source, 'validations.is_listing_page'
+            )
+            if soup and is_listing_page:
+                page_number = self.get_page_number(
+                    self.bs_select(soup, self.source, 'page_number')
+                )
+                url['products'] = self.get_products(
+                    response.content, url['search'], 'listing'
+                )
+                if page_number > 1:
+                    url['start_page'] = self.first_page + 1
+                    url['end_page'] = self.first_page + page_number
+                else:
+                    url['start_page'] = None
+                    url['end_page'] = None
+            else:
+                url['products'] = []
+                url['start_page'] = None
+                url['end_page'] = None
+
+    # @log_time(fake_args=['source'])
+    def get_results(self, urls):
+        generated_urls = []
+        products = []
+        for url in urls:
+            if not (url['start_page'] and url['end_page']):
+                continue
+            for generated_url in self.generate_paginated_urls(
+                    url['url'], url['start_page'], url['end_page']
+            ):
+                generated_urls.append(
+                    {
+                        'url': generated_url,
+                        'search': url['search']
+                    }
+                )
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        bulk_req = asyncio.ensure_future(
+            self.get_page_contents([url['url'] for url in generated_urls])
+        )
+        responses = loop.run_until_complete(bulk_req)
+        for generated_url, response in zip(generated_urls, responses):
+            products += self.get_products(
+                response.content, generated_url['search'], 'listing'
+            )
+        return products
 
     # @log_time(log_args=False, log_kwargs=False)
     def filter_results(self, results):
@@ -187,12 +228,16 @@ class Scraper(ToolsMixin, RequestMixin):
 
     def get_page_number(self, result):
         if result and isinstance(result, ResultSet):
-            numbers = [max(map(int, re.findall(r'\d+', e.text))) for e in result if any(re.findall(r'\d+', e.text))]
+            numbers = [max(map(int, re.findall(r'\d+', e.text))) for e in result
+                       if any(re.findall(r'\d+', e.text))]
             page = max(numbers)
             return self.max_page if page > self.max_page else page
         elif result:
-            numbers = tuple(map(int, re.findall(r'\d+', result.text.replace(',', '').replace('.', ''))))
-            page = math.ceil(max(numbers) / self.source['page_number']['products_per_page']) if numbers else 1
+            numbers = tuple(map(int, re.findall(r'\d+', result.text.replace(',',
+                                                                            '').replace(
+                '.', ''))))
+            page = math.ceil(max(numbers) / self.source['page_number'][
+                'products_per_page']) if numbers else 1
             return self.max_page if page > self.max_page else page
         else:
             return 1

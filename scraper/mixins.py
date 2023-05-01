@@ -1,8 +1,5 @@
-import concurrent
-import logging
-import math
+import asyncio
 import string
-import time
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 from urllib.parse import urlparse, parse_qs
@@ -62,28 +59,15 @@ class RequestMixin:
         return req.url
 
     @log_time(log_args=[1])
-    def _request(self, url, **kwargs):
+    async def _request(self, url, **kwargs):
         method = kwargs.pop('method', 'GET')
         return self.session.request(method, url, **kwargs)
 
-    def get_page_contents(self, url_list):
-        error_count = 0
-        threads = []
-        for url in url_list:
-            threads.append(self.thread_service.submit(self._request, url))
-            time.sleep(self.sleep)
-        for thread in concurrent.futures.as_completed(threads):
-            try:
-                yield thread.result().content
-            except requests.exceptions.RequestException as e:
-                error_count += 1
-                logging.error(
-                    'Too much error occurred while getting the page contents!',
-                    e,
-                    url_list
-                )
-                if error_count >= math.ceil(len(url_list) / 3):
-                    raise
+    async def get_page_contents(self, url_list):
+        futures = [asyncio.ensure_future(self._request(url)) for url in
+                   url_list]
+        responses = asyncio.gather(*futures, return_exceptions=True)
+        return await responses
 
 
 class ToolsMixin:
