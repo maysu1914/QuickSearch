@@ -198,8 +198,13 @@ class QuickSearch:
     # @log_time()
     def get_results_by_url(self, url, source, search_text, max_page):
         scraper = Scraper(source, max_page=max_page)
-        combinations = scraper.get_all_combinations(search_text)
-        results = scraper.get_results({'url': url, 'search': combinations})
+        urls = [
+            {
+                'url': url, 'search': scraper.get_all_combinations(search_text),
+                'start_page': scraper.first_page, 'end_page': max_page
+            }
+        ]
+        results = scraper.get_results(urls)
         return results
 
     @staticmethod

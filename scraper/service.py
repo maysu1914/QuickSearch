@@ -146,10 +146,10 @@ class Scraper(ToolsMixin, RequestMixin):
         return text or element.text
 
     @log_time(fake_args=['source'])
-    def search(self, category, search):
+    def search(self, category, search, urls=None):
         results = []
         # multiple results if search has list
-        urls = self.get_urls(category, search)
+        urls = urls or self.get_urls(category, search)
         self.set_pre_results(urls)
         for url in urls:
             results += url.pop('products', [])
