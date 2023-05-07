@@ -61,11 +61,15 @@ class RequestMixin:
     @log_time(log_args=[1])
     async def _request(self, url, **kwargs):
         method = kwargs.pop('method', 'GET')
+        print(url)
         return self.session.request(method, url, **kwargs)
 
     async def get_page_contents(self, url_list):
-        futures = [asyncio.ensure_future(self._request(url)) for url in
-                   url_list]
+        futures = []
+        for index, url in enumerate(url_list, start=1):
+            if self.sleep and index > 1:
+                await asyncio.sleep(self.sleep)
+            futures.append(asyncio.ensure_future(self._request(url)))
         responses = asyncio.gather(*futures, return_exceptions=True)
         return await responses
 
