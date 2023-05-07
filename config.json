@@ -827,7 +827,19 @@
                         "selector": {
                             "type": "select",
                             "args": [
-                                "span.products__item-badge-text,div.products__conditional-message,p.products__installment,div.products__campaing__timer"
+                                "span.products__item-badge-text,div.products__conditional-message,p.products__installment,div.products__campaing:not(.hidden)"
+                            ],
+                            "kwargs": {}
+                        }
+                    }
+                },
+                "comment_count": {
+                    "listing": {
+                        "function": "get_product_comment_count",
+                        "selector": {
+                            "type": "select_one",
+                            "args": [
+                                "span.products-stars__review-count"
                             ],
                             "kwargs": {}
                         }
