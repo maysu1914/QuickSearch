@@ -241,7 +241,7 @@ class Scraper(ToolsMixin, RequestMixin):
                 'products_per_page']) if numbers else 1
             return self.max_page if page > self.max_page else page
         else:
-            return 1
+            return self.max_page
 
     def create_url(self, search, category):
         url = urljoin(self.base_url, self.query['path'])
