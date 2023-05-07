@@ -132,8 +132,9 @@ class Scraper(ToolsMixin, RequestMixin):
     def bs_select(soup, dictionary, attribute_path):
         selector = get_attribute_by_path(dictionary,
                                          f"{attribute_path}.selector")
-        return getattr(soup, selector['type'])(*selector['args'], **selector[
-            'kwargs']) if selector else None
+        return selector and getattr(soup, selector['type'])(
+            *selector['args'], **selector['kwargs']
+        )
 
     @staticmethod
     def get_text(element):
@@ -244,7 +245,8 @@ class Scraper(ToolsMixin, RequestMixin):
 
     def create_url(self, search, category):
         url = urljoin(self.base_url, self.query['path'])
-        search = self.query['space'].join(search.split())
+        space_char = self.query.get('space')
+        search = space_char and space_char.join(search.split()) or search
         category = category.format(search=search) if self.is_formattable(category) else category
         return url % {'category': category, 'search': search}
 
