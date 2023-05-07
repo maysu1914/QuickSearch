@@ -85,7 +85,7 @@ class Scraper(ToolsMixin, RequestMixin):
 
     def generate_paginated_urls(self, url, start_page, end_page):
         urls = []
-        for number in range(start_page, end_page):
+        for number in range(start_page, end_page + 1):
             urls.append(self.prepare_url(url, self.pagination_query % number))
         return urls
 
@@ -178,7 +178,7 @@ class Scraper(ToolsMixin, RequestMixin):
                 )
                 if page_number > 1:
                     url['start_page'] = self.first_page + 1
-                    url['end_page'] = self.first_page + page_number
+                    url['end_page'] = page_number + (self.first_page - 1)
                 else:
                     url['start_page'] = None
                     url['end_page'] = None
@@ -192,7 +192,7 @@ class Scraper(ToolsMixin, RequestMixin):
         generated_urls = []
         products = []
         for url in urls:
-            if not (url['start_page'] and url['end_page']):
+            if not (url.get('start_page') and url.get('end_page')):
                 continue
             for generated_url in self.generate_paginated_urls(
                     url['url'], url['start_page'], url['end_page']
