@@ -754,6 +754,86 @@
                     }
                 }
             }
+        },
+        {
+            "name": "Cicekspeti",
+            "type": "marketplace",
+            "style": {
+                "bg_color": "(255,103,29)",
+                "fg_color": "(0,61,166)"
+            },
+            "base_url": "https://www.ciceksepeti.com/",
+            "query": {
+                "path": "/arama?query=%(search)s&qt=%(search)s&orderby=3"
+            },
+            "sleep_after_request": 0,
+            "pagination_query": "page=%d",
+            "categories": {
+                "All": ""
+            },
+            "validations": {
+                "is_listing_page": {
+                    "selector": {
+                        "type": "select_one",
+                        "args": [
+                            "div.products.products--category"
+                        ],
+                        "kwargs": {}
+                    }
+                },
+                "is_detail_page": {}
+            },
+            "product": {
+                "listing": {
+                    "selector": {
+                        "type": "select",
+                        "args": [
+                            "div.products__item"
+                        ],
+                        "kwargs": {}
+                    }
+                },
+                "detail": {}
+            },
+            "attributes": {
+                "name": {
+                    "required": true,
+                    "listing": {
+                        "function": "get_product_name",
+                        "selector": {
+                            "type": "select_one",
+                            "args": [
+                                "p.products__item-title"
+                            ],
+                            "kwargs": {}
+                        }
+                    }
+                },
+                "price": {
+                    "listing": {
+                        "function": "get_product_price",
+                        "selector": {
+                            "type": "select",
+                            "args": [
+                                "div.price.price--original,span.price__integer-value,div.price.price--old"
+                            ],
+                            "kwargs": {}
+                        }
+                    }
+                },
+                "info": {
+                    "listing": {
+                        "function": "get_product_info",
+                        "selector": {
+                            "type": "select",
+                            "args": [
+                                "span.products__item-badge-text,div.products__conditional-message,p.products__installment,div.products__campaing__timer"
+                            ],
+                            "kwargs": {}
+                        }
+                    }
+                }
+            }
         }
     ]
 }
