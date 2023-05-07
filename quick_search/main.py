@@ -161,7 +161,7 @@ class QuickSearch:
         max_page = self.get_max_page_input() or self.max_page
 
         if search_type == '0':
-            category = self.get_category_input()
+            category = 'All'  # self.get_category_input()
             sources = self.get_source_input_by_category(category)
             search_text = self.get_search_input()
             results = self.get_results(sources, category, search_text, max_page)
