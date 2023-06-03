@@ -93,7 +93,7 @@
                         "selector": {
                             "type": "select",
                             "args": [
-                                "div.stmp.fc, .low-price-in-last-month"
+                                "div.stmp.fc, .low-price-in-last-month, div.unit-info"
                             ],
                             "kwargs": {}
                         }
