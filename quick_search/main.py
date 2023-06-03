@@ -200,7 +200,7 @@ class QuickSearch:
         scraper = Scraper(source, max_page=max_page)
         urls = [
             {
-                'url': url, 'search': scraper.get_all_combinations(search_text),
+                'url': url, 'search': scraper._get_all_combinations(search_text),
                 'start_page': scraper.first_page, 'end_page': max_page
             }
         ]
