@@ -158,6 +158,34 @@ class Scraper(RequestMixin):
         text = ''.join(element.find_all(text=True, recursive=False)).strip()
         return text or element.text
 
+    @staticmethod
+    def _parse_numbers(text):
+        return re.findall(r'\d+', text)
+
+    def get_page_number(self, result):
+        if result and isinstance(result, ResultSet):
+            numbers = [self.get_page_number(e) for e in result]
+            return max(numbers)
+        elif result:
+            page = self.max_page
+            trimmed = result.text.replace(',', '').replace('.', '')
+            numbers = map(int, self._parse_numbers(trimmed))
+            products_per_page = self.source['page_number']['products_per_page']
+            method = self.source['page_number']['method']
+            try:
+                if method == 'total':
+                    page = math.ceil(max(numbers) / products_per_page)
+                elif method == 'pagination':
+                    page = max(numbers)
+            except ValueError as exc:
+                logging.error(
+                    "Couldn't fine any number in {}. Exc: {}".format(
+                        result, exc.__repr__()
+                    )
+                )
+            return page > self.max_page and self.max_page or page
+        else:
+            return self.max_page
 
     def set_pre_results(self, urls):
         loop = asyncio.new_event_loop()
@@ -229,21 +257,6 @@ class Scraper(RequestMixin):
                 seen.add(item['hash'])
         return filtered_results
 
-    def get_page_number(self, result):
-        if result and isinstance(result, ResultSet):
-            numbers = [max(map(int, re.findall(r'\d+', e.text))) for e in result
-                       if any(re.findall(r'\d+', e.text))]
-            page = max(numbers)
-            return self.max_page if page > self.max_page else page
-        elif result:
-            numbers = tuple(map(int, re.findall(r'\d+', result.text.replace(',',
-                                                                            '').replace(
-                '.', ''))))
-            page = math.ceil(max(numbers) / self.source['page_number'][
-                'products_per_page']) if numbers else 1
-            return self.max_page if page > self.max_page else page
-        else:
-            return self.max_page
     @log_time(fake_args=['source'])
     def search(self, category, search, urls=None):
         results = []
