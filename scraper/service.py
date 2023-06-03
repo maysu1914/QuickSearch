@@ -146,11 +146,11 @@ class Scraper(RequestMixin):
 
     @staticmethod
     def bs_select(soup, dictionary, attribute_path):
-        selector = get_attribute_by_path(dictionary,
-                                         f"{attribute_path}.selector")
-        return selector and getattr(soup, selector['type'])(
-            *selector['args'], **selector['kwargs']
+        selector = get_attribute_by_path(
+            dictionary, f"{attribute_path}.selector"
         )
+        function = selector and getattr(soup, selector['type'], None)
+        return function and function(*selector['args'], **selector['kwargs'])
 
     @staticmethod
     def get_text(element):
