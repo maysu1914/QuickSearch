@@ -103,7 +103,8 @@ class Scraper(RequestMixin):
         return urls
 
     def is_suitable_to_search(self, product_name, search):
-        product_name = product_name.lower()
+        normalizer = re.compile(r'[^A-Za-z0-9]+')
+        product_name = normalizer.sub('', product_name).lower()
         search = search.lower()
 
         # find all numbers
@@ -130,7 +131,8 @@ class Scraper(RequestMixin):
 
         # not suitable if the words are not exist at same count in the text
         for word in _search:
-            if product_name.count(word) < search.count(word):
+            normalized_word = normalizer.sub('', word).lower()
+            if product_name.count(normalized_word) < search.count(word):
                 return False
         return True
 
