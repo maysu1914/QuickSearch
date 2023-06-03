@@ -81,7 +81,7 @@
                         "selector": {
                             "type": "select",
                             "args": [
-                                "div.prc-box-dscntd, div.prc-box-sllng"
+                                "div.discountedPriceBox > div.prc-box-dscntd, div.prc-box-sllng"
                             ],
                             "kwargs": {}
                         }
