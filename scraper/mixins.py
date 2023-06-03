@@ -72,23 +72,3 @@ class RequestMixin:
             futures.append(asyncio.ensure_future(self._request(url)))
         responses = asyncio.gather(*futures, return_exceptions=True)
         return await responses
-
-
-class ToolsMixin:
-
-    @staticmethod
-    def is_formattable(text):
-        return any(
-            [
-                tup[1] for tup in string.Formatter().parse(text)
-                if tup[1] is not None
-            ]
-        )
-
-    @staticmethod
-    def find_nth(haystack, needle, n):
-        start = haystack.find(needle)
-        while start >= 0 and n > 1:
-            start = haystack.find(needle, start + len(needle))
-            n -= 1
-        return start

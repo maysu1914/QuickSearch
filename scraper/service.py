@@ -2,6 +2,7 @@ import asyncio
 import hashlib
 import itertools
 import json
+import logging
 import math
 import re
 from urllib.parse import urljoin
@@ -10,13 +11,15 @@ from bs4 import BeautifulSoup
 from bs4.element import ResultSet
 from requests.utils import requote_uri
 
-from scraper.mixins import RequestMixin, ToolsMixin
-from scraper.utils import get_attribute_by_path, log_time
+from scraper.mixins import RequestMixin
+from scraper.utils import (
+    get_attribute_by_path, log_time, is_formattable, find_nth
+)
 
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
-class Scraper(ToolsMixin, RequestMixin):
+class Scraper(RequestMixin):
     default_first_page = 1
     minimum_search_word_length = 3
 
@@ -54,31 +57,41 @@ class Scraper(ToolsMixin, RequestMixin):
         return get_attribute_by_path(self.source, 'page_number.first_page',
                                      self.default_first_page)
 
-    def get_all_combinations(self, search):
-        searches = []
-        if '[' in search and ']' in search:
-            static = search
-            dynamic = []
+    @staticmethod
+    def _get_all_combinations(search):
+        if any(char not in search for char in ['[', ']']):
+            return [search]
 
-            for a, b in zip(range(1, search.count('[') + 1), range(1, search.count(']') + 1)):
-                start = self.find_nth(search, '[', a)
-                end = self.find_nth(search, ']', a) + 1
-                part = search[start:end]
-                dynamic.append(part.strip('][').split(','))
-                static = static.replace(part, '%s')
-            for i in list(itertools.product(*dynamic)):
-                searches.append((' '.join(static.split()) % i).strip())
-        else:
-            searches.append(search)
+        searches = []
+        static = search
+        dynamic = []
+        openings = search.count('[')
+        closings = search.count(']')
+        for a, b in zip(range(1, openings + 1), range(1, closings + 1)):
+            start = find_nth(search, '[', a)
+            end = find_nth(search, ']', a) + 1
+            part = search[start:end]
+            dynamic.append(part.strip('][').split(','))
+            static = static.replace(part, '%s')
+        for i in list(itertools.product(*dynamic)):
+            searches.append((' '.join(static.split()) % i).strip())
 
         return searches
+
+    def create_url(self, search, category):
+        url = urljoin(self.base_url, self.query['path'])
+        space_char = self.query.get('space')
+        search = space_char and space_char.join(search.split()) or search
+        category = category.format(search=search) if is_formattable(
+            category) else category
+        return url % {'category': category, 'search': search}
 
     def get_urls(self, category, search):
         categories = self.source.get('categories')
         urls = []
 
         if category in categories:
-            for search_text in self.get_all_combinations(search):
+            for search_text in self._get_all_combinations(search):
                 url = self.create_url(search_text, categories[category])
                 urls.append({'search': search_text, 'url': requote_uri(url)})
         return urls
@@ -242,13 +255,6 @@ class Scraper(ToolsMixin, RequestMixin):
             return self.max_page if page > self.max_page else page
         else:
             return self.max_page
-
-    def create_url(self, search, category):
-        url = urljoin(self.base_url, self.query['path'])
-        space_char = self.query.get('space')
-        search = space_char and space_char.join(search.split()) or search
-        category = category.format(search=search) if self.is_formattable(category) else category
-        return url % {'category': category, 'search': search}
 
     # @log_time(log_args=False, log_kwargs=False)
     def get_products(self, content, search, page_type):

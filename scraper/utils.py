@@ -1,5 +1,23 @@
 import logging
+import string
 import time
+
+
+def is_formattable(text):
+    return any(
+        [
+            tup[1] for tup in string.Formatter().parse(text)
+            if tup[1] is not None
+        ]
+    )
+
+
+def find_nth(haystack, needle, n):
+    start = haystack.find(needle)
+    while start >= 0 and n > 1:
+        start = haystack.find(needle, start + len(needle))
+        n -= 1
+    return start
 
 
 def get_attribute_by_path(dictionary, attribute_path, default=None):
