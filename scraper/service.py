@@ -54,8 +54,9 @@ class Scraper(RequestMixin):
 
     @property
     def first_page(self):
-        return get_attribute_by_path(self.source, 'page_number.first_page',
-                                     self.default_first_page)
+        return get_attribute_by_path(
+            self.source, 'page_number.first_page', self.default_first_page
+        )
 
     @staticmethod
     def _get_all_combinations(search):
