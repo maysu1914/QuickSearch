@@ -102,13 +102,6 @@ class Scraper(RequestMixin):
             urls.append(self.prepare_url(url, self.pagination_query % number))
         return urls
 
-    def check_the_suitability(self, product_name, searches):
-        if not isinstance(searches, list):
-            searches = [searches]
-        return any(
-            (self.is_suitable_to_search(product_name, search) for search in
-             searches))
-
     def is_suitable_to_search(self, product_name, search):
         product_name = product_name.lower()
         search = search.lower()
@@ -140,6 +133,14 @@ class Scraper(RequestMixin):
             if product_name.count(word) < search.count(word):
                 return False
         return True
+
+    def check_the_suitability(self, product_name, searches):
+        if not isinstance(searches, list):
+            searches = [searches]
+        return any([
+            self.is_suitable_to_search(product_name, search)
+            for search in searches
+        ])
 
     @staticmethod
     def bs_select(soup, dictionary, attribute_path):
