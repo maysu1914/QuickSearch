@@ -158,17 +158,6 @@ class Scraper(RequestMixin):
         text = ''.join(element.find_all(text=True, recursive=False)).strip()
         return text or element.text
 
-    @log_time(fake_args=['source'])
-    def search(self, category, search, urls=None):
-        results = []
-        # multiple results if search has list
-        urls = urls or self.get_urls(category, search)
-        self.set_pre_results(urls)
-        for url in urls:
-            results += url.pop('products', [])
-        results += self.get_results(urls)
-        results = self.filter_results(results)
-        return results
 
     def set_pre_results(self, urls):
         loop = asyncio.new_event_loop()
@@ -255,6 +244,17 @@ class Scraper(RequestMixin):
             return self.max_page if page > self.max_page else page
         else:
             return self.max_page
+    @log_time(fake_args=['source'])
+    def search(self, category, search, urls=None):
+        results = []
+        # multiple results if search has list
+        urls = urls or self.get_urls(category, search)
+        self.set_pre_results(urls)
+        for url in urls:
+            results += url.pop('products', [])
+        results += self.get_results(urls)
+        results = self.filter_results(results)
+        return results
 
     # @log_time(log_args=False, log_kwargs=False)
     def get_products(self, content, search, page_type):
