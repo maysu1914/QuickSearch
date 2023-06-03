@@ -846,6 +846,98 @@
                     }
                 }
             }
+        },
+        {
+            "name": "Pazarama",
+            "type": "marketplace",
+            "style": {
+                "bg_color": "(255,20,139)",
+                "fg_color": "(0,55,243)"
+            },
+            "base_url": "https://www.pazarama.com/",
+            "query": {
+                "path": "arama?q=%(search)s&siralama=artan-fiyat"
+            },
+            "sleep_after_request": 0,
+            "pagination_query": "sayfa=%d",
+            "categories": {
+                "All": ""
+            },
+            "validations": {
+                "is_listing_page": {
+                    "selector": {
+                        "type": "select_one",
+                        "args": [
+                            "div[productcode]"
+                        ],
+                        "kwargs": {}
+                    }
+                },
+                "is_detail_page": {}
+            },
+            "page_number": {
+                "selector": {
+                    "type": "select_one",
+                    "args": [
+                        "div.product-filter-sidebar__item > p"
+                    ],
+                    "kwargs": {}
+                },
+                "first_page": 1,
+                "method": "total",
+                "products_per_page": 20
+            },
+            "product": {
+                "listing": {
+                    "selector": {
+                        "type": "select",
+                        "args": [
+                            "div[productcode]"
+                        ],
+                        "kwargs": {}
+                    }
+                },
+                "detail": {}
+            },
+            "attributes": {
+                "name": {
+                    "required": true,
+                    "listing": {
+                        "function": "get_product_name",
+                        "selector": {
+                            "type": "select_one",
+                            "args": [
+                                "div.font-normal > div.line-clamp-2"
+                            ],
+                            "kwargs": {}
+                        }
+                    }
+                },
+                "price": {
+                    "listing": {
+                        "function": "get_product_price",
+                        "selector": {
+                            "type": "select",
+                            "args": [
+                                "div.product-card__price > div.text-sm,div.product-card__price > div.text-huge"
+                            ],
+                            "kwargs": {}
+                        }
+                    }
+                },
+                "comment_count": {
+                    "listing": {
+                        "function": "get_product_comment_count",
+                        "selector": {
+                            "type": "select_one",
+                            "args": [
+                                "p.text-sm.font-semibold.ml-3"
+                            ],
+                            "kwargs": {}
+                        }
+                    }
+                }
+            }
         }
     ]
 }
