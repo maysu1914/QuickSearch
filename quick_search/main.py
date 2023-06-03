@@ -25,7 +25,7 @@ class QuickSearch:
 
     def get_search_types(self):
         search_types = (
-            'By entering the categories, sources, and a search text.',
+            'By selecting the sources and entering a search text.',
             'By entering a URL and a search text.'
         )
         return search_types
