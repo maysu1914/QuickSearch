@@ -423,7 +423,7 @@
                         "selector": {
                             "type": "select",
                             "args": [
-                                "div.shipping-status, .dod-badge, div[data-test-id=product-image-footer-label]"
+                                "div.shipping-status, .dod-badge, div[data-test-id=product-image-footer-label],div[data-test-id=campaign]"
                             ],
                             "kwargs": {}
                         }
