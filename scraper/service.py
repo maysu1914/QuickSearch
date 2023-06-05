@@ -9,6 +9,7 @@ from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet
+from price_parser import Price
 from requests.utils import requote_uri
 
 from scraper.mixins import RequestMixin
@@ -183,7 +184,7 @@ class Scraper(RequestMixin):
                     page = max(numbers)
             except ValueError as exc:
                 logging.error(
-                    "Couldn't fine any number in {}. Exc: {}".format(
+                    "Couldn't find any number in {}. Exc: {}".format(
                         result, exc.__repr__()
                     )
                 )
@@ -311,15 +312,17 @@ class Scraper(RequestMixin):
             return None
 
     def get_product_price(self, result):
-        if isinstance(result, ResultSet):
-            numbers = [''.join([s for s in self.get_text(e).split(',')[0] if s.isdigit()]) for e in result]
-            numbers = [int(number) for number in numbers if number]
-            return min(numbers) if numbers else 0
-        elif result:
-            number = ''.join([s for s in result.text.split(',')[0] if s.isdigit()])
-            return int(number) if number else 0
-        else:
-            return 0
+        if not isinstance(result, ResultSet):
+            result = [result]
+        prices = {
+            int(price.amount) for price in
+            [
+                Price.fromstring(self.get_text(item)) for item in result
+                if item
+            ]
+            if price.amount
+        }
+        return prices and min(prices) or 0
 
     def get_product_info(self, result):
         if isinstance(result, ResultSet):
