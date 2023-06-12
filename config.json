@@ -16,7 +16,7 @@
                 "path": "/sr?wc=%(category)s&q=%(search)s&qt=%(search)s&st=%(search)s&lc=%(category)s&sst=PRICE_BY_ASC",
                 "space": " "
             },
-            "sleep_after_request": 0.25,
+            "sleep_after_request": 0.75,
             "pagination_query": "pi=%d",
             "categories": {
                 "All": "",
@@ -81,7 +81,7 @@
                         "selector": {
                             "type": "select",
                             "args": [
-                                "div.discountedPriceBox > div.prc-box-dscntd, div.prc-box-sllng"
+                                "div > div.prc-box-dscntd, div.prc-box-sllng, div.prc-box-orgnl"
                             ],
                             "kwargs": {}
                         }
@@ -93,7 +93,7 @@
                         "selector": {
                             "type": "select",
                             "args": [
-                                "div.stmp.fc, .low-price-in-last-month, div.unit-info"
+                                "div.stmp.fc, .low-price-in-last-month, div.unit-info, div.product-stamp-container > span, div.badge-wrapper"
                             ],
                             "kwargs": {}
                         }
@@ -236,7 +236,7 @@
                 "path": "/%(category)s?q=%(search)s&srt=PRICE_LOW",
                 "space": " "
             },
-            "sleep_after_request": 0.5,
+            "sleep_after_request": 0.75,
             "pagination_query": "pg=%d",
             "categories": {
                 "All": "arama",
@@ -347,7 +347,7 @@
                 "path": "/ara?q=%(search)s%(category)s&siralama=artanfiyat",
                 "space": " "
             },
-            "sleep_after_request": 0.4,
+            "sleep_after_request": 0.75,
             "pagination_query": "sayfa=%d",
             "categories": {
                 "All": "",
@@ -467,7 +467,7 @@
                 "path": "/s?k=%(search)s%(category)s",
                 "space": "+"
             },
-            "sleep_after_request": 0,
+            "sleep_after_request": 0.75,
             "pagination_query": "page=%d",
             "categories": {
                 "All": "",
