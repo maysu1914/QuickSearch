@@ -1,23 +1,21 @@
 import asyncio
-import hashlib
 import itertools
-import json
-import logging
-import math
 import re
 from urllib.parse import urljoin
 
-from bs4 import BeautifulSoup
-from bs4.element import ResultSet
-from price_parser import Price
 from requests.utils import requote_uri
 
 from scraper.mixins import RequestMixin
+from scraper.parsers import HtmlParser
 from scraper.utils import (
-    get_attribute_by_path, log_time, is_formattable, find_nth
+    get_attribute_by_path, log_time, is_formattable, find_nth, set_hash
 )
 
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+PARSERS = {
+    'html': HtmlParser
+}
 
 
 class Scraper(RequestMixin):
@@ -28,6 +26,7 @@ class Scraper(RequestMixin):
         super(Scraper, self).__init__(source, *args, **kwargs)
         self.source = source
         self.max_page = kwargs.get('max_page', 3)
+        self.parser = self.parser_class(source, self.max_page)
 
     @property
     def name(self):
@@ -46,8 +45,9 @@ class Scraper(RequestMixin):
         return self.source.get('pagination_query')
 
     @property
-    def parser(self):
-        return self.source.get('parser')
+    def parser_class(self):
+        parser_name = self.source.get('parser')
+        return PARSERS.get(parser_name)
 
     @property
     def attributes(self):
@@ -58,21 +58,6 @@ class Scraper(RequestMixin):
         return get_attribute_by_path(
             self.source, 'page_number.first_page', self.default_first_page
         )
-
-    @property
-    def products_per_page(self):
-        return self.source['page_number']['products_per_page']
-
-    @property
-    def pagination_method(self):
-        method = self.source['page_number']['method']
-        return getattr(self, 'get_page_from_{}'.format(method))
-
-    def get_page_from_total(self, value):
-        return math.ceil(max(value) / self.products_per_page)
-
-    def get_page_from_pagination(self, value):
-        return max(value)
 
     @staticmethod
     def _get_all_combinations(search):
@@ -161,65 +146,6 @@ class Scraper(RequestMixin):
             for search in searches
         ])
 
-    @staticmethod
-    def _parse_numbers(text):
-        return re.findall(r'\d+', text)
-
-    @staticmethod
-    def bs_select(soup, dictionary, attribute_path):
-        selector = get_attribute_by_path(
-            dictionary, f"{attribute_path}.selector"
-        )
-        function = selector and getattr(soup, selector['type'], None)
-        return function and function(*selector['args'], **selector['kwargs'])
-
-    @staticmethod
-    def get_text(element):
-        """
-        it will parse the text of element without children's
-        returns the whole texts if no text found
-        """
-        text = ''.join(element.find_all(text=True, recursive=False)).strip()
-        return text or element.text
-
-    def get_page_number(self, soup):
-        def get_value(el):
-            key = self.source['page_number'].get('key')
-            return key and el[key] or self.get_text(el)
-
-        result = self.bs_select(soup, self.source, 'page_number')
-        values = []
-
-        if not result:
-            return self.max_page
-
-        if not isinstance(result, ResultSet):
-            result = [result]
-
-        for element in result:
-            trimmed = get_value(element).replace(',', '').replace('.', '')
-            numbers = map(int, self._parse_numbers(trimmed))
-            try:
-                values.append(self.pagination_method(numbers))
-            except ValueError as exc:
-                logging.error(
-                    "Couldn't find any number in {}. Exc: {}".format(
-                        result, exc.__repr__()
-                    )
-                )
-
-        page = values and max(values)
-        return page and page > self.max_page and self.max_page or page
-
-    @staticmethod
-    def get_normalized_response(response):
-        return BeautifulSoup(response.content, 'lxml')
-
-    def is_response_ok(self, soup):
-        return self.bs_select(
-            soup, self.source, 'validations.is_listing_page'
-        )
-
     def set_pre_results(self, urls):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
@@ -228,9 +154,9 @@ class Scraper(RequestMixin):
         )
         responses = loop.run_until_complete(bulk_req)
         for url, response in zip(urls, responses):
-            normalized_response = self.get_normalized_response(response)
-            if normalized_response and self.is_response_ok(normalized_response):
-                page_number = self.get_page_number(normalized_response)
+            normalized_response = self.parser.get_normalized_response(response)
+            if self.parser.is_response_ok(normalized_response):
+                page_number = self.parser.get_page_number(normalized_response)
                 url['products'] = self.get_products(
                     normalized_response, url['search']
                 )
@@ -245,7 +171,6 @@ class Scraper(RequestMixin):
                 url['start_page'] = None
                 url['end_page'] = None
 
-    # @log_time(fake_args=['source'])
     def get_results(self, urls):
         generated_urls = []
         products = []
@@ -268,14 +193,14 @@ class Scraper(RequestMixin):
         )
         responses = loop.run_until_complete(bulk_req)
         for generated_url, response in zip(generated_urls, responses):
-            normalized_response = self.get_normalized_response(response)
+            normalized_response = self.parser.get_normalized_response(response)
             products += self.get_products(
                 normalized_response, generated_url['search']
             )
         return products
 
-    # @log_time(log_args=False, log_kwargs=False)
-    def filter_results(self, results):
+    @staticmethod
+    def filter_results(results):
         seen = set()
         filtered_results = []
         for item in sorted(results, key=lambda i: not i['suitable_to_search']):
@@ -298,122 +223,24 @@ class Scraper(RequestMixin):
         results = self.filter_results(results)
         return results
 
-    def parse_products(self, soup):
-        return self.bs_select(soup, self.source, f"product.listing")
-
-    def get_value(self, parsed_product, key_path):
-        return self.bs_select(parsed_product, self.attributes, key_path)
-
-    # @log_time(log_args=False, log_kwargs=False)
     def get_products(self, normalized_response, search):
         products = []
 
-        for product in self.parse_products(normalized_response):
+        for product in self.parser.parse_products(normalized_response):
             acceptable = True
             data = {'source': self.name}
             for attribute_name, attribute_config in self.attributes.items():
                 is_required = attribute_config.get('required')
-                function = attribute_config['listing']['function']
-                key_path = f"{attribute_name}.listing"
-                parsed_value = self.get_value(product, key_path)
-                value_key = attribute_config['listing'].get('key')
-                normalized_value = getattr(self, function)(
-                    parsed_value, key=value_key
+                attribute_value = self.parser.get_product_attribute_value(
+                    product, attribute_name, attribute_config
                 )
-                data[attribute_name] = normalized_value
+                data[attribute_name] = attribute_value
                 if is_required and not data[attribute_name]:
                     acceptable = False
             if acceptable:
                 data['suitable_to_search'] = self.check_the_suitability(
                     data['name'], search
                 )
-                self.add_hash(data, keys=['name', 'price'])
+                set_hash(data, keys=['name', 'price'])
                 products.append(data)
         return products
-
-    def add_hash(self, product, keys=None):
-        keys = keys or product.keys()
-        hash = hashlib.md5()
-        content = [product.get(key) for key in keys]
-        encoded = json.dumps(content, sort_keys=True).encode()
-        hash.update(encoded)
-        product['hash'] = hash.hexdigest()
-
-    def get_product_name(self, result, key=None):
-        def get_value(el):
-            return key and el[key] or el.text
-
-        if not result:
-            return
-
-        if not isinstance(result, ResultSet):
-            result = [result]
-
-        return ' '.join(map(lambda i: ' '.join(get_value(i).split()), result))
-
-    def get_product_price(self, result, key=None):
-        def get_value(el):
-            return key and el[key] or self.get_text(el)
-
-        if not result:
-            return
-
-        if not isinstance(result, ResultSet):
-            result = [result]
-
-        prices = {
-            int(price.amount) for price in
-            [
-                Price.fromstring(get_value(item)) for item in result
-                if item
-            ]
-            if price.amount
-        }
-        return prices and min(prices)
-
-    def get_product_info(self, result, key=None):
-        def get_value(el):
-            return key and el[key] or el.text
-
-        if not result:
-            return
-
-        if not isinstance(result, ResultSet):
-            result = [result]
-
-        return ' '.join(map(lambda i: ' '.join(get_value(i).split()), result))
-
-    def get_product_comment_count(self, result, key=None):
-        def get_value(el):
-            return key and el[key] or el.text
-
-        if not result:
-            return
-
-        if not isinstance(result, ResultSet):
-            result = [result]
-
-        return ' '.join(map(lambda i: ' '.join(get_value(i).split()), result))
-
-    def get_discount_calculated(self, result, key=None):
-        def get_value(el):
-            return key and el[key] or self.get_text(el)
-
-        if not result:
-            return
-
-        if not isinstance(result, ResultSet):
-            result = [result]
-
-        prices = {
-            int(price.amount) for price in
-            [
-                Price.fromstring(get_value(item)) for item in result
-                if item
-            ]
-            if price.amount
-        }
-
-        min_val = min(prices)
-        max_val = max(prices)
-        return min_val != max_val and (max_val - min_val) / max_val * 100
