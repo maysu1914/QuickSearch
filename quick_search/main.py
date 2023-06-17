@@ -211,7 +211,7 @@ class QuickSearch:
     def divide_results(results):
         correct_results = []
         near_results = []
-        results = sorted(results, key=lambda i: (i['price'] == 0, i['price']))
+        results = sorted(results, key=lambda i: (i['price'] is None, i['price']))
 
         for item in results:
             if item.get('suitable_to_search'):
