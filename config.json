@@ -783,6 +783,19 @@
                 },
                 "is_detail_page": {}
             },
+            "page_number": {
+                "selector": {
+                    "type": "select",
+                    "args": [
+                        "input.js-total-record"
+                    ],
+                    "kwargs": {}
+                },
+                "key": "value",
+                "first_page": 1,
+                "method": "total",
+                "products_per_page": 60
+            },
             "product": {
                 "listing": {
                     "selector": {
