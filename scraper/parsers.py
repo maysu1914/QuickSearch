@@ -1,5 +1,6 @@
 import logging
 import math
+from functools import lru_cache
 
 from bs4 import BeautifulSoup, ResultSet
 from price_parser import Price
@@ -211,3 +212,85 @@ class HtmlParser(Parser):
         min_val = min(prices)
         max_val = max(prices)
         return min_val != max_val and (max_val - min_val) / max_val * 100
+
+
+class JsonParser(Parser):
+
+    @staticmethod
+    @lru_cache
+    def _get_headers():
+        user_agent_values = [
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 'Safari/537.36',
+            'AppleWebKit/537.36 (KHTML, like Gecko)', 'Chrome/100.0.4896.127'
+        ]
+        accept_values = [
+            '*/*'
+        ]
+        headers = {
+            'user-agent': ' '.join(user_agent_values),
+            'accept': ','.join(accept_values)
+        }
+        return headers
+
+    def is_response_ok(self, normalized_response):
+        query = get_attribute_by_path(self.source, 'validations.query', {})
+        return all(
+            normalized_response.get(key) == value
+            for key, value in query.items()
+        )
+
+    @staticmethod
+    def get_normalized_response(response):
+        return response.json()
+
+    def get_page_number(self, normalized_response):
+        key = get_attribute_by_path(self.source, 'page_number.key')
+        page = get_attribute_by_path(normalized_response, key)
+        return page and page > self.max_page and self.max_page or page
+
+    def parse_products(self, normalized_response):
+        key = get_attribute_by_path(self.source, 'product.key')
+        return get_attribute_by_path(normalized_response, key)
+
+    def get_product_attribute_value(self, product, name, config):
+        function = config['function']
+        keys = config['keys']
+        kwargs = config.get('kwargs') or {}
+        values = []
+
+        for key in keys:
+            if isinstance(key, dict):
+                value = get_attribute_by_path(product, key['key'])
+                if not value:
+                    continue
+                values.append(key['text_format'].format(value))
+            else:
+                values.append(get_attribute_by_path(product, key))
+
+        return getattr(self, function)(values, **kwargs)
+
+    def get_product_name(self, values):
+        trimmed_values = [' '.join(value.split()) for value in values]
+        return ' '.join(trimmed_values)
+
+    def get_product_price(self, values, decimal_index=None):
+        def get_value(value):
+            if decimal_index:
+                return "{},{}".format(
+                    str(value)[:decimal_index],
+                    str(value)[decimal_index:]
+                )
+            return value
+
+        prices = {
+            int(price.amount) for price in
+            [
+                Price.fromstring(get_value(value)) for value in values
+            ]
+            if price.amount
+        }
+        return prices and min(prices)
+
+    def get_product_info(self, values, text_format=None):
+        trimmed_values = [' '.join(value.split()) for value in values]
+        return ' '.join(trimmed_values)

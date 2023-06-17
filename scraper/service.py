@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 from requests.utils import requote_uri
 
 from scraper.mixins import RequestMixin
-from scraper.parsers import HtmlParser
+from scraper.parsers import HtmlParser, JsonParser
 from scraper.utils import (
     get_attribute_by_path, log_time, is_formattable, find_nth, set_hash
 )
@@ -14,7 +14,8 @@ from scraper.utils import (
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 PARSERS = {
-    'html': HtmlParser
+    'html': HtmlParser,
+    'json': JsonParser
 }
 
 
