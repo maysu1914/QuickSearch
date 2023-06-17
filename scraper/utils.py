@@ -1,6 +1,13 @@
+import hashlib
+import json
 import logging
+import re
 import string
 import time
+
+
+def parse_numbers(text):
+    return re.findall(r'\d+', text)
 
 
 def is_formattable(text):
@@ -28,6 +35,15 @@ def get_attribute_by_path(dictionary, attribute_path, default=None):
             return default
     else:
         return current_attr
+
+
+def set_hash(obj, keys=None):
+    keys = keys or obj.keys()
+    hash = hashlib.md5()
+    content = [obj.get(key) for key in keys]
+    encoded = json.dumps(content, sort_keys=True).encode()
+    hash.update(encoded)
+    obj['hash'] = hash.hexdigest()
 
 
 def log_time(log_args=True, log_kwargs=True, log_response=False,
