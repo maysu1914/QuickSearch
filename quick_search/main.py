@@ -11,7 +11,7 @@ from quick_search.prompts import PromptSource, PromptURL
 from scraper.service import Scraper
 from scraper.utils import get_attribute_by_path, log_time
 
-EXECUTOR = ThreadPoolExecutor(max_workers=8)
+EXECUTOR = ThreadPoolExecutor(max_workers=16)
 
 init_colorit()
 
