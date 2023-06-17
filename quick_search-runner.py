@@ -20,7 +20,7 @@ if __name__ == '__main__':
         encoding='utf-8',
         level=logging.INFO
     )
-    config = json.load(open('config.json'))
+    config = json.load(open('config.json', encoding="utf-8"))
 
 
     def my_handler(type, value, tb):
