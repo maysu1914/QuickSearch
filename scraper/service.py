@@ -19,7 +19,6 @@ PARSERS = {
 
 
 class Scraper(RequestMixin):
-    default_first_page = 1
     minimum_search_word_length = 3
 
     def __init__(self, source, *args, **kwargs):
@@ -56,7 +55,7 @@ class Scraper(RequestMixin):
     @property
     def first_page(self):
         return get_attribute_by_path(
-            self.source, 'page_number.first_page', self.default_first_page
+            self.source, 'page_number.first_page', 1
         )
 
     @staticmethod
