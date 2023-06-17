@@ -59,6 +59,21 @@ class Scraper(RequestMixin):
             self.source, 'page_number.first_page', self.default_first_page
         )
 
+    @property
+    def products_per_page(self):
+        return self.source['page_number']['products_per_page']
+
+    @property
+    def pagination_method(self):
+        method = self.source['page_number']['method']
+        return getattr(self, 'get_page_from_{}'.format(method))
+
+    def get_page_from_total(self, value):
+        return math.ceil(max(value) / self.products_per_page)
+
+    def get_page_from_pagination(self, value):
+        return max(value)
+
     @staticmethod
     def _get_all_combinations(search):
         if any(char not in search for char in ['[', ']']):
@@ -147,6 +162,10 @@ class Scraper(RequestMixin):
         ])
 
     @staticmethod
+    def _parse_numbers(text):
+        return re.findall(r'\d+', text)
+
+    @staticmethod
     def bs_select(soup, dictionary, attribute_path):
         selector = get_attribute_by_path(
             dictionary, f"{attribute_path}.selector"
@@ -163,34 +182,43 @@ class Scraper(RequestMixin):
         text = ''.join(element.find_all(text=True, recursive=False)).strip()
         return text or element.text
 
-    @staticmethod
-    def _parse_numbers(text):
-        return re.findall(r'\d+', text)
+    def get_page_number(self, soup):
+        def get_value(el):
+            key = self.source['page_number'].get('key')
+            return key and el[key] or self.get_text(el)
 
-    def get_page_number(self, result):
-        if result and isinstance(result, ResultSet):
-            numbers = [self.get_page_number(e) for e in result]
-            return max(numbers)
-        elif result:
-            page = self.max_page
-            trimmed = result.text.replace(',', '').replace('.', '')
+        result = self.bs_select(soup, self.source, 'page_number')
+        values = []
+
+        if not result:
+            return self.max_page
+
+        if not isinstance(result, ResultSet):
+            result = [result]
+
+        for element in result:
+            trimmed = get_value(element).replace(',', '').replace('.', '')
             numbers = map(int, self._parse_numbers(trimmed))
-            products_per_page = self.source['page_number']['products_per_page']
-            method = self.source['page_number']['method']
             try:
-                if method == 'total':
-                    page = math.ceil(max(numbers) / products_per_page)
-                elif method == 'pagination':
-                    page = max(numbers)
+                values.append(self.pagination_method(numbers))
             except ValueError as exc:
                 logging.error(
                     "Couldn't find any number in {}. Exc: {}".format(
                         result, exc.__repr__()
                     )
                 )
-            return page > self.max_page and self.max_page or page
-        else:
-            return self.max_page
+
+        page = values and max(values)
+        return page and page > self.max_page and self.max_page or page
+
+    @staticmethod
+    def get_normalized_response(response):
+        return BeautifulSoup(response.content, 'lxml')
+
+    def is_response_ok(self, soup):
+        return self.bs_select(
+            soup, self.source, 'validations.is_listing_page'
+        )
 
     def set_pre_results(self, urls):
         loop = asyncio.new_event_loop()
@@ -200,16 +228,11 @@ class Scraper(RequestMixin):
         )
         responses = loop.run_until_complete(bulk_req)
         for url, response in zip(urls, responses):
-            soup = BeautifulSoup(response.content, 'lxml')
-            is_listing_page = self.bs_select(
-                soup, self.source, 'validations.is_listing_page'
-            )
-            if soup and is_listing_page:
-                page_number = self.get_page_number(
-                    self.bs_select(soup, self.source, 'page_number')
-                )
+            normalized_response = self.get_normalized_response(response)
+            if normalized_response and self.is_response_ok(normalized_response):
+                page_number = self.get_page_number(normalized_response)
                 url['products'] = self.get_products(
-                    response.content, url['search'], 'listing'
+                    normalized_response, url['search']
                 )
                 if page_number > 1:
                     url['start_page'] = self.first_page + 1
@@ -245,8 +268,9 @@ class Scraper(RequestMixin):
         )
         responses = loop.run_until_complete(bulk_req)
         for generated_url, response in zip(generated_urls, responses):
+            normalized_response = self.get_normalized_response(response)
             products += self.get_products(
-                response.content, generated_url['search'], 'listing'
+                normalized_response, generated_url['search']
             )
         return products
 
@@ -274,78 +298,122 @@ class Scraper(RequestMixin):
         results = self.filter_results(results)
         return results
 
+    def parse_products(self, soup):
+        return self.bs_select(soup, self.source, f"product.listing")
+
+    def get_value(self, parsed_product, key_path):
+        return self.bs_select(parsed_product, self.attributes, key_path)
+
     # @log_time(log_args=False, log_kwargs=False)
-    def get_products(self, content, search, page_type):
-        soup = BeautifulSoup(content, 'lxml')
+    def get_products(self, normalized_response, search):
         products = []
 
-        for product in self.bs_select(soup, self.source, f"product.{page_type}"):
+        for product in self.parse_products(normalized_response):
             acceptable = True
             data = {'source': self.name}
-            for key, value in self.attributes.items():
-                function = value[page_type]['function']
-                key_path = f"{key}.{page_type}"
-                data[key] = getattr(self, function)(self.bs_select(product, self.attributes, key_path))
-                if value.get('required') and not data[key]:
+            for attribute_name, attribute_config in self.attributes.items():
+                is_required = attribute_config.get('required')
+                function = attribute_config['listing']['function']
+                key_path = f"{attribute_name}.listing"
+                parsed_value = self.get_value(product, key_path)
+                value_key = attribute_config['listing'].get('key')
+                normalized_value = getattr(self, function)(
+                    parsed_value, key=value_key
+                )
+                data[attribute_name] = normalized_value
+                if is_required and not data[attribute_name]:
                     acceptable = False
             if acceptable:
                 data['suitable_to_search'] = self.check_the_suitability(
                     data['name'], search
                 )
-                products.append(self.add_hash(data, keys=['name', 'price']))
+                self.add_hash(data, keys=['name', 'price'])
+                products.append(data)
         return products
 
     def add_hash(self, product, keys=None):
         keys = keys or product.keys()
         hash = hashlib.md5()
-        encoded = json.dumps([product.get(key) for key in keys], sort_keys=True).encode()
+        content = [product.get(key) for key in keys]
+        encoded = json.dumps(content, sort_keys=True).encode()
         hash.update(encoded)
         product['hash'] = hash.hexdigest()
-        return product
 
-    def get_product_name(self, result):
-        if isinstance(result, ResultSet):
-            return ' '.join(map(lambda i: ' '.join(i.text.split()), result))
-        elif result:
-            return ' '.join(result.text.split())
-        else:
-            return None
+    def get_product_name(self, result, key=None):
+        def get_value(el):
+            return key and el[key] or el.text
 
-    def get_product_price(self, result):
+        if not result:
+            return
+
         if not isinstance(result, ResultSet):
             result = [result]
+
+        return ' '.join(map(lambda i: ' '.join(get_value(i).split()), result))
+
+    def get_product_price(self, result, key=None):
+        def get_value(el):
+            return key and el[key] or self.get_text(el)
+
+        if not result:
+            return
+
+        if not isinstance(result, ResultSet):
+            result = [result]
+
         prices = {
             int(price.amount) for price in
             [
-                Price.fromstring(self.get_text(item)) for item in result
+                Price.fromstring(get_value(item)) for item in result
                 if item
             ]
             if price.amount
         }
-        return prices and min(prices) or 0
+        return prices and min(prices)
 
-    def get_product_info(self, result):
-        if isinstance(result, ResultSet):
-            return ', '.join(map(lambda i: ' '.join(i.text.split()), result))
-        elif result:
-            return ' '.join(result.text.split())
-        else:
-            return None
+    def get_product_info(self, result, key=None):
+        def get_value(el):
+            return key and el[key] or el.text
 
-    def get_product_comment_count(self, result):
-        if isinstance(result, ResultSet):
-            return ' '.join(map(lambda i: ' '.join(i.text.split()), result))
-        elif result:
-            return ' '.join(result.text.split())
-        else:
-            return None
+        if not result:
+            return
 
-    def get_discount_calculated(self, result):
-        if isinstance(result, ResultSet):
-            numbers = [''.join([s for s in self.get_text(e).split(',')[0] if s.isdigit()]) for e in result]
-            values = [int(number) for number in numbers] if numbers and all(numbers) else [0]
-            min_val = min(values)
-            max_val = max(values)
-            return int((max_val - min_val) / max_val * 100) if min_val != max_val else 0
-        else:
-            return 0
+        if not isinstance(result, ResultSet):
+            result = [result]
+
+        return ' '.join(map(lambda i: ' '.join(get_value(i).split()), result))
+
+    def get_product_comment_count(self, result, key=None):
+        def get_value(el):
+            return key and el[key] or el.text
+
+        if not result:
+            return
+
+        if not isinstance(result, ResultSet):
+            result = [result]
+
+        return ' '.join(map(lambda i: ' '.join(get_value(i).split()), result))
+
+    def get_discount_calculated(self, result, key=None):
+        def get_value(el):
+            return key and el[key] or self.get_text(el)
+
+        if not result:
+            return
+
+        if not isinstance(result, ResultSet):
+            result = [result]
+
+        prices = {
+            int(price.amount) for price in
+            [
+                Price.fromstring(get_value(item)) for item in result
+                if item
+            ]
+            if price.amount
+        }
+
+        min_val = min(prices)
+        max_val = max(prices)
+        return min_val != max_val and (max_val - min_val) / max_val * 100
