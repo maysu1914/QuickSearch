@@ -18,11 +18,10 @@ PARSERS = {
 }
 
 
-class Scraper(RequestMixin):
+class Scraper:
     minimum_search_word_length = 3
 
     def __init__(self, source, *args, **kwargs):
-        super(Scraper, self).__init__(source, *args, **kwargs)
         self.source = source
         self.max_page = kwargs.get('max_page', 3)
         self.parser = self.parser_class(source, self.max_page)
@@ -100,7 +99,9 @@ class Scraper(RequestMixin):
     def generate_paginated_urls(self, url, start_page, end_page):
         urls = []
         for number in range(start_page, end_page + 1):
-            urls.append(self.prepare_url(url, self.pagination_query % number))
+            urls.append(
+                self.parser.prepare_url(url, self.pagination_query % number)
+            )
         return urls
 
     def is_suitable_to_search(self, product_name, search):
@@ -149,7 +150,7 @@ class Scraper(RequestMixin):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         bulk_req = asyncio.ensure_future(
-            self.get_page_contents([url['url'] for url in urls])
+            self.parser.get_page_contents([url['url'] for url in urls])
         )
         responses = loop.run_until_complete(bulk_req)
         for url, response in zip(urls, responses):
@@ -188,7 +189,9 @@ class Scraper(RequestMixin):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         bulk_req = asyncio.ensure_future(
-            self.get_page_contents([url['url'] for url in generated_urls])
+            self.parser.get_page_contents(
+                [url['url'] for url in generated_urls]
+            )
         )
         responses = loop.run_until_complete(bulk_req)
         for generated_url, response in zip(generated_urls, responses):

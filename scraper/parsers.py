@@ -4,12 +4,14 @@ import math
 from bs4 import BeautifulSoup, ResultSet
 from price_parser import Price
 
+from scraper.mixins import RequestMixin
 from scraper.utils import get_attribute_by_path, parse_numbers
 
 
-class Parser:
+class Parser(RequestMixin):
 
     def __init__(self, source, max_page):
+        super().__init__(source)
         self.source = source
         self.max_page = max_page
 
