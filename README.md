@@ -7,27 +7,6 @@ Install requirements by typing "pip3 install -r requirements.txt" your terminal 
 ## Executable Creation
     pyinstaller --onefile --add-data "config.json;." quick_search-runner.py
 
-## Supported websites
-These websites are can be searched at the same time for now:
-
-- vatanbilgisayar.com
-- n11.com
-- hepsiburada.com
-- trendyol.com
-- amazon.com.tr
-- teknosa.com
-- gittigidiyor.com
-- mediamarkt.com.tr
-- All (you can exclude any one of the above by entering of negatives of their indexes)
-
-## Supported categories
-You can search your product in a particular category for getting much clear results.
-
-- Notebooks
-- Smartphones
-- Monitors
-- All
-
 ## Special search style
 You can search your products with this special search style:
 
@@ -68,6 +47,6 @@ You can search your products with this special search style:
     acer 8gb ram windows
     acer 16gb ram windows
 
-You can use this style when you are not searching for a particular product. Of course it will take some time to search because of many requests to be made. You can calculate the minimum number of requests to be made by multiplying the number of words in the word lists with each other and multiplying that number with the number of websites to search.
+You can use this style when you are not searching for a particular product. Of course, it will take some time to search because of many requests to be made. You can calculate the minimum number of requests to be made by multiplying the number of words in the word lists with each other and multiplying that number with the number of websites to search.
 
 *For example, there is minimum of 2x2 requests will be made for each website in the third example*
