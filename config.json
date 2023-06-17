@@ -960,6 +960,65 @@
                     }
                 }
             }
+        },
+        {
+            "name": "Migros",
+            "type": "marketplace",
+            "style": {
+                "bg_color": "(255,255,255)",
+                "fg_color": "(255,127,0)"
+            },
+            "base_url": "https://www.migros.com.tr/",
+            "parser": "json",
+            "query": {
+                "path": "/rest/products/search?query=%(search)s&sirala=once-en-dusuk-fiyat"
+            },
+            "sleep_after_request": 0.3,
+            "pagination_query": "sayfa=%d",
+            "categories": {
+                "All": ""
+            },
+            "validations": {
+                "query": {
+                    "successful": true
+                }
+            },
+            "page_number": {
+                "key": "data.pageCount",
+                "first_page": 1
+            },
+            "product": {
+                "key": "data.storeProductInfos"
+            },
+            "attributes": {
+                "name": {
+                    "function": "get_product_name",
+                    "required": true,
+                    "keys": [
+                        "name"
+                    ]
+                },
+                "price": {
+                    "function": "get_product_price",
+                    "keys": [
+                        "shownPrice",
+                        "salePrice",
+                        "regularPrice"
+                    ],
+                    "kwargs": {
+                        "decimal_index": -2
+                    }
+                },
+                "info": {
+                    "function": "get_product_info",
+                    "keys": [
+                        {
+                            "key": "discountRate",
+                            "text_format": "%{} İNDİRİM"
+                        }
+                    ]
+                }
+            }
         }
     ]
 }
