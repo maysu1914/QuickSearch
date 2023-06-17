@@ -12,6 +12,7 @@
                 "fg_color": "(0,0,0)"
             },
             "base_url": "https://www.trendyol.com/",
+            "parser": "html",
             "query": {
                 "path": "/sr?wc=%(category)s&q=%(search)s&qt=%(search)s&st=%(search)s&lc=%(category)s&sst=PRICE_BY_ASC",
                 "space": " "
@@ -121,6 +122,7 @@
                 "fg_color": "(255,255,255)"
             },
             "base_url": "https://www.vatanbilgisayar.com/",
+            "parser": "html",
             "query": {
                 "path": "/arama/%(search)s/%(category)s?srt=UP",
                 "space": " "
@@ -232,6 +234,7 @@
                 "fg_color": "(0,0,0)"
             },
             "base_url": "https://www.n11.com/",
+            "parser": "html",
             "query": {
                 "path": "/%(category)s?q=%(search)s&srt=PRICE_LOW",
                 "space": " "
@@ -343,6 +346,7 @@
                 "fg_color": "(255,255,255)"
             },
             "base_url": "https://www.hepsiburada.com/",
+            "parser": "html",
             "query": {
                 "path": "/ara?q=%(search)s%(category)s&siralama=artanfiyat",
                 "space": " "
@@ -463,6 +467,7 @@
                 "fg_color": "(255,255,255)"
             },
             "base_url": "https://www.amazon.com.tr/",
+            "parser": "html",
             "query": {
                 "path": "/s?k=%(search)s%(category)s",
                 "space": "+"
@@ -571,6 +576,7 @@
                 "fg_color": "(0,88,169)"
             },
             "base_url": "https://www.teknosa.com/",
+            "parser": "html",
             "query": {
                 "path": "/arama/?s=%(search)s%(category)s",
                 "space": "+"
@@ -667,6 +673,7 @@
                 "fg_color": "(255,255,255)"
             },
             "base_url": "https://www.mediamarkt.com.tr/",
+            "parser": "html",
             "query": {
                 "path": "/tr/search.html?query=%(search)s%(category)s&searchProfile=VALID&sort=price&sourceRef=INVALID",
                 "space": "%2B"
@@ -763,6 +770,7 @@
                 "fg_color": "(0,61,166)"
             },
             "base_url": "https://www.ciceksepeti.com/",
+            "parser": "html",
             "query": {
                 "path": "/arama?query=%(search)s&qt=%(search)s&orderby=3"
             },
@@ -868,6 +876,7 @@
                 "fg_color": "(0,55,243)"
             },
             "base_url": "https://www.pazarama.com/",
+            "parser": "html",
             "query": {
                 "path": "arama?q=%(search)s&siralama=artan-fiyat"
             },
