@@ -149,7 +149,7 @@
                 "selector": {
                     "type": "select_one",
                     "args": [
-                        ".wrapper-detailpage-header__item-left"
+                        ".wrapper-detailpage-header__item-left > h1"
                     ],
                     "kwargs": {}
                 },
