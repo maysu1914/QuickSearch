@@ -467,7 +467,7 @@
                 "path": "/s?k=%(search)s%(category)s",
                 "space": "+"
             },
-            "sleep_after_request": 0.75,
+            "sleep_after_request": 3,
             "pagination_query": "page=%d",
             "categories": {
                 "All": "",
@@ -491,7 +491,7 @@
                 "selector": {
                     "type": "select",
                     "args": [
-                        "span.s-pagination-item"
+                        ".s-pagination-item[aria-label*=sayfa]"
                     ],
                     "kwargs": {}
                 },
