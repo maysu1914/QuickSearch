@@ -1,22 +1,31 @@
 import asyncio
-import string
+import time
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, urlsplit
 
 import requests
 from requests.adapters import HTTPAdapter
 from requests.models import PreparedRequest
 from urllib3.util.retry import Retry
 
+from scraper.browsers import CustomChrome
 from scraper.utils import log_time
 
 
 class RequestMixin:
     def __init__(self, source, *args, **kwargs):
-        self.session = self._get_session()
+        if (kwargs.get('method') or 'requests') == 'requests':
+            self.session = self._get_session()
+        else:
+            self.browser = self._get_browser()
         self.sleep = source.get('sleep_after_request', 0)
         self.thread_service = ThreadPoolExecutor()
+
+    def _get_browser(self):
+        driver = CustomChrome()
+        driver.minimize_window()
+        return driver
 
     @staticmethod
     @lru_cache
@@ -62,7 +71,22 @@ class RequestMixin:
     async def _request(self, url, **kwargs):
         method = kwargs.pop('method', 'GET')
         print(url)
-        return self.session.request(method, url, **kwargs)
+        if hasattr(self, 'session'):
+            try:
+                return self.session.request(method, url, **kwargs)
+            except requests.exceptions.SSLError as e:
+                return self.session.request(method, url, verify=False, **kwargs)
+        else:
+            base_url = urlsplit(url)
+            base_url = "{}://{}".format(base_url.scheme, base_url.netloc)
+            if self.source.get('visit_homepage_first', True):
+                self.browser.open(base_url)
+                time.sleep(self.sleep)
+            if self.source.get('refresh_browser', False):
+                self.browser.quit()
+                self.browser = self._get_browser()
+            self.browser.open(url)
+            return self.browser.page_source
 
     async def get_page_contents(self, url_list):
         futures = []
