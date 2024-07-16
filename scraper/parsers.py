@@ -4,6 +4,7 @@ from functools import lru_cache
 
 from bs4 import BeautifulSoup, ResultSet
 from price_parser import Price
+from selenium.common.exceptions import WebDriverException
 
 from scraper.mixins import RequestMixin
 from scraper.utils import get_attribute_by_path, parse_numbers
@@ -11,8 +12,8 @@ from scraper.utils import get_attribute_by_path, parse_numbers
 
 class Parser(RequestMixin):
 
-    def __init__(self, source, max_page):
-        super().__init__(source)
+    def __init__(self, source, max_page, *args, **kwargs):
+        super().__init__(source, *args, **kwargs)
         self.source = source
         self.max_page = max_page
 
@@ -89,7 +90,12 @@ class HtmlParser(Parser):
 
     @staticmethod
     def get_normalized_response(response):
-        return BeautifulSoup(response.content, 'lxml')
+        try:
+            return BeautifulSoup(response.content, 'lxml')
+        except AttributeError:
+            if isinstance(response, WebDriverException) or isinstance(response, UnicodeDecodeError):
+                return BeautifulSoup('', 'lxml')
+            return BeautifulSoup(response, 'lxml')
 
     def get_page_number(self, soup):
         def get_value(el):
@@ -118,7 +124,7 @@ class HtmlParser(Parser):
                 )
 
         page = values and max(values)
-        return page and page > self.max_page and self.max_page or page
+        return page and page < self.max_page and page or self.max_page
 
     def parse_products(self, soup):
         return self.bs_select(soup, self.source, f"product.listing")
@@ -127,14 +133,14 @@ class HtmlParser(Parser):
         return self.bs_select(parsed_product, config, key_path)
 
     def get_product_attribute_value(self, product, name, config):
-        function = config['listing']['function']
         parsed_value = self.get_value(product, config, 'listing')
-        value_key = config['listing'].get('key')
+        function = config['listing']['function']
+        kwargs = config['listing'].get('kwargs') or {}
         return getattr(self, function)(
-            parsed_value, key=value_key
+            parsed_value, **kwargs
         )
 
-    def get_product_name(self, result, key=None):
+    def get_product_name(self, result, key=None, delimiter=' '):
         def get_value(el):
             return key and el[key] or el.text
 
@@ -144,7 +150,9 @@ class HtmlParser(Parser):
         if not isinstance(result, ResultSet):
             result = [result]
 
-        return ' '.join(map(lambda i: ' '.join(get_value(i).split()), result))
+        return delimiter.join(
+            map(lambda i: ' '.join(get_value(i).split()), result)
+        )
 
     def get_product_price(self, result, key=None):
         def get_value(el):
@@ -166,7 +174,7 @@ class HtmlParser(Parser):
         }
         return prices and min(prices)
 
-    def get_product_info(self, result, key=None):
+    def get_product_info(self, result, key=None, delimiter=' '):
         def get_value(el):
             return key and el[key] or el.text
 
@@ -176,9 +184,11 @@ class HtmlParser(Parser):
         if not isinstance(result, ResultSet):
             result = [result]
 
-        return ' '.join(map(lambda i: ' '.join(get_value(i).split()), result))
+        return delimiter.join(
+            map(lambda i: ' '.join(get_value(i).split()), result)
+        )
 
-    def get_product_comment_count(self, result, key=None):
+    def get_product_comment_count(self, result, key=None, delimiter=' '):
         def get_value(el):
             return key and el[key] or el.text
 
@@ -188,7 +198,9 @@ class HtmlParser(Parser):
         if not isinstance(result, ResultSet):
             result = [result]
 
-        return ' '.join(map(lambda i: ' '.join(get_value(i).split()), result))
+        return delimiter.join(
+            map(lambda i: ' '.join(get_value(i).split()), result)
+        )
 
     def get_discount_calculated(self, result, key=None):
         def get_value(el):
@@ -211,7 +223,7 @@ class HtmlParser(Parser):
 
         min_val = min(prices)
         max_val = max(prices)
-        return min_val != max_val and (max_val - min_val) / max_val * 100
+        return min_val != max_val and round((max_val - min_val) / max_val * 100)
 
 
 class JsonParser(Parser):
@@ -246,7 +258,7 @@ class JsonParser(Parser):
     def get_page_number(self, normalized_response):
         key = get_attribute_by_path(self.source, 'page_number.key')
         page = get_attribute_by_path(normalized_response, key)
-        return page and page > self.max_page and self.max_page or page
+        return page and page < self.max_page and page or self.max_page
 
     def parse_products(self, normalized_response):
         key = get_attribute_by_path(self.source, 'product.key')
@@ -269,9 +281,9 @@ class JsonParser(Parser):
 
         return getattr(self, function)(values, **kwargs)
 
-    def get_product_name(self, values):
+    def get_product_name(self, values, delimiter=' '):
         trimmed_values = [' '.join(value.split()) for value in values]
-        return ' '.join(trimmed_values)
+        return delimiter.join(trimmed_values)
 
     def get_product_price(self, values, decimal_index=None):
         def get_value(value):
@@ -291,6 +303,6 @@ class JsonParser(Parser):
         }
         return prices and min(prices)
 
-    def get_product_info(self, values, text_format=None):
+    def get_product_info(self, values, delimiter=' '):
         trimmed_values = [' '.join(value.split()) for value in values]
-        return ' '.join(trimmed_values)
+        return delimiter.join(trimmed_values)
