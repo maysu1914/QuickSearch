@@ -3,6 +3,7 @@
     "version": "v0.12",
     "author": "maysu1914",
     "github": "https://github.com/maysu1914/QuickSearch",
+    "debug": true,
     "sources": [
         {
             "name": "Trendyol",
@@ -14,7 +15,7 @@
             "base_url": "https://www.trendyol.com/",
             "parser": "html",
             "query": {
-                "path": "/sr?wc=%(category)s&q=%(search)s&qt=%(search)s&st=%(search)s&lc=%(category)s&sst=PRICE_BY_ASC",
+                "path": "/sr?wc=%(category)s&q=%(search)s&qt=%(search)s&st=%(search)s&lc=%(category)s",
                 "space": " "
             },
             "sleep_after_request": 0.75,
@@ -97,6 +98,9 @@
                                 "div.stmp.fc, .low-price-in-last-month, div.unit-info, div.product-stamp-container > span, div.badge-wrapper"
                             ],
                             "kwargs": {}
+                        },
+                        "kwargs":{
+                            "delimiter": " - "
                         }
                     }
                 },
@@ -124,7 +128,7 @@
             "base_url": "https://www.vatanbilgisayar.com/",
             "parser": "html",
             "query": {
-                "path": "/arama/%(search)s/%(category)s?srt=UP",
+                "path": "/arama/%(search)s/%(category)s",
                 "space": " "
             },
             "sleep_after_request": 0,
@@ -208,6 +212,9 @@
                                 "div.price-basket-camp--helper, span.wrapper-condition__text"
                             ],
                             "kwargs": {}
+                        },
+                        "kwargs":{
+                            "delimiter": " - "
                         }
                     }
                 },
@@ -236,7 +243,7 @@
             "base_url": "https://www.n11.com/",
             "parser": "html",
             "query": {
-                "path": "/%(category)s?q=%(search)s&srt=PRICE_LOW",
+                "path": "/%(category)s?q=%(search)s",
                 "space": " "
             },
             "sleep_after_request": 0.75,
@@ -320,6 +327,9 @@
                                 "cargoBadgeText"
                             ],
                             "kwargs": {}
+                        },
+                        "kwargs":{
+                            "delimiter": " - "
                         }
                     }
                 },
@@ -348,7 +358,7 @@
             "base_url": "https://www.hepsiburada.com/",
             "parser": "html",
             "query": {
-                "path": "/ara?q=%(search)s%(category)s&siralama=artanfiyat",
+                "path": "/ara?q=%(search)s%(category)s",
                 "space": " "
             },
             "sleep_after_request": 0.75,
@@ -430,6 +440,9 @@
                                 "div.shipping-status, .dod-badge, div[data-test-id=product-image-footer-label],div[data-test-id=campaign]"
                             ],
                             "kwargs": {}
+                        },
+                        "kwargs":{
+                            "delimiter": " - "
                         }
                     }
                 },
@@ -462,6 +475,7 @@
         {
             "name": "AmazonTR",
             "type": "marketplace",
+            "method": "browser",
             "style": {
                 "bg_color": "(255,153,0)",
                 "fg_color": "(255,255,255)"
@@ -485,7 +499,7 @@
                     "selector": {
                         "type": "select_one",
                         "args": [
-                            "div[data-component-type=s-search-result]"
+                            "div[data-component-type=s-search-result],div[id=gridItemRoot]"
                         ],
                         "kwargs": {}
                     }
@@ -496,7 +510,7 @@
                 "selector": {
                     "type": "select",
                     "args": [
-                        ".s-pagination-item[aria-label*=sayfa]"
+                        ".s-pagination-item[aria-label*=sayfa],ul.a-pagination > li > a"
                     ],
                     "kwargs": {}
                 },
@@ -509,7 +523,7 @@
                     "selector": {
                         "type": "select",
                         "args": [
-                            "div[data-component-type=s-search-result]"
+                            "div[data-component-type=s-search-result],div[id=gridItemRoot]"
                         ],
                         "kwargs": {}
                     }
@@ -522,9 +536,9 @@
                     "listing": {
                         "function": "get_product_name",
                         "selector": {
-                            "type": "select_one",
+                            "type": "select",
                             "args": [
-                                "h2"
+                                "h2, a > span > div"
                             ],
                             "kwargs": {}
                         }
@@ -534,9 +548,9 @@
                     "listing": {
                         "function": "get_product_price",
                         "selector": {
-                            "type": "select_one",
+                            "type": "select",
                             "args": [
-                                "span.a-price-whole"
+                                "span.a-price-whole, span.a-color-price > span"
                             ],
                             "kwargs": {}
                         }
@@ -548,9 +562,12 @@
                         "selector": {
                             "type": "select",
                             "args": [
-                                "span[aria-label='Kargo BEDAVA'], span[aria-label*=' Kargo BEDAVA'] > span:first-child, span[aria-label*=Stok i], div > span.a-color-base, span[aria-label*='kargo bedeli' i]"
+                                "span[aria-label='Kargo BEDAVA'], span[aria-label*=' Kargo BEDAVA'] > span:first-child, span[aria-label*=Stok i], div > span.a-color-base, span[aria-label*='kargo bedeli' i], span.zg-bdg-text, span.s-coupon-unclipped > span.s-coupon-highlight-color"
                             ],
                             "kwargs": {}
+                        },
+                        "kwargs":{
+                            "delimiter": " - "
                         }
                     }
                 },
@@ -560,7 +577,7 @@
                         "selector": {
                             "type": "select_one",
                             "args": [
-                                "span[aria-label*='5 y' i] + span"
+                                "span[aria-label*='5 y' i] + span, a[href*=product-reviews] > span"
                             ],
                             "kwargs": {}
                         }
@@ -584,10 +601,10 @@
             "sleep_after_request": 0,
             "pagination_query": "page=%d",
             "categories": {
-                "All": ":relevance",
-                "Notebooks": ":relevance:category:116004",
-                "Smartphones": ":relevance:category:100",
-                "Monitors": ":relevance:category:116010011"
+                "All": "",
+                "Notebooks": ":category:116004",
+                "Smartphones": ":category:100",
+                "Monitors": ":category:116010011"
             },
             "validations": {
                 "is_listing_page": {
@@ -661,6 +678,9 @@
                             ],
                             "kwargs": {}
                         }
+                    },
+                    "kwargs":{
+                        "delimiter": " - "
                     }
                 }
             }
@@ -675,7 +695,7 @@
             "base_url": "https://www.mediamarkt.com.tr/",
             "parser": "html",
             "query": {
-                "path": "/tr/search.html?query=%(search)s%(category)s&searchProfile=VALID&sort=price&sourceRef=INVALID",
+                "path": "/tr/search.html?query=%(search)s%(category)s&searchProfile=VALID&sourceRef=INVALID",
                 "space": "%2B"
             },
             "sleep_after_request": 0,
@@ -763,8 +783,11 @@
             }
         },
         {
-            "name": "Cicekspeti",
+            "name": "Ciceksepeti",
             "type": "marketplace",
+            "method": "browser",
+            "visit_homepage_first": false,
+            "refresh_browser": true,
             "style": {
                 "bg_color": "(255,103,29)",
                 "fg_color": "(0,61,166)"
@@ -772,9 +795,9 @@
             "base_url": "https://www.ciceksepeti.com/",
             "parser": "html",
             "query": {
-                "path": "/arama?query=%(search)s&qt=%(search)s&orderby=3"
+                "path": "/arama?query=%(search)s&qt=%(search)s"
             },
-            "sleep_after_request": 0,
+            "sleep_after_request": 5,
             "pagination_query": "page=%d",
             "categories": {
                 "All": ""
@@ -851,6 +874,9 @@
                                 "span.products__item-badge-text,div.products__conditional-message,p.products__installment,div.products__campaing:not(.hidden)"
                             ],
                             "kwargs": {}
+                        },
+                        "kwargs":{
+                            "delimiter": " - "
                         }
                     }
                 },
@@ -878,9 +904,9 @@
             "base_url": "https://www.pazarama.com/",
             "parser": "html",
             "query": {
-                "path": "arama?q=%(search)s&siralama=artan-fiyat"
+                "path": "arama?q=%(search)s"
             },
-            "sleep_after_request": 0,
+            "sleep_after_request": 0.5,
             "pagination_query": "sayfa=%d",
             "categories": {
                 "All": ""
@@ -890,7 +916,7 @@
                     "selector": {
                         "type": "select_one",
                         "args": [
-                            "div[productcode]"
+                            "div.product-card"
                         ],
                         "kwargs": {}
                     }
@@ -914,7 +940,7 @@
                     "selector": {
                         "type": "select",
                         "args": [
-                            "div[productcode]"
+                            "div.product-card"
                         ],
                         "kwargs": {}
                     }
@@ -962,6 +988,103 @@
             }
         },
         {
+            "name": "PttAVM",
+            "type": "marketplace",
+            "style": {
+                "bg_color": "(0,166,206)",
+                "fg_color": "(255,198,42)"
+            },
+            "base_url": "https://www.pttavm.com/",
+            "parser": "html",
+            "query": {
+                "path": "arama?q=%(search)s",
+                "space": "+"
+            },
+            "sleep_after_request": 0.3,
+            "pagination_query": "page=%d",
+            "categories": {
+                "All": ""
+            },
+            "validations": {
+                "is_listing_page": {
+                    "selector": {
+                        "type": "select_one",
+                        "args": [
+                            "div.product-list-box"
+                        ],
+                        "kwargs": {}
+                    }
+                },
+                "is_detail_page": {}
+            },
+            "page_number": {
+                "selector": {
+                    "type": "select_one",
+                    "args": [
+                        "span[class*=text-base] > b"
+                    ],
+                    "kwargs": {}
+                },
+                "first_page": 1,
+                "method": "total",
+                "products_per_page": 48
+            },
+            "product": {
+                "listing": {
+                    "selector": {
+                        "type": "select",
+                        "args": [
+                            "div.product-list-box"
+                        ],
+                        "kwargs": {}
+                    }
+                },
+                "detail": {}
+            },
+            "attributes": {
+                "name": {
+                    "required": true,
+                    "listing": {
+                        "function": "get_product_name",
+                        "selector": {
+                            "type": "select_one",
+                            "args": [
+                                "span.product-list-box-container-info-name"
+                            ],
+                            "kwargs": {}
+                        }
+                    }
+                },
+                "price": {
+                    "listing": {
+                        "function": "get_product_price",
+                        "selector": {
+                            "type": "select",
+                            "args": [
+                                "div.price-box-price"
+                            ],
+                            "kwargs": {}
+                        }
+                    }
+                },
+                "info": {
+                    "listing": {
+                        "function": "get_product_info",
+                        "selector": {
+                            "type": "select",
+                            "args": [
+                                "div.free-cargo,span.rounded-lg"
+                            ],
+                            "kwargs": {}
+                        },
+                        "kwargs":{
+                            "delimiter": " - "
+                        }
+                    }
+                }
+            }
+        },
+        {
             "name": "Migros",
             "type": "marketplace",
             "style": {
@@ -971,7 +1094,7 @@
             "base_url": "https://www.migros.com.tr/",
             "parser": "json",
             "query": {
-                "path": "/rest/products/search?query=%(search)s&sirala=once-en-dusuk-fiyat"
+                "path": "/rest/products/search?query=%(search)s"
             },
             "sleep_after_request": 0.3,
             "pagination_query": "sayfa=%d",
@@ -1016,7 +1139,10 @@
                             "key": "discountRate",
                             "text_format": "%{} İNDİRİM"
                         }
-                    ]
+                    ],
+                    "kwargs":{
+                        "delimiter": " - "
+                    }
                 }
             }
         }
