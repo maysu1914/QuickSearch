@@ -1,11 +1,11 @@
 import asyncio
 import itertools
+import logging
 import re
 from urllib.parse import urljoin
 
 from requests.utils import requote_uri
 
-from scraper.mixins import RequestMixin
 from scraper.parsers import HtmlParser, JsonParser
 from scraper.utils import (
     get_attribute_by_path, log_time, is_formattable, find_nth, set_hash
@@ -25,7 +25,7 @@ class Scraper:
     def __init__(self, source, *args, **kwargs):
         self.source = source
         self.max_page = kwargs.get('max_page', 3)
-        self.parser = self.parser_class(source, self.max_page)
+        self.parser = self.parser_class(source, self.max_page, method=source.get('method'))
 
     @property
     def name(self):
@@ -161,6 +161,15 @@ class Scraper:
                 url['products'] = self.get_products(
                     normalized_response, url['search']
                 )
+                if not url['products']:
+                    try:
+                        logging.warning(
+                            "empty result: {} - {}".format(
+                                response.text, response.url
+                            )
+                        )
+                    except AttributeError:
+                        pass
                 if page_number > 1:
                     url['start_page'] = self.first_page + 1
                     url['end_page'] = page_number + (self.first_page - 1)
@@ -168,6 +177,12 @@ class Scraper:
                     url['start_page'] = None
                     url['end_page'] = None
             else:
+                try:
+                    logging.warning(
+                        "bad result: {} - {}".format(response.text, response.url)
+                    )
+                except AttributeError:
+                    pass
                 url['products'] = []
                 url['start_page'] = None
                 url['end_page'] = None
